@@ -1,0 +1,51 @@
+/* ============================================
+    DESIGN TOKENS (Semantic Color System)
+    ============================================ */
+:root {
+  --color-bg: #070b14;
+  --color-surface: #0f1729;
+  --color-surface-elevated: rgba(19, 27, 45, 0.85);
+  --color-surface-hover: rgba(30, 42, 68, 0.9);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(94, 234, 212, 0.35);
+  --color-primary: #5eead4;
+  --color-primary-muted: rgba(94, 234, 212, 0.12);
+  --color-secondary: #60a5fa;
+  --color-accent: #a78bfa;
+  --color-text: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-tertiary: #64748b;
+  --color-focus: #5eead4;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-7: 32px; --space-8: 40px;
+  --space-9: 48px; --space-10: 64px; --space-12: 80px; --space-16: 96px;
+  --font-heading: 'Poppins', system-ui, sans-serif;
+  --font-body: 'Open Sans', system-ui, sans-serif;
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-base: 1rem;
+  --text-lg: 1.125rem; --text-xl: 1.25rem; --text-2xl: 1.5rem;
+  --text-3xl: 2rem; --text-4xl: 2.5rem; --text-5xl: clamp(2.5rem, 5vw, 4rem);
+  --text-6xl: clamp(3rem, 7vw, 5.5rem);
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+  --radius-xl: 20px; --radius-full: 9999px;
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 24px rgba(94, 234, 212, 0.15);
+  --z-nav: 100; --z-skip: 200;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 80px; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font-body); font-size: var(--text-base); line-height: 1.65;
+  color: var(--color-text); background: var(--color-bg);
+  background-image: radial-gradient(ellipse at 10% 10%, rgba(96, 165, 250, 0.08), transparent 40%),
+    radial-gradient(ellipse at 90% 20%, rgba(167, 139, 250, 0.07), transparent 35%),
+    radial-gradient(ellipse at 50% 80%, rgba(94, 234, 212, 0.04), transparent 40%);
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; overflow-x: hidden;
+}
+a { text-decoration: none; color: inherit; }
+img { max-width: 100%; display: block; }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: 2px; }
+:focus:not(:focus-visible) { outline: none; }
+.skip-link { position: fixed; top: -100%; left: var(--space-4); z-index: var(--z-skip); padding: var(--space-3) var(--space-6); background: var(--color-primary); color: var(--color-bg); font-weight: 700; border-radius: 0 0 var(--radius-sm) var(--radius-sm); transition: top 150ms ease; }
+.skip-link:focus { top: 0; }

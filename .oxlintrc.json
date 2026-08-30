@@ -1,0 +1,6 @@
+{
+  "$schema": "https://oxlint.dev/schema/v1.json",
+  "rules": {
+    "react/only-export-components": "warn"
+  }
+}

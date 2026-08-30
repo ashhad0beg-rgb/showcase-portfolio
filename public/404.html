@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redirecting...</title>
+    <script>
+      ;(function () {
+        var redirect = window.location.pathname
+        sessionStorage.setItem('portfolio_redirect', redirect)
+        window.location.replace('/portfolio/')
+      })()
+    </script>
+  </head>
+  <body>
+    <noscript>JavaScript is required. Please enable it to use this site.</noscript>
+  </body>
+</html>
