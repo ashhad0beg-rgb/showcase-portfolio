@@ -1,254 +1,380 @@
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { PortfolioProvider, usePortfolio } from './context/PortfolioContext.jsx'
-import LoginPage from './pages/AdminLogin.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import './App.css'
 import './admin/admin.css'
 
-function useVariants() {
-  const shouldReduceMotion = useReducedMotion()
-  const fadeUp = { hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 24 }, visible: { opacity: 1, y: 0 } }
-  const staggerContainer = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: shouldReduceMotion ? 0 : 0.06, when: 'beforeChildren' } } }
-  const staggerItem = { hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } } }
-  return { fadeUp, staggerContainer, staggerItem, shouldReduceMotion }
-}
+function useReduce() { return useReducedMotion() }
 
-const Icons = {
-  layers: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" /></svg>,
-  grid: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>,
-  zap: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M12 15l-2 5l9-13h-5l2-5-9 13h5z" /></svg>,
-  mail: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>,
-  linkedin: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg>,
-  menu: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>,
-  close: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>,
-}
-
-function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [activeSection, setActiveSection] = useState('')
-  const { data } = usePortfolio()
+/* ====== CUSTOM CURSOR ====== */
+function CustomCursor() {
+  const reduced = useReduce()
+  const dotRef = useRef(null)
+  const ringRef = useRef(null)
+  const [vis, setVis] = useState(false)
+  const mouse = useRef({ x: -100, y: -100 })
+  const pos = useRef({ x: -100, y: -100 })
   useEffect(() => {
-    const sections = document.querySelectorAll('section[id]')
-    const handleScroll = () => {
-      const scrollY = window.scrollY + 120
-      sections.forEach(s => {
-        const top = s.offsetTop, height = s.offsetHeight, id = s.getAttribute('id')
-        if (scrollY >= top && scrollY < top + height) setActiveSection(id)
-      })
+    if (reduced || window.matchMedia('(pointer: coarse)').matches) return
+    const onM = (e) => { mouse.current = { x: e.clientX, y: e.clientY }; setVis(true) }
+    const onE = () => setVis(true)
+    const onL = () => setVis(false)
+    window.addEventListener('mousemove', onM, { passive: true })
+    document.addEventListener('mouseenter', onE)
+    document.addEventListener('mouseleave', onL)
+    let raf
+    const tick = () => {
+      pos.current.x += (mouse.current.x - pos.current.x) * 0.15
+      pos.current.y += (mouse.current.y - pos.current.y) * 0.15
+      if (dotRef.current) dotRef.current.style.transform = `translate(${mouse.current.x - 4}px, ${mouse.current.y - 4}px)`
+      if (ringRef.current) ringRef.current.style.transform = `translate(${pos.current.x - 20}px, ${pos.current.y - 20}px)`
+      raf = requestAnimationFrame(tick)
     }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll()
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-  const navItems = [{ href: '#about', label: 'About' }, { href: '#skills', label: 'Skills' }, { href: '#certifications', label: 'Certifications' }, { href: '#projects', label: 'Projects' }, { href: '#contact', label: 'Contact' }]
+    raf = requestAnimationFrame(tick)
+    return () => { window.removeEventListener('mousemove', onM); document.removeEventListener('mouseenter', onE); document.removeEventListener('mouseleave', onL); cancelAnimationFrame(raf) }
+  }, [reduced])
+  if (reduced || typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) return null
   return (
-    <motion.nav className="nav" initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }} role="navigation" aria-label="Main navigation">
-      <a href="#" className="logo" aria-label={data.siteName}>ANSHED <span className="accent">BEG</span></a>
-      <ul className="nav-links-desktop" role="menubar">
-        {navItems.map(item => <li key={item.href} role="none"><a href={item.href} role="menuitem" className={activeSection === item.href.slice(1) ? 'active' : ''}>{item.label}</a></li>)}
-      </ul>
-      <motion.button className="nav-toggle" onClick={() => setIsOpen(!isOpen)} aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={isOpen} aria-controls="mobileNav" whileTap={{ scale: 0.92 }}>{isOpen ? Icons.close : Icons.menu}</motion.button>
-      <AnimatePresence>
-        {isOpen && <motion.div id="mobileNav" className="nav-links-mobile" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}><motion.ul initial="hidden" animate="visible" exit="hidden" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06 } } }}>{navItems.map(item => <motion.li key={item.href} variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}><a href={item.href} onClick={() => setIsOpen(false)} className={activeSection === item.href.slice(1) ? 'active' : ''}>{item.label}</a></motion.li>)}</motion.ul></motion.div>}
-      </AnimatePresence>
-    </motion.nav>
+    <div className="custom-cursor" style={{ opacity: vis ? 1 : 0 }}>
+      <div className="custom-cursor-dot" ref={dotRef} />
+      <div className="custom-cursor-ring" ref={ringRef} />
+    </div>
   )
 }
 
+/* ====== NAVBAR ====== */
+function Navbar() {
+  const [scrolled, setScrolled] = useState(false)
+  const [mob, setMob] = useState(false)
+  useEffect(() => {
+    const h = () => setScrolled(window.scrollY > 60)
+    window.addEventListener('scroll', h, { passive: true })
+    return () => window.removeEventListener('scroll', h)
+  }, [])
+  const items = [{ href: '#work', l: 'Work' }, { href: '#services', l: 'Services' }, { href: '#about', l: 'About' }, { href: '#contact', l: 'Contact' }]
+  return (
+    <>
+      <motion.nav className={`nav${scrolled ? ' scrolled' : ''}`} initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
+        <a href="#" className="nav-logo">ANSHED <span className="accent">BEG</span></a>
+        <ul className="nav-links">{items.map(i => <li key={i.href}><a href={i.href}>{i.l}</a></li>)}</ul>
+        <div className="nav-availability"><span className="nav-availability-dot" /> AVAILABLE FOR FREELANCE</div>
+        <button className={`nav-toggle${mob ? ' open' : ''}`} onClick={() => setMob(!mob)} aria-label="Toggle menu"><span /><span /><span /></button>
+      </motion.nav>
+      <AnimatePresence>{mob && <motion.div className="nav-mobile" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>{items.map(i => <a key={i.href} href={i.href} onClick={() => setMob(false)}>{i.l}</a>)}</motion.div>}</AnimatePresence>
+    </>
+  )
+}
+
+/* ====== HERO ====== */
 function Hero() {
-  const { fadeUp, shouldReduceMotion } = useVariants()
+  const r = useReduce()
   const { data } = usePortfolio()
-  const hero = data.hero
+  const h = data.hero
+  const lines = h.title.split('\n')
   return (
     <section className="hero" aria-label="Introduction">
-      <div className="hero-content">
-        <motion.div className="hero-badge" variants={fadeUp} initial="hidden" animate="visible" transition={{ duration: 0.5, delay: 0.1 }}>{Icons.layers} {hero.badge}</motion.div>
-        <motion.h1 variants={fadeUp} initial="hidden" animate="visible" transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}>{hero.title}</motion.h1>
-        <motion.p className="hero-description" variants={fadeUp} initial="hidden" animate="visible" transition={{ duration: 0.5, delay: 0.35 }}>{hero.description}</motion.p>
-        <motion.div className="hero-buttons" variants={fadeUp} initial="hidden" animate="visible" transition={{ duration: 0.5, delay: 0.5 }}>
-          <motion.a href="#projects" className="btn btn-primary" whileHover={shouldReduceMotion ? {} : { scale: 1.04, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>{Icons.grid} {hero.buttonPrimary}</motion.a>
-          <motion.a href="#skills" className="btn btn-secondary" whileHover={shouldReduceMotion ? {} : { scale: 1.04, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>{Icons.zap} {hero.buttonSecondary}</motion.a>
+      <motion.div className="hero-eyebrow" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>{h.eyebrow}</motion.div>
+      <h1 className="hero-title">{lines.map((line, i) => (
+        <span className="line" key={i}><motion.span className="word" initial={{ y: '110%', filter: 'blur(8px)' }} animate={{ y: 0, filter: 'blur(0px)' }} transition={r ? { duration: 0 } : { duration: 0.7, delay: 0.2 + i * 0.12, ease: [0.16, 1, 0.3, 1] }}>{line}</motion.span></span>
+      ))}</h1>
+      <motion.p className="hero-desc" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={r ? { duration: 0 } : { duration: 0.5, delay: 0.7 }}>{h.description}</motion.p>
+      <motion.div className="hero-buttons" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={r ? { duration: 0 } : { duration: 0.5, delay: 0.9 }}>
+        <a href="#showreel" className="btn btn-primary">{h.buttonPrimary} <span className="btn-arrow">→</span></a>
+        <a href="#contact" className="btn btn-outline">{h.buttonSecondary}</a>
+      </motion.div>
+      <motion.div className="hero-scroll" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={r ? { duration: 0 } : { duration: 0.5, delay: 1.2 }}>
+        <span className="hero-scroll-line" /> SCROLL TO EXPLORE <span className="hero-scroll-arrow">↓</span>
+      </motion.div>
+    </section>
+  )
+}
+
+/* ====== MARQUEE BANNER ====== */
+function MarqueeBanner({ items, reverse }) {
+  const doubled = [...items, ...items]
+  return (
+    <div className="marquee-banner">
+      <div className={`marquee${reverse ? ' marquee-reverse' : ''}`}>{doubled.map((t, i) => <span className="marquee-item" key={i}>{t}<span className="dot" /></span>)}</div>
+    </div>
+  )
+}
+
+/* ====== SHOWREEL ====== */
+function Showreel() {
+  const r = useReduce()
+  const { data } = usePortfolio()
+  const s = data.showreel
+  const [playing, setPlaying] = useState(false)
+  return (
+    <section id="showreel" className="showreel">
+      <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>{s.label}</motion.div>
+      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>{s.title}</motion.h2>
+      <motion.div className="showreel-player" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.7, delay: 0.2 }}>
+        {s.videoUrl && !playing ? (
+          <>
+            {s.posterUrl && <img src={s.posterUrl} alt="Showreel poster" />}
+            <button className="showreel-play" onClick={() => setPlaying(true)} aria-label="Play showreel">▶</button>
+          </>
+        ) : s.videoUrl && playing ? (
+          <video src={s.videoUrl} controls autoPlay />
+        ) : (
+          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(0,255,136,0.08), rgba(0,0,0,0.4))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ color: 'var(--color-text-tertiary)', fontSize: 'var(--text-sm)', letterSpacing: '2px', textTransform: 'uppercase' }}>Add showreel video in admin</span>
+          </div>
+        )}
+      </motion.div>
+      <div className="showreel-tags">{s.tags.map(t => <span className="showreel-tag" key={t}>{t}</span>)}</div>
+    </section>
+  )
+}
+
+/* ====== SELECTED WORK ====== */
+function Work() {
+  const r = useReduce()
+  const { data } = usePortfolio()
+  const [selected, setSelected] = useState(null)
+  useEffect(() => {
+    if (!selected) return
+    const k = (e) => { if (e.key === 'Escape') setSelected(null) }
+    document.addEventListener('keydown', k)
+    document.body.style.overflow = 'hidden'
+    return () => { document.removeEventListener('keydown', k); document.body.style.overflow = '' }
+  }, [selected])
+  return (
+    <section id="work" className="work">
+      <div className="work-header">
+        <div>
+          <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>PORTFOLIO</motion.div>
+          <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>SELECTED WORK</motion.h2>
+        </div>
+      </div>
+      <div className="work-grid">{data.work.map((p, i) => (
+        <motion.div className="work-item" key={i} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={r ? { duration: 0 } : { duration: 0.6, delay: i * 0.05 }} onClick={() => setSelected(p)}>
+          <div className="work-item-visual">{p.image ? <img src={p.image} alt={p.title} loading="lazy" /> : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(0,255,136,0.06), var(--color-surface))' }} />}</div>
+          <div className="work-item-info">
+            <div className="work-item-category">{p.category}</div>
+            <h3 className="work-item-title">{p.title}</h3>
+            <div className="work-item-meta"><span>{p.client}</span><span>{p.year}</span><span>{p.role}</span></div>
+            <div className="work-item-view">VIEW PROJECT <span className="btn-arrow">→</span></div>
+          </div>
+        </motion.div>
+      ))}</div>
+      <AnimatePresence>{selected && (
+        <motion.div className="project-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelected(null)} role="dialog" aria-modal="true" aria-label={selected.title}>
+          <motion.div className="project-modal" initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ type: 'spring', stiffness: 320, damping: 30 }} onClick={e => e.stopPropagation()}>
+            {selected.image && <img className="project-modal-img" src={selected.image} alt={selected.title} />}
+            <div className="project-modal-body">
+              <div className="work-item-category" style={{ marginBottom: '12px' }}>{selected.category}</div>
+              <h3>{selected.title}</h3>
+              <p style={{ marginTop: '8px', fontSize: 'var(--text-sm)', color: 'var(--color-text-tertiary)' }}>{selected.client} · {selected.year} · {selected.role}</p>
+              <p>{selected.description}</p>
+              <button className="project-modal-close" onClick={() => setSelected(null)} aria-label="Close">×</button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}</AnimatePresence>
+    </section>
+  )
+}
+
+/* ====== SERVICES ====== */
+function Services() {
+  const r = useReduce()
+  const { data } = usePortfolio()
+  const [open, setOpen] = useState(null)
+  return (
+    <section id="services" className="services">
+      <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>WHAT I DO</motion.div>
+      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>SERVICES</motion.h2>
+      <div className="services-list">{data.services.map((s, i) => (
+        <motion.div className={`service-item${open === i ? ' open' : ''}`} key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.5, delay: i * 0.05 }} onClick={() => setOpen(open === i ? null : i)}>
+          <div className="service-header"><span className="service-number">{s.number}</span><h3 className="service-name">{s.name}</h3></div>
+          <div className="service-desc"><p>{s.description}</p></div>
+        </motion.div>
+      ))}</div>
+    </section>
+  )
+}
+
+/* ====== PROCESS ====== */
+function Process() {
+  const r = useReduce()
+  const { data } = usePortfolio()
+  return (
+    <section id="process" className="process">
+      <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>HOW I WORK</motion.div>
+      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>PROCESS</motion.h2>
+      <div className="process-grid">{data.process.map((s, i) => (
+        <motion.div className="process-step" key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.5, delay: i * 0.08 }}>
+          <div className="process-step-number">{s.number}</div>
+          <h3 className="process-step-name">{s.name}</h3>
+          <p className="process-step-desc">{s.description}</p>
+        </motion.div>
+      ))}</div>
+    </section>
+  )
+}
+
+/* ====== ABOUT ====== */
+function About() {
+  const r = useReduce()
+  const { data } = usePortfolio()
+  const a = data.about
+  return (
+    <section id="about" className="about">
+      <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>ABOUT</motion.div>
+      <div className="about-grid">
+        <motion.div className="about-content" initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6 }}>
+          <h2 className="section-title" style={{ marginBottom: '32px' }}>{a.title}</h2>
+          <div className="highlight">{a.highlight}</div>
+          <p>{a.content}</p>
+          <div className="about-details">{a.details.map((d, i) => (
+            <div className="about-detail" key={i}><span className="about-detail-label">{d.label}</span><span>{d.value}</span></div>
+          ))}</div>
+        </motion.div>
+        <motion.div className="about-image" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.15 }}>
+          {a.image ? <img src={a.image} alt="Portrait" /> : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(0,255,136,0.06), var(--color-surface))' }} />}
         </motion.div>
       </div>
     </section>
   )
 }
 
-function Stats() {
-  const { staggerContainer, staggerItem, shouldReduceMotion } = useVariants()
+/* ====== TOOLS MARQUEE ====== */
+function Tools() {
   const { data } = usePortfolio()
-  return (<motion.div className="stats" role="list" aria-label="Portfolio statistics" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }}>{data.stats.map(stat => <motion.div key={stat.label} className="stat-card" role="listitem" variants={staggerItem} whileHover={shouldReduceMotion ? {} : { y: -4, boxShadow: '0 0 24px rgba(94, 234, 212, 0.15)' }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}><div className="stat-value">{stat.value}</div><div className="stat-label">{stat.label}</div></motion.div>)}</motion.div>)
-}
-
-function About() {
-  const { fadeUp } = useVariants()
-  const { data } = usePortfolio()
-  const about = data.about
+  const t = [...data.tools, ...data.tools]
   return (
-    <section id="about" className="section" aria-labelledby="about-title">
-      <div className="section-header">
-        <motion.h2 id="about-title" className="section-title" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5 }}>{about.title}</motion.h2>
-        <motion.p className="section-subtitle" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5, delay: 0.1 }}>{about.subtitle}</motion.p>
-      </div>
-      <motion.div className="about-card" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.5, delay: 0.15 }}><p dangerouslySetInnerHTML={{ __html: about.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} /></motion.div>
+    <section className="tools">
+      <div className="tools-label">TOOLS I USE</div>
+      <div className="marquee">{t.map((name, i) => <span className="marquee-item" key={i}>{name}<span className="dot" /></span>)}</div>
     </section>
   )
 }
 
-function Skills() {
-  const { fadeUp, staggerContainer, staggerItem, shouldReduceMotion } = useVariants()
+/* ====== EXPERIENCE ====== */
+function Experience() {
+  const r = useReduce()
   const { data } = usePortfolio()
   return (
-    <section id="skills" className="section" aria-labelledby="skills-title">
-      <div className="section-header">
-        <motion.h2 id="skills-title" className="section-title" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5 }}>Core Expertise</motion.h2>
-        <motion.p className="section-subtitle" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5, delay: 0.1 }}>Key areas represented across the portfolio.</motion.p>
-      </div>
-      <motion.div className="skills-grid" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>{data.skills.map(skill => <motion.div key={skill.title} className="skill-card" variants={staggerItem} whileHover={shouldReduceMotion ? {} : { y: -4, borderColor: 'rgba(94, 234, 212, 0.35)' }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}><h3>{skill.title}</h3><p>{skill.desc}</p></motion.div>)}</motion.div>
+    <section id="experience" className="experience">
+      <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>EXPERIENCE</motion.div>
+      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>EXPERIENCE</motion.h2>
+      <div className="experience-list">{data.experience.map((e, i) => (
+        <motion.div className="experience-item" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.4, delay: i * 0.05 }}>
+          <span className="experience-year">{e.year}</span>
+          <span className="experience-role">{e.role}</span>
+          <span className="experience-client">{e.client}</span>
+        </motion.div>
+      ))}</div>
     </section>
   )
 }
 
-function Certifications() {
-  const { fadeUp, staggerContainer, staggerItem, shouldReduceMotion } = useVariants()
+/* ====== TESTIMONIALS ====== */
+function Testimonials() {
+  const r = useReduce()
   const { data } = usePortfolio()
-  return (
-    <section id="certifications" className="section" aria-labelledby="certs-title">
-      <div className="section-header">
-        <motion.h2 id="certs-title" className="section-title" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5 }}>Professional Certifications</motion.h2>
-        <motion.p className="section-subtitle" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5, delay: 0.1 }}>{data.certifications.length} certifications and professional credentials.</motion.p>
-      </div>
-      <motion.div className="cert-grid" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }}>{data.certifications.map((cert, i) => <motion.div key={cert} className="cert-card" variants={staggerItem} whileHover={shouldReduceMotion ? {} : { y: -4, borderColor: 'rgba(94, 234, 212, 0.35)' }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}><div className="cert-number">CERTIFICATION {String(i + 1).padStart(2, '0')}</div><h3>{cert}</h3><p>{data.issuers[i % data.issuers.length]}</p></motion.div>)}</motion.div>
-    </section>
-  )
-}
-
-function Projects() {
-  const { fadeUp, staggerContainer, staggerItem, shouldReduceMotion } = useVariants()
-  const { data } = usePortfolio()
-  const [selected, setSelected] = useState(null)
-  const close = () => setSelected(null)
+  const [idx, setIdx] = useState(0)
+  const t = data.testimonials
   useEffect(() => {
-    if (!selected) return
-    const onKey = (e) => { if (e.key === 'Escape') close() }
-    document.addEventListener('keydown', onKey)
-    document.body.style.overflow = 'hidden'
-    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = '' }
-  }, [selected])
-  const transition = shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 320, damping: 30 }
+    if (t.length <= 1) return
+    const id = setInterval(() => setIdx(i => (i + 1) % t.length), 6000)
+    return () => clearInterval(id)
+  }, [t.length])
+  if (!t.length) return null
   return (
-    <section id="projects" className="section" aria-labelledby="projects-title">
-      <div className="section-header">
-        <motion.h2 id="projects-title" className="section-title" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5 }}>Featured Projects</motion.h2>
-        <motion.p className="section-subtitle" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5, delay: 0.1 }}>{data.projects.length} featured creative projects.</motion.p>
-      </div>
-      <motion.div className="project-grid" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.05 }}>{data.projects.map((project, i) => (
-        <motion.button key={`${project.title}-${i}`} type="button" className="project-card project-card-btn" variants={staggerItem} onClick={() => setSelected(project)} whileHover={shouldReduceMotion ? {} : { y: -6, boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)' }} whileTap={shouldReduceMotion ? {} : { scale: 0.98 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} aria-label={`Open ${project.title}`}>
-          <span className="project-tile-img-wrap">
-            {project.image ? <img className="project-tile-img" src={project.image} alt={project.title} loading="lazy" layoutId={`project-img-${project.title}`} /> : <span className="project-tile-img project-tile-img-fallback" />}
-          </span>
-          <span className="project-card-body">
-            <span className="project-number">{String(i + 1).padStart(2, '0')}</span>
-            <span className="project-tile-meta">
-              <span className="project-title">{project.title}</span>
-              <span className="project-desc">{project.desc}</span>
-              <span className="project-tags">{project.tags.map(tag => <span key={tag} className="project-tag">{tag}</span>)}</span>
-            </span>
-          </span>
-        </motion.button>
-      ))}</motion.div>
-      <AnimatePresence>
-        {selected && (
-          <motion.div className="project-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={close} role="dialog" aria-modal="true" aria-label={selected.title}>
-            <motion.div className="project-modal" initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0, scale: 0.96 }} transition={transition} onClick={(e) => e.stopPropagation()}>
-              {selected.image && <motion.img className="project-modal-img" layoutId={`project-img-${selected.title}`} src={selected.image} alt={selected.title} transition={transition} />}
-              <div className="project-modal-body">
-                <motion.h3 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.15, duration: 0.3 }}>{selected.title}</motion.h3>
-                <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.22, duration: 0.3 }}>{selected.desc}</motion.p>
-                <div className="project-tags">{selected.tags.map(tag => <span key={tag} className="project-tag">{tag}</span>)}</div>
-                <button className="project-modal-close" type="button" onClick={close} aria-label="Close">×</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
+    <section className="testimonials">
+      <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>TESTIMONIALS</motion.div>
+      <AnimatePresence mode="wait">
+        <motion.div key={idx} className="testimonials-quote" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={r ? { duration: 0 } : { duration: 0.5 }}>
+          {t[idx].quote}
+          <div className="testimonials-author"><strong>{t[idx].author}</strong> — {t[idx].company}</div>
+        </motion.div>
       </AnimatePresence>
     </section>
   )
 }
 
-function Contact() {
-  const { fadeUp, shouldReduceMotion } = useVariants()
+/* ====== FAQ ====== */
+function Faq() {
+  const r = useReduce()
   const { data } = usePortfolio()
-  const contact = data.contact
+  const [open, setOpen] = useState(null)
   return (
-    <section id="contact" className="section contact-section" aria-labelledby="contact-title">
-      <motion.h2 id="contact-title" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5 }}>{contact.title}</motion.h2>
-      <motion.p variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5, delay: 0.1 }}>{contact.description}</motion.p>
-      <motion.div className="contact-buttons" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5, delay: 0.2 }}>
-        <motion.a href={`mailto:${contact.email}`} className="btn btn-primary" aria-label="Send email to Anshed Beg" whileHover={shouldReduceMotion ? {} : { scale: 1.04, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>{Icons.mail} Contact Me</motion.a>
-        <motion.a href={contact.linkedin} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" aria-label="Visit LinkedIn profile (opens in new tab)" whileHover={shouldReduceMotion ? {} : { scale: 1.04, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>{Icons.linkedin} LinkedIn</motion.a>
+    <section id="faq" className="faq">
+      <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>FAQ</motion.div>
+      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>QUESTIONS</motion.h2>
+      <div className="faq-list">{data.faq.map((f, i) => (
+        <motion.div className={`faq-item${open === i ? ' open' : ''}`} key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.4, delay: i * 0.04 }}>
+          <button className="faq-question" onClick={() => setOpen(open === i ? null : i)}><span>{f.question}</span><span className="faq-icon">+</span></button>
+          <div className="faq-answer"><p>{f.answer}</p></div>
+        </motion.div>
+      ))}</div>
+    </section>
+  )
+}
+
+/* ====== CONTACT / FINAL CTA ====== */
+function Contact() {
+  const r = useReduce()
+  const { data } = usePortfolio()
+  const c = data.contact
+  return (
+    <section id="contact" className="contact">
+      <motion.div className="contact-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>{c.label}</motion.div>
+      <motion.h2 className="contact-title" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>{c.title}</motion.h2>
+      <motion.div className="contact-subtitle" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.2 }}>{c.subtitle}</motion.div>
+      <motion.div className="contact-buttons" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.5, delay: 0.35 }}>
+        <a href={`mailto:${c.email}`} className="btn btn-primary">{c.buttonPrimary} <span className="btn-arrow">→</span></a>
+        <a href={`mailto:${c.email}`} className="btn btn-outline">EMAIL ME</a>
+      </motion.div>
+      <motion.div className="contact-social" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.5, delay: 0.5 }}>
+        {c.social.map(s => <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer">{s.name}</a>)}
       </motion.div>
     </section>
   )
 }
 
+/* ====== FOOTER ====== */
 function Footer() {
   const { data } = usePortfolio()
-  return <footer className="footer">{data.footer}</footer>
-}
-
-function AdminRoutes() {
-  const { isAuthenticated } = usePortfolio()
-  if (!isAuthenticated) return <Navigate to="/admin/login" replace />
+  const f = data.footer
   return (
-    <Routes>
-      <Route path="/admin/*" element={<AdminDashboard />} />
-      <Route path="/admin/login" element={<LoginPage />} />
-    </Routes>
+    <footer className="footer">
+      <div>{f.name} — {f.role}</div>
+      <div>{f.availability}</div>
+      <a href="#" className="footer-back-top">BACK TO TOP ↑</a>
+      <div>{f.copyright}</div>
+    </footer>
   )
 }
 
-function RedirectHandler() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  useEffect(() => {
-    const redirect = sessionStorage.getItem('portfolio_redirect')
-    if (redirect && redirect !== '/portfolio/') {
-      sessionStorage.removeItem('portfolio_redirect')
-      if (window.location.pathname === '/portfolio/' || window.location.pathname === '/') {
-        navigate(redirect.replace(/^\/portfolio/, '') || '/')
-      }
-    }
-  }, [navigate, location.pathname])
-  return null
-}
+/* ====== MARQUEES ====== */
+const row1 = ['VIDEO EDITING', 'MOTION DESIGN', 'VISUAL STORYTELLING', 'CREATIVE DIRECTION']
+const row2 = ['EDITING', 'ANIMATION', 'BRANDING', 'COLOR GRADING', 'TYPOGRAPHY']
 
-function PortfolioRoutes() {
+/* ====== PORTFOLIO SITE ====== */
+function PortfolioSite() {
   return (
     <>
-      <RedirectHandler />
-      <Routes>
-        <Route path="/admin/*" element={<AdminRoutes />} />
-        <Route path="/*" element={<PortfolioApp />} />
-      </Routes>
-    </>
-  )
-}
-
-function PortfolioApp() {
-  return (
-    <>
-      <a href="#main-content" className="skip-link">Skip to main content</a>
+      <CustomCursor />
       <Navbar />
-      <main id="main-content">
+      <main>
         <Hero />
-        <Stats />
+        <MarqueeBanner items={row1} />
+        <Showreel />
+        <Work />
+        <Services />
+        <Process />
         <About />
-        <Skills />
-        <Certifications />
-        <Projects />
+        <Tools />
+        <Experience />
+        <MarqueeBanner items={row2} reverse />
+        <Testimonials />
+        <Faq />
         <Contact />
       </main>
       <Footer />
@@ -256,12 +382,45 @@ function PortfolioApp() {
   )
 }
 
-export default function App() {
+/* ====== ADMIN ROUTES ====== */
+function AdminRoutes() {
+  const { isAuthenticated } = usePortfolio()
+  return isAuthenticated ? (
+    <Routes>
+      <Route path="/admin/*" element={<AdminDashboard />} />
+      <Route path="/admin/login" element={<AdminDashboard />} />
+    </Routes>
+  ) : <Navigate to="/admin/login" replace />
+}
+
+/* ====== REDIRECT HANDLER ====== */
+function RedirectHandler() {
+  const nav = useNavigate()
+  const loc = useLocation()
+  useEffect(() => {
+    const redirect = sessionStorage.getItem('portfolio_redirect')
+    if (redirect && redirect !== '/showcase-portfolio/' && (location.pathname === '/showcase-portfolio/' || location.pathname === '/')) {
+      sessionStorage.removeItem('portfolio_redirect')
+      nav(redirect.replace(/^\/showcase-portfolio/, '') || '/')
+    }
+  }, [nav, loc.pathname])
+  return null
+}
+
+/* ====== APP ====== */
+function App() {
   return (
     <PortfolioProvider>
-      <BrowserRouter>
-        <PortfolioRoutes />
+      <BrowserRouter basename="/showcase-portfolio">
+        <RedirectHandler />
+        <Routes>
+          <Route path="/admin/*" element={<AdminRoutes />} />
+          <Route path="/admin/login" element={<AdminRoutes />} />
+          <Route path="/*" element={<PortfolioSite />} />
+        </Routes>
       </BrowserRouter>
     </PortfolioProvider>
   )
 }
+
+export default App
