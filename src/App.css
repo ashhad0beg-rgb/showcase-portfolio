@@ -63,6 +63,17 @@
 .project-card-body p { color: var(--color-text-secondary); font-size: var(--text-sm); line-height: 1.65; }
 .project-tags { margin-top: var(--space-4); display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .project-tag { padding: var(--space-1) var(--space-3); font-size: var(--text-xs); font-weight: 500; border-radius: var(--radius-full); background: var(--color-primary-muted); color: var(--color-primary); letter-spacing: 0.3px; }
+/* IMAGE TILES */
+.project-tile { position: relative; aspect-ratio: 4 / 3; overflow: hidden; }
+.project-tile-img { width: 100%; height: 100%; }
+.project-tile-img img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(1); transition: filter 0.45s ease, transform 0.45s ease; }
+.project-tile:hover .project-tile-img img { filter: grayscale(0); transform: scale(1.05); }
+.project-tile-overlay { position: absolute; inset: 0; padding: var(--space-5); display: flex; flex-direction: column; justify-content: space-between; background: linear-gradient(to top, rgba(7, 11, 20, 0.92), rgba(7, 11, 20, 0.15) 55%, transparent); }
+.project-tile-overlay .project-number { font-family: var(--font-heading); font-size: var(--text-2xl); font-weight: 800; color: rgba(255, 255, 255, 0.85); line-height: 1; align-self: flex-end; }
+.project-tile-overlay .project-tile-meta h3 { font-family: var(--font-heading); font-size: var(--text-base); font-weight: 600; color: #fff; margin-bottom: var(--space-2); line-height: 1.4; }
+.project-tile-overlay .project-tile-meta p { color: rgba(255, 255, 255, 0.75); font-size: var(--text-sm); line-height: 1.6; }
+.project-tile-overlay .project-tags { margin-top: var(--space-3); }
+.project-tile-placeholder { background: linear-gradient(135deg, rgba(94, 234, 212, 0.18), rgba(96, 165, 250, 0.1), rgba(167, 139, 250, 0.22)); }
 /* CONTACT */
 .contact-section { text-align: center; background: linear-gradient(135deg, rgba(94, 234, 212, 0.08), rgba(96, 165, 250, 0.06)); }
 .contact-section h2 { font-family: var(--font-heading); font-size: var(--text-4xl); font-weight: 700; letter-spacing: -1px; line-height: 1.2; }

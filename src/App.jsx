@@ -134,7 +134,30 @@ function Projects() {
         <motion.h2 id="projects-title" className="section-title" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5 }}>Featured Projects</motion.h2>
         <motion.p className="section-subtitle" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5, delay: 0.1 }}>{data.projects.length} featured creative projects.</motion.p>
       </div>
-      <motion.div className="project-grid" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.05 }}>{data.projects.map((project, i) => <motion.div key={project.title} className="project-card" variants={staggerItem} whileHover={shouldReduceMotion ? {} : { y: -6, boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)' }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}><div className="project-card-header"><div className="project-number">{String(i + 1).padStart(2, '0')}</div></div><div className="project-card-body"><h3>{project.title}</h3><p>{project.desc}</p><div className="project-tags">{project.tags.map(tag => <span key={tag} className="project-tag">{tag}</span>)}</div></div></motion.div>)}</motion.div>
+      <motion.div className="project-grid" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.05 }}>{data.projects.map((project, i) => (
+        <motion.div key={`${project.title}-${i}`} className="project-card" variants={staggerItem} whileHover={shouldReduceMotion ? {} : { y: -6, boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)' }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
+          {project.image ? (
+            <div className="project-tile">
+              <div className="project-tile-img">
+                <img src={project.image} alt={project.title} loading="lazy" />
+              </div>
+              <div className="project-tile-overlay">
+                <div className="project-number">{String(i + 1).padStart(2, '0')}</div>
+                <div className="project-tile-meta">
+                  <h3>{project.title}</h3>
+                  <p>{project.desc}</p>
+                  <div className="project-tags">{project.tags.map(tag => <span key={tag} className="project-tag">{tag}</span>)}</div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="project-tile project-tile-placeholder">
+              <div className="project-card-header"><div className="project-number">{String(i + 1).padStart(2, '0')}</div></div>
+              <div className="project-card-body"><h3>{project.title}</h3><p>{project.desc}</p><div className="project-tags">{project.tags.map(tag => <span key={tag} className="project-tag">{tag}</span>)}</div></div>
+            </div>
+          )}
+        </motion.div>
+      ))}</motion.div>
     </section>
   )
 }

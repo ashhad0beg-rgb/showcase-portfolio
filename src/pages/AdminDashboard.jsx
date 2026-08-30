@@ -154,13 +154,15 @@ function ProjectsEdit() {
   const { data, updateArrayItem, addArrayItem, removeArrayItem } = usePortfolio()
   return (
     <div className="admin-section">
-      <div className="section-header-row"><h2>Projects ({data.projects.length})</h2><button className="btn-add" onClick={() => addArrayItem('projects', { title: '', desc: '', tags: [''] })}>+ Add Project</button></div>
+      <div className="section-header-row"><h2>Projects ({data.projects.length})</h2><button className="btn-add" onClick={() => addArrayItem('projects', { title: '', desc: '', tags: [''], image: '' })}>+ Add Project</button></div>
       {data.projects.map((project, i) => (
         <div key={i} className="edit-card edit-card-lg">
           <div className="edit-card-header"><span>Project #{i + 1}</span><button className="btn-remove" onClick={() => removeArrayItem('projects', i)}>×</button></div>
           <input type="text" placeholder="Title" value={project.title} onChange={(e) => updateArrayItem('projects', i, { title: e.target.value })} />
           <textarea placeholder="Description" value={project.desc} onChange={(e) => updateArrayItem('projects', i, { desc: e.target.value })} rows={2} />
           <div className="tags-edit"><label>Tags (comma separated):</label><input type="text" value={project.tags.join(', ')} onChange={(e) => updateArrayItem('projects', i, { tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })} /></div>
+          <div className="tags-edit"><label>Image URL:</label><input type="text" placeholder="https://... (shown as black & white tile, color on hover)" value={project.image || ''} onChange={(e) => updateArrayItem('projects', i, { image: e.target.value })} /></div>
+          {project.image && <div className="image-preview"><label>Preview:</label><img src={project.image} alt="Project preview" /></div>}
         </div>
       ))}
     </div>
