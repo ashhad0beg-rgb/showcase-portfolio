@@ -128,6 +128,16 @@ function Certifications() {
 function Projects() {
   const { fadeUp, staggerContainer, staggerItem, shouldReduceMotion } = useVariants()
   const { data } = usePortfolio()
+  const [selected, setSelected] = useState(null)
+  const close = () => setSelected(null)
+  useEffect(() => {
+    if (!selected) return
+    const onKey = (e) => { if (e.key === 'Escape') close() }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = '' }
+  }, [selected])
+  const transition = shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 320, damping: 30 }
   return (
     <section id="projects" className="section" aria-labelledby="projects-title">
       <div className="section-header">
@@ -135,29 +145,35 @@ function Projects() {
         <motion.p className="section-subtitle" variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.5, delay: 0.1 }}>{data.projects.length} featured creative projects.</motion.p>
       </div>
       <motion.div className="project-grid" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.05 }}>{data.projects.map((project, i) => (
-        <motion.div key={`${project.title}-${i}`} className="project-card" variants={staggerItem} whileHover={shouldReduceMotion ? {} : { y: -6, boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)' }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
-          {project.image ? (
-            <div className="project-tile">
-              <div className="project-tile-img">
-                <img src={project.image} alt={project.title} loading="lazy" />
-              </div>
-              <div className="project-tile-overlay">
-                <div className="project-number">{String(i + 1).padStart(2, '0')}</div>
-                <div className="project-tile-meta">
-                  <h3>{project.title}</h3>
-                  <p>{project.desc}</p>
-                  <div className="project-tags">{project.tags.map(tag => <span key={tag} className="project-tag">{tag}</span>)}</div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="project-tile project-tile-placeholder">
-              <div className="project-card-header"><div className="project-number">{String(i + 1).padStart(2, '0')}</div></div>
-              <div className="project-card-body"><h3>{project.title}</h3><p>{project.desc}</p><div className="project-tags">{project.tags.map(tag => <span key={tag} className="project-tag">{tag}</span>)}</div></div>
-            </div>
-          )}
-        </motion.div>
+        <motion.button key={`${project.title}-${i}`} type="button" className="project-card project-card-btn" variants={staggerItem} onClick={() => setSelected(project)} whileHover={shouldReduceMotion ? {} : { y: -6, boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)' }} whileTap={shouldReduceMotion ? {} : { scale: 0.98 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} aria-label={`Open ${project.title}`}>
+          <span className="project-tile-img-wrap">
+            {project.image ? <img className="project-tile-img" src={project.image} alt={project.title} loading="lazy" layoutId={`project-img-${project.title}`} /> : <span className="project-tile-img project-tile-img-fallback" />}
+          </span>
+          <span className="project-card-body">
+            <span className="project-number">{String(i + 1).padStart(2, '0')}</span>
+            <span className="project-tile-meta">
+              <span className="project-title">{project.title}</span>
+              <span className="project-desc">{project.desc}</span>
+              <span className="project-tags">{project.tags.map(tag => <span key={tag} className="project-tag">{tag}</span>)}</span>
+            </span>
+          </span>
+        </motion.button>
       ))}</motion.div>
+      <AnimatePresence>
+        {selected && (
+          <motion.div className="project-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={close} role="dialog" aria-modal="true" aria-label={selected.title}>
+            <motion.div className="project-modal" initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0, scale: 0.96 }} transition={transition} onClick={(e) => e.stopPropagation()}>
+              {selected.image && <motion.img className="project-modal-img" layoutId={`project-img-${selected.title}`} src={selected.image} alt={selected.title} transition={transition} />}
+              <div className="project-modal-body">
+                <motion.h3 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.15, duration: 0.3 }}>{selected.title}</motion.h3>
+                <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.22, duration: 0.3 }}>{selected.desc}</motion.p>
+                <div className="project-tags">{selected.tags.map(tag => <span key={tag} className="project-tag">{tag}</span>)}</div>
+                <button className="project-modal-close" type="button" onClick={close} aria-label="Close">×</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   )
 }
