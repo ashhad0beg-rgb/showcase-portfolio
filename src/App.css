@@ -134,6 +134,14 @@
   justify-content: center; padding: 120px 5% var(--space-12);
   position: relative; overflow: hidden;
 }
+.particles-background {
+  position: absolute; inset: 0; z-index: 0;
+}
+.particles-background canvas { position: absolute; top: 0; left: 0; }
+.hero > *:not(.particles-background) { position: relative; z-index: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .particles-background { display: none; }
+}
 .hero-eyebrow {
   font-family: var(--font-display);
   font-size: var(--text-xs); font-weight: 600;

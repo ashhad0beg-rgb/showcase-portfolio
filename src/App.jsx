@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { PortfolioProvider, usePortfolio } from './context/PortfolioContext.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
+import ParticlesBackground from './components/ParticlesBackground.jsx'
 import './App.css'
 import './admin/admin.css'
 
@@ -75,6 +76,7 @@ function Hero() {
   const lines = h.title.split('\n')
   return (
     <section className="hero" aria-label="Introduction">
+      <ParticlesBackground />
       <motion.div className="hero-eyebrow" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>{h.eyebrow}</motion.div>
       <h1 className="hero-title">{lines.map((line, i) => (
         <span className="line" key={i}><motion.span className="word" initial={{ y: '110%', filter: 'blur(8px)' }} animate={{ y: 0, filter: 'blur(0px)' }} transition={r ? { duration: 0 } : { duration: 0.7, delay: 0.2 + i * 0.12, ease: [0.16, 1, 0.3, 1] }}>{line}</motion.span></span>
