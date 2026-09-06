@@ -5,6 +5,7 @@ import { PortfolioProvider, usePortfolio } from './context/PortfolioContext.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
 import ParticlesBackground from './components/ParticlesBackground.jsx'
+import ThemeInjector from './components/ThemeInjector.jsx'
 import './App.css'
 import './admin/admin.css'
 
@@ -426,10 +427,11 @@ function RedirectHandler() {
   return null
 }
 
-/* ====== APP ====== */
-function App() {
+/* ====== THEMED SHELL (applies font & layout globally) ====== */
+function ThemedShell() {
   return (
-    <PortfolioProvider>
+    <>
+      <ThemeInjector />
       <BrowserRouter basename="/showcase-portfolio">
         <RedirectHandler />
         <Routes>
@@ -437,6 +439,15 @@ function App() {
           <Route path="/*" element={<PortfolioSite />} />
         </Routes>
       </BrowserRouter>
+    </>
+  )
+}
+
+/* ====== APP ====== */
+function App() {
+  return (
+    <PortfolioProvider>
+      <ThemedShell />
     </PortfolioProvider>
   )
 }

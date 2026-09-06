@@ -1,5 +1,12 @@
 const defaultData = {
-  _version: 5,
+  _version: 6,
+  theme: {
+    fontDisplay: "Poppins",
+    fontBody: "Open Sans",
+    layout: "default",
+    accentColor: "#00ff88",
+    borderRadius: "default",
+  },
   hero: {
     eyebrow: "Video Editor & Motion Designer",
     title: "I EDIT.\nI ANIMATE.\nI CREATE.",
