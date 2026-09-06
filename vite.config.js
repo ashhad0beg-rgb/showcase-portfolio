@@ -16,15 +16,4 @@ export default defineConfig({
     },
   ],
   base: '/showcase-portfolio/',
-  build: {
-    chunkSizeWarningLimit: 1000,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules/firebase')) return 'firebase'
-          if (id.includes('node_modules/react') || id.includes('node_modules/framer-motion') || id.includes('node_modules/react-router')) return 'vendor'
-        },
-      },
-    },
-  },
 })

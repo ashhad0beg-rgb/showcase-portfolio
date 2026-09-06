@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "firebase": "^12.18.0",
     "framer-motion": "^13.1.1",
     "particles.js": "^2.0.0",
     "react": "^19.2.8",
