@@ -1,5 +1,4 @@
 import { useEffect, useId } from 'react'
-import 'particles.js'
 import particlesConfig from '../data/particlesConfig.json'
 
 function ParticlesBackground() {

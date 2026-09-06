@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { PortfolioProvider, usePortfolio } from './context/PortfolioContext.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
+import AdminLogin from './pages/AdminLogin.jsx'
 import ParticlesBackground from './components/ParticlesBackground.jsx'
 import './App.css'
 import './admin/admin.css'
@@ -392,7 +393,12 @@ function AdminRoutes() {
       <Route path="/admin/*" element={<AdminDashboard />} />
       <Route path="/admin/login" element={<AdminDashboard />} />
     </Routes>
-  ) : <Navigate to="/admin/login" replace />
+  ) : (
+    <Routes>
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/*" element={<Navigate to="/admin/login" replace />} />
+    </Routes>
+  )
 }
 
 /* ====== REDIRECT HANDLER ====== */
