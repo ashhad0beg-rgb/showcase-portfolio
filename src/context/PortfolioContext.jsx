@@ -108,14 +108,14 @@ export function PortfolioProvider({ children }) {
           .single()
         if (cancelled) return
         if (error) {
-          // PGRST116 = no rows, 42P01 = table not exist yet (user hasn't run SQL)
+          // PGRST116 = no rows, 42P01 / PGRST205 = table not exist yet (user hasn't run supabase.sql)
           if (error.code === 'PGRST116' || error.message?.includes('0 rows')) {
             setSyncStatus('no-remote')
             console.log('[supabase] no remote row yet — will create on first authenticated write')
-          } else if (error.code === '42P01') {
+          } else if (error.code === '42P01' || error.code === 'PGRST205' || error.message?.includes("Could not find the table 'public.portfolio") || error.message?.includes('schema cache')) {
             setSyncStatus('no-remote')
-            setLastSyncError('Supabase table portfolio missing — run supabase.sql in SQL Editor')
-            console.warn('[supabase] table missing, run supabase.sql')
+            setLastSyncError("Supabase table 'public.portfolio' missing — run supabase.sql in SQL Editor then NOTIFY pgrst, 'reload schema'")
+            console.warn('[supabase] table missing — run supabase.sql + NOTIFY pgrst reload:', error.message)
           } else {
             console.warn('[supabase] fetch initial failed:', error.message)
             setSyncStatus('error')

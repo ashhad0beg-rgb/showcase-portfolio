@@ -60,7 +60,10 @@ create policy "Authenticated write portfolio history"
 -- 5) Enable Realtime for <2s global sync (free tier includes realtime)
 -- Supabase Dashboard → Database → Realtime → Enable for portfolio table
 -- Or via SQL:
-alter publication supabase_realtime add table public.portfolio;
+do $$ begin
+  alter publication supabase_realtime add table public.portfolio;
+exception when duplicate_object then null;
+end $$;
 
 -- 6) No initial row required — first Supabase-authenticated publish will create id=1 via upsert.
 -- If you want an initial row, publish from admin after setup. No need to insert manually.
@@ -68,7 +71,11 @@ alter publication supabase_realtime add table public.portfolio;
 -- 7) Optional: tighten history — keep only last 100 rows (run as cron or manually)
 -- delete from public.portfolio_history where id not in (select id from public.portfolio_history order by created_at desc limit 100);
 
+-- 8) Reload PostgREST schema cache so "Could not find the table 'public.portfolio' in the schema cache" disappears
+notify pgrst, 'reload schema';
+
 -- Done! Now:
 -- 1) Add admin user: Supabase Dashboard → Authentication → Users → Add user
 -- 2) Copy Project URL + anon key to .env and GitHub Secrets
 -- 3) Enable Realtime: Database → Realtime → portfolio = ON (if not already via alter publication)
+-- 4) If you still see "Could not find the table 'public.portfolio'" after running, run: notify pgrst, 'reload schema'; and wait 2s, then retry
