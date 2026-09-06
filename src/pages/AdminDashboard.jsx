@@ -27,7 +27,14 @@ export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState('dashboard')
   const [saved, setSaved] = useState(false)
   const [info, setInfo] = useState('')
+  const [ghToken, setGhToken] = useState(() => localStorage.getItem('github_pat') || '')
+  const [publishing, setPublishing] = useState(false)
   const fileRef = useRef(null)
+
+  useEffect(() => {
+    if (ghToken) localStorage.setItem('github_pat', ghToken)
+    else localStorage.removeItem('github_pat')
+  }, [ghToken])
 
   // Redirect if not authenticated - use Navigate component instead of imperative
   if (!isAuthenticated) {
@@ -38,6 +45,60 @@ export default function AdminDashboard() {
     setSaved(true)
     if (msg) setInfo(msg)
     setTimeout(() => { setSaved(false); setInfo('') }, 2500)
+  }
+
+  const handlePublish = async () => {
+    if (!ghToken) {
+      alert('GitHub Token not set!\n\nGo to Admin → Settings → GitHub Publish Token and paste a Personal Access Token (classic) with `repo` scope.\nCreate one at: https://github.com/settings/tokens/new')
+      setActiveSection('settings')
+      navigate('/admin/settings')
+      return
+    }
+    if (!confirm('Publish current admin data to LIVE website?\n\nThis will commit src/data/defaultData.js to GitHub and trigger a 1–2 min deploy. All visitors will see the new data after deploy.')) return
+    setPublishing(true)
+    try {
+      const publishData = { ...data, _version: (data._version || 0) + 1 }
+      const fileStr = `const defaultData = ${JSON.stringify(publishData, null, 2)}\n\nexport default defaultData\n`
+      // UTF-8 safe base64 for browser
+      const b64 = btoa(unescape(encodeURIComponent(fileStr)))
+      const owner = 'ashhad0beg-rgb'
+      const repo = 'showcase-portfolio'
+      const path = 'src/data/defaultData.js'
+      // 1. get current SHA
+      const getRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+        headers: { Authorization: `Bearer ${ghToken}`, Accept: 'application/vnd.github.v3+json' }
+      })
+      if (!getRes.ok) {
+        const txt = await getRes.text()
+        throw new Error(`Fetch SHA failed (${getRes.status}): ${txt.slice(0, 400)}`)
+      }
+      const { sha } = await getRes.json()
+      // 2. PUT new content
+      const putRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${ghToken}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: `chore(admin): publish v${publishData._version} via admin`,
+          content: b64,
+          sha,
+          branch: 'main'
+        })
+      })
+      if (!putRes.ok) {
+        const txt = await putRes.text()
+        throw new Error(`Publish failed (${putRes.status}): ${txt.slice(0, 600)}`)
+      }
+      // Update local copy to match published version so this browser also shows new version
+      importData(publishData)
+      localStorage.setItem('portfolio_data', JSON.stringify(publishData))
+      triggerSaved(`✓ Published v${publishData._version}! Live in ~2 min`)
+    } catch (e) {
+      console.error(e)
+      alert('Publish failed: ' + e.message + '\n\nCheck:\n• Token has `repo` scope (classic PAT)\n• Repo is ashhad0beg-rgb/showcase-portfolio\n• Network allowed to api.github.com')
+      triggerSaved('Publish failed')
+    } finally {
+      setPublishing(false)
+    }
   }
 
   const handleManualSave = () => {
@@ -128,6 +189,7 @@ export default function AdminDashboard() {
           <div className="admin-topbar-actions">
             {saved && <span className="save-indicator">{info || '✓ Saved!'}</span>}
             {!saved && <span className="autosave-hint">Auto-saved</span>}
+            <button className="btn-publish" onClick={handlePublish} disabled={publishing} title="Publish to live website via GitHub (global)">{publishing ? 'Publishing…' : '🌐 Publish to Web'}</button>
             <button className="btn-save" onClick={handleManualSave} title="Force save to localStorage">Save</button>
             <button className="btn-secondary" onClick={handleViewSite} title="View live site">View Site</button>
             <button className="btn-secondary" onClick={handleExport} title="Download JSON file">Export</button>
@@ -138,7 +200,10 @@ export default function AdminDashboard() {
           </div>
         </div>
         <div className="admin-storage-note">
-          💡 Changes auto-save to <code>localStorage</code> (this browser only). Use <strong>Export</strong> → commit <code>src/data/defaultData.js</code> or uploaded JSON to make them visible to all visitors on GitHub Pages.
+          <strong>How publishing works:</strong><br />
+          ✏️ Edits <strong>auto-save locally</strong> to this browser's <code>localStorage</code> (instant preview, but only you see it).<br />
+          🌐 Click <strong>Publish to Web</strong> (needs GitHub Token in Settings) to commit <code>src/data/defaultData.js</code> to <code>ashhad0beg-rgb/showcase-portfolio</code> → live for <strong>all visitors</strong> after 1–2 min deploy.<br />
+          💡 No token? Use <strong>Export</strong> → replace <code>src/data/defaultData.js</code> locally → <code>git commit & push</code> manually.
         </div>
         <div className="admin-content">
           {activeSection === 'dashboard' && <DashboardOverview data={data} updateData={updateData} onSave={triggerSaved} />}
@@ -153,7 +218,7 @@ export default function AdminDashboard() {
           {activeSection === 'testimonials' && <TestimonialsEdit onSave={triggerSaved} />}
           {activeSection === 'faq' && <FaqEdit onSave={triggerSaved} />}
           {activeSection === 'contact' && <ContactEdit onSave={triggerSaved} />}
-          {activeSection === 'settings' && <SettingsEdit onSave={triggerSaved} />}
+          {activeSection === 'settings' && <SettingsEdit onSave={triggerSaved} ghToken={ghToken} setGhToken={setGhToken} publishing={publishing} onPublish={handlePublish} />}
         </div>
       </main>
     </div>
@@ -353,9 +418,10 @@ function ContactEdit({ onSave }) {
   )
 }
 
-function SettingsEdit({ onSave }) {
+function SettingsEdit({ onSave, ghToken, setGhToken, publishing, onPublish }) {
   const { data, updateData, updateSection } = usePortfolio()
   const f = data.footer
+  const [showToken, setShowToken] = useState(false)
   return (
     <div className="admin-section"><h2>Site Settings</h2>
       <div className="form-group"><label>Site Name</label><input type="text" value={data.siteName} onChange={(e) => { updateData('siteName', e.target.value); onSave('Saved') }} /></div>
@@ -363,7 +429,42 @@ function SettingsEdit({ onSave }) {
       <div className="form-group"><label>Footer Name</label><input type="text" value={f.name} onChange={(e) => { updateSection('footer', { name: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Footer Role</label><input type="text" value={f.role} onChange={(e) => { updateSection('footer', { role: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Footer Copyright</label><input type="text" value={f.copyright} onChange={(e) => { updateSection('footer', { copyright: e.target.value }); onSave('Saved') }} /></div>
-      <div className="form-group"><label>Admin Password</label><p className="hint">Current password: <code>admin2026</code> (change in code if needed)</p></div>
+      <div className="form-group"><label>Admin Password</label><p className="hint">Current password: <code>admin2026</code> (change in code <code>src/context/PortfolioContext.jsx:72</code> if needed)</p></div>
+
+      <div className="settings-divider" />
+      <h3 style={{ fontFamily: 'Poppins', fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>🌐 Publish to Web (Global)</h3>
+      <div className="admin-publish-box">
+        <div className="form-group" style={{ marginBottom: '12px' }}>
+          <label>GitHub Publish Token (PAT)</label>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input
+              type={showToken ? 'text' : 'password'}
+              value={ghToken}
+              onChange={(e) => setGhToken(e.target.value)}
+              placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+              style={{ flex: 1 }}
+              autoComplete="off"
+            />
+            <button className="btn-secondary" type="button" onClick={() => setShowToken(!showToken)} style={{ whiteSpace: 'nowrap' }}>{showToken ? 'Hide' : 'Show'}</button>
+            {ghToken && <button className="btn-secondary" type="button" onClick={() => { setGhToken(''); localStorage.removeItem('github_pat') }} title="Clear token">Clear</button>}
+          </div>
+          <p className="hint" style={{ marginTop: '8px', lineHeight: 1.6 }}>
+            Stored only in <code>localStorage</code> on this browser. Required scope: <code>repo</code> (classic PAT).<br />
+            Create: <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener noreferrer" style={{ color: '#5eead4', textDecoration: 'underline' }}>github.com/settings/tokens/new</a> → select <code>repo</code> → Generate → paste here.<br />
+            For fine-grained PAT: repo <code>ashhad0beg-rgb/showcase-portfolio</code> → Permissions: Contents: Read & write.
+          </p>
+          {ghToken ? <span className="hint" style={{ color: '#5eead4' }}>✓ Token saved locally ({ghToken.length} chars, {ghToken.slice(0, 4)}…{ghToken.slice(-4)})</span> : <span className="hint" style={{ color: '#fca5a5' }}>No token — Publish will prompt you.</span>}
+        </div>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <button className="btn-publish" onClick={onPublish} disabled={publishing} style={{ minHeight: '44px', padding: '10px 20px' }}>
+            {publishing ? '⏳ Publishing…' : '🌐 Publish Current Data to Live Site'}
+          </button>
+          <span className="hint">Commits <code>src/data/defaultData.js</code> with bumped <code>_version</code> → triggers GitHub Pages deploy (~2 min). All visitors see new data.</span>
+        </div>
+        <div className="hint" style={{ marginTop: '12px', background: 'rgba(255,255,255,0.04)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <strong>No token workflow:</strong> Click <code>Export</code> in top bar → open <code>src/data/defaultData.js</code> in VS Code → replace with exported JSON (keep <code>const defaultData = ...\nexport default defaultData</code> wrapper) → bump <code>_version</code> → <code>git add/commit/push</code>.
+        </div>
+      </div>
     </div>
   )
 }
