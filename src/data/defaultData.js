@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 11,
+  "_version": 12,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -8,7 +8,7 @@ const defaultData = {
     "borderRadius": "default"
   },
   "hero": {
-    "eyebrow": "First in Bloodline",
+    "eyebrow": "",
     "title": "First in Bloodline",
     "description": "I transform ideas into cinematic edits, motion graphics and visual experiences that make brands impossible to ignore.",
     "buttonPrimary": "WATCH SHOWREEL",
