@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 10,
+  "_version": 11,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -9,7 +9,7 @@ const defaultData = {
   },
   "hero": {
     "eyebrow": "First in Bloodline",
-    "title": "I EDIT.\nI Fuck\nI CREATE.",
+    "title": "First in Bloodline",
     "description": "I transform ideas into cinematic edits, motion graphics and visual experiences that make brands impossible to ignore.",
     "buttonPrimary": "WATCH SHOWREEL",
     "buttonSecondary": "LET'S WORK TOGETHER",
