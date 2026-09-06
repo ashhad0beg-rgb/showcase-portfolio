@@ -6,13 +6,18 @@
     <title>Redirecting...</title>
     <script>
       ;(function () {
-        var redirect = window.location.pathname
-        sessionStorage.setItem('portfolio_redirect', redirect)
+        try {
+          var l = window.location
+          var redirect = l.pathname + l.search + l.hash
+          sessionStorage.setItem('portfolio_redirect', redirect)
+        } catch (e) {}
         window.location.replace('/showcase-portfolio/')
       })()
     </script>
   </head>
   <body>
-    <noscript>JavaScript is required. Please enable it to use this site.</noscript>
+    <p style="text-align:center;padding:40px;font-family:sans-serif;color:#94a3b8">Redirecting… <a href="/showcase-portfolio/">click here</a> if not redirected.</p>
+    <noscript>JavaScript is required. Please <a href="/showcase-portfolio/">go to homepage</a>.</noscript>
   </body>
 </html>
+<!-- NOTE: vite.config.js copies dist/index.html -> dist/404.html at build, so this redirect is only fallback for cached old 404 or if copy fails. New deploys serve SPA directly at /admin/login without redirect. -->

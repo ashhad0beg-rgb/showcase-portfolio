@@ -388,29 +388,40 @@ function PortfolioSite() {
 /* ====== ADMIN ROUTES ====== */
 function AdminRoutes() {
   const { isAuthenticated } = usePortfolio()
-  return isAuthenticated ? (
+  if (isAuthenticated) {
+    return (
+      <Routes>
+        <Route path="login" element={<Navigate to="/admin" replace />} />
+        <Route path="*" element={<AdminDashboard />} />
+      </Routes>
+    )
+  }
+  return (
     <Routes>
-      <Route path="/admin/*" element={<AdminDashboard />} />
-      <Route path="/admin/login" element={<AdminDashboard />} />
-    </Routes>
-  ) : (
-    <Routes>
-      <Route path="/admin/login" element={<AdminLogin />} />
-      <Route path="/*" element={<Navigate to="/admin/login" replace />} />
+      <Route path="login" element={<AdminLogin />} />
+      <Route path="*" element={<Navigate to="/admin/login" replace />} />
     </Routes>
   )
 }
 
 /* ====== REDIRECT HANDLER ====== */
+// Fallback for old 404.html redirect (kept for cached GH Pages 404). New deployments use 404.html = index.html so this is rarely needed.
 function RedirectHandler() {
   const nav = useNavigate()
   const loc = useLocation()
   useEffect(() => {
-    const redirect = sessionStorage.getItem('portfolio_redirect')
-    if (redirect && redirect !== '/showcase-portfolio/' && (location.pathname === '/showcase-portfolio/' || location.pathname === '/')) {
+    try {
+      const redirect = sessionStorage.getItem('portfolio_redirect')
+      if (!redirect) return
       sessionStorage.removeItem('portfolio_redirect')
-      nav(redirect.replace(/^\/showcase-portfolio/, '') || '/')
-    }
+      const base = '/showcase-portfolio'
+      if (!redirect.startsWith(base)) return
+      const target = redirect.slice(base.length) || '/'
+      // basename stripped: at root loc.pathname === '/'
+      if (loc.pathname === '/' || loc.pathname === '') {
+        nav(target, { replace: true })
+      }
+    } catch {}
   }, [nav, loc.pathname])
   return null
 }
@@ -423,7 +434,6 @@ function App() {
         <RedirectHandler />
         <Routes>
           <Route path="/admin/*" element={<AdminRoutes />} />
-          <Route path="/admin/login" element={<AdminRoutes />} />
           <Route path="/*" element={<PortfolioSite />} />
         </Routes>
       </BrowserRouter>
