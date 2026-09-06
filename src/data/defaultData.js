@@ -1,9 +1,9 @@
 const defaultData = {
-  "_version": 9,
+  "_version": 10,
   "theme": {
-    "fontDisplay": "DM Sans",
-    "fontBody": "Roboto",
-    "layout": "default",
+    "fontDisplay": "Poppins",
+    "fontBody": "Poppins",
+    "layout": "compact",
     "accentColor": "#00ff88",
     "borderRadius": "default"
   },
