@@ -82,9 +82,24 @@ export function PortfolioProvider({ children }) {
     setIsAuthenticated(false)
   }, [])
 
+  const resetData = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY)
+    setData(defaultData)
+  }, [])
+
+  const importData = useCallback((newData) => {
+    try {
+      // keep version from imported data, but ensure it has required keys
+      setData(newData)
+    } catch (e) {
+      console.error('import failed', e)
+    }
+  }, [])
+
   return (
     <PortfolioContext.Provider value={{
       data,
+      setData,
       isAuthenticated,
       login,
       logout,
@@ -93,6 +108,8 @@ export function PortfolioProvider({ children }) {
       updateArrayItem,
       addArrayItem,
       removeArrayItem,
+      resetData,
+      importData,
     }}>
       {children}
     </PortfolioContext.Provider>
