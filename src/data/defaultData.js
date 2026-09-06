@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 8,
+  "_version": 9,
   "theme": {
     "fontDisplay": "DM Sans",
     "fontBody": "Roboto",
@@ -9,7 +9,7 @@ const defaultData = {
   },
   "hero": {
     "eyebrow": "First in Bloodline",
-    "title": "I EDIT.\nI ANIMATE.\nI CREATE.",
+    "title": "I EDIT.\nI Fuck\nI CREATE.",
     "description": "I transform ideas into cinematic edits, motion graphics and visual experiences that make brands impossible to ignore.",
     "buttonPrimary": "WATCH SHOWREEL",
     "buttonSecondary": "LET'S WORK TOGETHER",
