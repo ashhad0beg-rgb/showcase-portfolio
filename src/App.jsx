@@ -59,7 +59,7 @@ function Navbar() {
   return (
     <>
       <motion.nav className={`nav${scrolled ? ' scrolled' : ''}`} initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
-        <a href="#" className="nav-logo">ANSHED <span className="accent">BEG</span></a>
+        <a href="#" className="nav-logo">Ashhad <span className="accent">Beg</span></a>
         <ul className="nav-links">{items.map(i => <li key={i.href}><a href={i.href}>{i.l}</a></li>)}</ul>
         <div className="nav-availability"><span className="nav-availability-dot" /> AVAILABLE FOR FREELANCE</div>
         <button className={`nav-toggle${mob ? ' open' : ''}`} onClick={() => setMob(!mob)} aria-label="Toggle menu"><span /><span /><span /></button>

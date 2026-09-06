@@ -1,5 +1,5 @@
 const defaultData = {
-  _version: 4,
+  _version: 5,
   hero: {
     eyebrow: "Video Editor & Motion Designer",
     title: "I EDIT.\nI ANIMATE.\nI CREATE.",
@@ -60,7 +60,7 @@ const defaultData = {
     { year: "2024", role: "Motion Graphics Designer", client: "Apple" }
   ],
   testimonials: [
-    { quote: "Working with Anshed completely transformed the visual direction of our campaign. The attention to detail and creative vision was outstanding.", author: "Creative Director", company: "Nike" },
+    { quote: "Working with Ashhad completely transformed the visual direction of our campaign. The attention to detail and creative vision was outstanding.", author: "Creative Director", company: "Nike" },
     { quote: "Exceptional motion graphics work. The animations were fluid, on-brand and exceeded our expectations.", author: "Marketing Lead", company: "Spotify" }
   ],
   faq: [
@@ -77,7 +77,7 @@ const defaultData = {
     title: "LET'S MAKE SOMETHING",
     subtitle: "IMPOSSIBLE TO IGNORE.",
     buttonPrimary: "START A PROJECT",
-    email: "anshedbeg@example.com",
+    email: "ashhadbeg@example.com",
     social: [
       { name: "Instagram", url: "#" },
       { name: "Behance", url: "#" },
@@ -87,13 +87,13 @@ const defaultData = {
     ]
   },
   footer: {
-    name: "ANSHED BEG",
+    name: "Ashhad Beg",
     role: "Video Editor / Motion Graphics Designer",
     availability: "Available for selected freelance projects.",
-    copyright: "© 2026 ANSHED BEG. ALL RIGHTS RESERVED."
+    copyright: "© 2026 Ashhad Beg. ALL RIGHTS RESERVED."
   },
-  siteName: "Anshed Beg | Video Editor & Motion Designer",
-  siteDescription: "Anshed Beg — Premium Video Editing & Motion Graphics Portfolio"
+  siteName: "Ashhad Beg | Video Editor & Motion Designer",
+  siteDescription: "Ashhad Beg — Premium Video Editing & Motion Graphics Portfolio"
 }
 
 export default defaultData
