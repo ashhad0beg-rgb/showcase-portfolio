@@ -16,7 +16,9 @@ function CustomCursor() {
   const reduced = useReduce()
   const dotRef = useRef(null)
   const ringRef = useRef(null)
+  const wrapRef = useRef(null)
   const [vis, setVis] = useState(false)
+  const [cursorType, setCursorType] = useState('')
   const mouse = useRef({ x: -100, y: -100 })
   const pos = useRef({ x: -100, y: -100 })
   useEffect(() => {
@@ -24,9 +26,23 @@ function CustomCursor() {
     const onM = (e) => { mouse.current = { x: e.clientX, y: e.clientY }; setVis(true) }
     const onE = () => setVis(true)
     const onL = () => setVis(false)
+    const onOver = (e) => {
+      const t = e.target
+      if (!(t instanceof Element)) return
+      if (t.closest('.work-item')) setCursorType('project')
+      else if (t.closest('a, button, .btn, .service-item, .faq-question, .showreel-play')) setCursorType('hover')
+      else setCursorType('')
+    }
+    const onOut = (e) => {
+      const t = e.target
+      if (!(t instanceof Element)) return
+      if (!t.closest('a, button, .btn, .work-item, .service-item, .faq-question, .showreel-play')) setCursorType('')
+    }
     window.addEventListener('mousemove', onM, { passive: true })
     document.addEventListener('mouseenter', onE)
     document.addEventListener('mouseleave', onL)
+    document.addEventListener('mouseover', onOver)
+    document.addEventListener('mouseout', onOut)
     let raf
     const tick = () => {
       pos.current.x += (mouse.current.x - pos.current.x) * 0.15
@@ -36,13 +52,13 @@ function CustomCursor() {
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
-    return () => { window.removeEventListener('mousemove', onM); document.removeEventListener('mouseenter', onE); document.removeEventListener('mouseleave', onL); cancelAnimationFrame(raf) }
+    return () => { window.removeEventListener('mousemove', onM); document.removeEventListener('mouseenter', onE); document.removeEventListener('mouseleave', onL); document.removeEventListener('mouseover', onOver); document.removeEventListener('mouseout', onOut); cancelAnimationFrame(raf) }
   }, [reduced])
-  if (reduced || typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) return null
+  if (reduced || (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches)) return null
   return (
-    <div className="custom-cursor" style={{ opacity: vis ? 1 : 0 }}>
+    <div ref={wrapRef} className={`custom-cursor${cursorType ? ` cursor-${cursorType}` : ''}`} style={{ opacity: vis ? 1 : 0 }}>
       <div className="custom-cursor-dot" ref={dotRef} />
-      <div className="custom-cursor-ring" ref={ringRef} />
+      <div className="custom-cursor-ring" ref={ringRef}><span className="custom-cursor-label">View</span></div>
     </div>
   )
 }

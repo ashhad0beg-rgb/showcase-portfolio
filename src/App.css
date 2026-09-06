@@ -45,6 +45,10 @@
 @media (pointer: coarse) {
   .custom-cursor { display: none !important; }
 }
+/* Admin: hide custom cursor and restore system cursor (admin has no CustomCursor, but body.cursor:none hid it) */
+body:has(.admin-layout) .custom-cursor,
+body:has(.admin-login) .custom-cursor { display: none !important; }
+body:has(.admin-layout), body:has(.admin-login) { cursor: auto !important; }
 
 /* ---------- NAVIGATION ---------- */
 .nav {
