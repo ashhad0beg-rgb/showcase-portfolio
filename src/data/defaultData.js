@@ -1,8 +1,8 @@
 const defaultData = {
-  "_version": 7,
+  "_version": 8,
   "theme": {
-    "fontDisplay": "Poppins",
-    "fontBody": "Open Sans",
+    "fontDisplay": "DM Sans",
+    "fontBody": "Roboto",
     "layout": "default",
     "accentColor": "#00ff88",
     "borderRadius": "default"
