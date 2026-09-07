@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 21,
+  "_version": 22,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -29,22 +29,22 @@ const defaultData = {
     {
       "number": "01",
       "name": "VIDEO EDITING",
-      "description": "Commercials, YouTube videos, social content, trailers and cinematic edits. Pacing, rhythm and storytelling through cuts."
+      "description": "Turning raw footage into something worth watching twice."
     },
     {
       "number": "02",
-      "name": "MOTION GRAPHICS",
-      "description": "2D animation, kinetic typography, logo animation, explainer graphics and visual effects that bring ideas to life."
+      "name": "MOTION  DESIGNER",
+      "description": "Motion with purpose. Creativity in every frame."
     },
     {
       "number": "03",
-      "name": "BRAND CONTENT",
-      "description": "Social campaigns, promotional videos and branded visual content that communicates and converts."
+      "name": "VISUAL STORYTELLING",
+      "description": "Turning ideas into stories through visuals."
     },
     {
       "number": "04",
       "name": "CREATIVE DIRECTION",
-      "description": "Visual concepts, storytelling, art direction and creative development from concept to delivery."
+      "description": "Turning big ideas into bold visual experiences."
     }
   ],
   "process": [
