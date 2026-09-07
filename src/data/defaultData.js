@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 12,
+  "_version": 13,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -104,11 +104,6 @@ const defaultData = {
       "number": "04",
       "name": "CREATIVE DIRECTION",
       "description": "Visual concepts, storytelling, art direction and creative development from concept to delivery."
-    },
-    {
-      "number": "05",
-      "name": "3D & VISUAL EFFECTS",
-      "description": "3D motion, compositing and advanced visual treatments for high-impact productions."
     }
   ],
   "process": [
