@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 18,
+  "_version": 19,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -21,7 +21,7 @@ const defaultData = {
     "videoUrl": "",
     "posterUrl": "",
     "tags": [
-      "VIDEO EDITOR MOTION DESIGNER VISUAL STORYTELLING CREATIVE ED"
+      "VIDEO EDITOR MOTION DESIGNER VISUAL STORYTELLING CREATIVE DI"
     ]
   },
   "work": [
