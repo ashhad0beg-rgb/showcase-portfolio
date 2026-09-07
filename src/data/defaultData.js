@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 14,
+  "_version": 15,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -233,7 +233,7 @@ const defaultData = {
     "title": "LET'S MAKE SOMETHING",
     "subtitle": "IMPOSSIBLE TO IGNORE.",
     "buttonPrimary": "START A PROJECT",
-    "email": "ashhadbeg@example.com",
+    "email": "ashhad0beg@example.com",
     "social": [
       {
         "name": "Instagram",
