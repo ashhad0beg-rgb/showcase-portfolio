@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 13,
+  "_version": 14,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -157,11 +157,7 @@ const defaultData = {
     "Adobe After Effects",
     "Premiere Pro",
     "Photoshop",
-    "Illustrator",
-    "Blender",
-    "Cinema 4D",
-    "DaVinci Resolve",
-    "Figma"
+    "Illustrator"
   ],
   "experience": [
     {
