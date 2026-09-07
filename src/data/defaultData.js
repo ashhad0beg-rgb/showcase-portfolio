@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 17,
+  "_version": 18,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -16,16 +16,12 @@ const defaultData = {
     "image": ""
   },
   "showreel": {
-    "label": "SHOWREEL 2026",
-    "title": "SHOWREEL",
+    "label": "",
+    "title": "",
     "videoUrl": "",
     "posterUrl": "",
     "tags": [
-      "Editing",
-      "Motion Graphics",
-      "Commercials",
-      "Social Content",
-      "Brand Films"
+      "VIDEO EDITOR MOTION DESIGNER VISUAL STORYTELLING CREATIVE ED"
     ]
   },
   "work": [
