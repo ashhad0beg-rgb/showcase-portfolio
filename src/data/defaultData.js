@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 15,
+  "_version": 16,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -10,7 +10,7 @@ const defaultData = {
   "hero": {
     "eyebrow": "",
     "title": "First in Bloodline",
-    "description": "I transform ideas into cinematic edits, motion graphics and visual experiences that make brands impossible to ignore.",
+    "description": "I build visual experiences where editing meets motion, design meets storytelling, and every frame has a purpose. From cinematic cuts to expressive motion graphics, I create bold, modern visuals designed to capture attention and turn simple ideas into something unforgettable.",
     "buttonPrimary": "WATCH SHOWREEL",
     "buttonSecondary": "LET'S WORK TOGETHER",
     "image": ""
