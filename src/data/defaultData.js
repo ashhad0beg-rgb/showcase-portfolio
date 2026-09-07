@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 16,
+  "_version": 17,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -11,8 +11,8 @@ const defaultData = {
     "eyebrow": "",
     "title": "First in Bloodline",
     "description": "I build visual experiences where editing meets motion, design meets storytelling, and every frame has a purpose. From cinematic cuts to expressive motion graphics, I create bold, modern visuals designed to capture attention and turn simple ideas into something unforgettable.",
-    "buttonPrimary": "WATCH SHOWREEL",
-    "buttonSecondary": "LET'S WORK TOGETHER",
+    "buttonPrimary": "",
+    "buttonSecondary": "",
     "image": ""
   },
   "showreel": {
