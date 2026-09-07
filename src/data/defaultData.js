@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 20,
+  "_version": 21,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -24,62 +24,7 @@ const defaultData = {
       "VIDEO EDITOR MOTION DESIGNER VISUAL STORYTELLING CREATIVE DI"
     ]
   },
-  "work": [
-    {
-      "title": "FUTURE IS NOW",
-      "client": "Nike",
-      "year": "2026",
-      "role": "Motion Design / Editing",
-      "category": "Commercial",
-      "image": "",
-      "description": "A cinematic brand film featuring dynamic motion graphics and seamless editing."
-    },
-    {
-      "title": "NEON DREAMS",
-      "client": "Spotify",
-      "year": "2025",
-      "role": "Video Editing",
-      "category": "Music Visual",
-      "image": "",
-      "description": "Music video with vibrant color grading and creative transitions."
-    },
-    {
-      "title": "PULSE",
-      "client": "Samsung",
-      "year": "2026",
-      "role": "Motion Graphics",
-      "category": "Product Video",
-      "image": "",
-      "description": "Product launch video with 3D motion and kinetic typography."
-    },
-    {
-      "title": "WAVELENGTH",
-      "client": "Adidas",
-      "year": "2025",
-      "role": "Editing / Art Direction",
-      "category": "Brand Film",
-      "image": "",
-      "description": "Brand campaign film with editorial pacing and visual storytelling."
-    },
-    {
-      "title": "CATALYST",
-      "client": "Tesla",
-      "year": "2026",
-      "role": "Motion Design",
-      "category": "Commercial",
-      "image": "",
-      "description": "Animated explainer with iconographic motion and clean messaging."
-    },
-    {
-      "title": "ECHO",
-      "client": "Apple",
-      "year": "2025",
-      "role": "Video Editing",
-      "category": "Social Content",
-      "image": "",
-      "description": "Social media campaign with fast-paced edits and platform optimization."
-    }
-  ],
+  "work": [],
   "services": [
     {
       "number": "01",
