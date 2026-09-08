@@ -37,11 +37,12 @@ export default function LoginPage() {
         if (!ok && supaError) {
           // try emergency fallback via context (local passwords)
           ok = await login(email, password)
-          if (!ok) setError(`Supabase: ${supaError} — emergency fallback also failed. Try ashhad0beg@gmail.com / ashhad0beg@gmail.com`)
+          if (!ok) setError(`Supabase: ${supaError}`)
           else {
-            // emergency succeeded, show warning but allow
-            setError(`Supabase: ${supaError} — logged in via emergency local (create real Auth user for Live)`)
-            setTimeout(() => navigate('/admin'), 800)
+            // emergency succeeded — show exact Supabase error for 4s before entering admin so you can copy it
+            setError(`Supabase: ${supaError} — logged in via EMERGENCY LOCAL (fix: create real Auth user or reset password via Dashboard → Auth → Users)`)
+            setLoading(false)
+            setTimeout(() => navigate('/admin'), 4000)
             return
           }
         } else if (!ok) {
