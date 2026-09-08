@@ -255,8 +255,9 @@ export default function AdminDashboard() {
     window.open('/showcase-portfolio/', '_blank')
   }
 
-  const handlePublish = () => { if (sbEnabled) handleInstantPublish(); else handleGhPublish() }
-  const publishing = instantPublishing || ghPublishing
+  // GitHub-only publication as requested — Supabase kept for auth only, not for data sync
+  const handlePublish = () => handleGhPublish()
+  const publishing = ghPublishing
 
   return (
     <div className="admin-layout">
@@ -294,13 +295,12 @@ export default function AdminDashboard() {
             {saved ? <span className="save-indicator">{info || 'Saved'}</span> : <span className="autosave-hint">Auto-saved</span>}
             <button className="btn-secondary" onClick={handleViewSite}>Preview</button>
             <button className="btn-save" onClick={handleManualSave}>Save</button>
-            <button className="btn-publish" onClick={handlePublish} disabled={publishing || isSyncing} title={sbEnabled ? 'Publish LIVE via Supabase' : 'Publish via GitHub'}>{publishing ? 'Publishing…' : sbEnabled ? 'Publish' : 'Publish'}</button>
+            <button className="btn-publish" onClick={handlePublish} disabled={publishing} title="Publish to GitHub Pages (1-2 min)">{publishing ? 'Publishing…' : 'Publish to GitHub'}</button>
           </div>
         </div>
         <div className="admin-storage-note" style={{ background: sbEnabled ? 'rgba(94,234,212,0.06)' : 'rgba(148,163,184,0.06)', borderColor: sbEnabled ? 'rgba(94,234,212,0.12)' : 'rgba(255,255,255,0.06)' }}>
-          {sbEnabled ? (supabaseUser ? (supabaseUser.id === 'emergency-local' ? <span style={{ color: '#fb923c' }}>⚠ Emergency — {supabaseUser.email} · Supabase: {(() => { try { return localStorage.getItem('last_supabase_error') || lastAuthError || 'Invalid login credentials' } catch { return lastAuthError || 'Invalid login credentials' } })()} — fix in Auth → Users then re-login for Live</span> : <span style={{ color: '#5eead4' }}>✓ Live sync — {supabaseUser.email}</span>) : <span style={{ color: '#fb923c' }}>○ Signed out — sign in to publish live</span>) : <span>○ Local mode — edits saved in this browser only</span>}
+          {sbEnabled ? (supabaseUser ? (supabaseUser.id === 'emergency-local' ? <span style={{ color: '#fb923c' }}>⚠ Emergency — {supabaseUser.email} · Supabase: {(() => { try { return localStorage.getItem('last_supabase_error') || lastAuthError || 'Invalid login' } catch { return lastAuthError || 'Invalid login' } })()} — fix Auth user for Live</span> : <span style={{ color: '#5eead4' }}>✓ Supabase login — {supabaseUser.email} · Publish via GitHub</span>) : <span style={{ color: '#fb923c' }}>○ Signed out — Supabase login required</span>) : <span>○ Local mode — login required</span>}
           {lastSyncError && !lastSyncError.includes('Realtime failed') && <span style={{ color: '#fca5a5', marginLeft: '12px' }}>· {lastSyncError.slice(0,60)}</span>}
-          {lastSyncError && lastSyncError.includes('Realtime failed') && <span style={{ color: '#94a3b8', marginLeft: '12px' }}>· Polling active</span>}
         </div>
         <div className="admin-content">
           {activeSection === 'dashboard' && <DashboardOverview data={data} updateData={updateData} onSave={triggerSaved} />}

@@ -87,9 +87,15 @@ export function PortfolioProvider({ children }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Subscribe to Supabase Realtime for instant global updates (<2s)
-  // Table: portfolio (id=1) with columns: id, data(jsonb), version, updated_at, updated_by
+  // GitHub-only publication as requested — Supabase for login only, not for portfolio data sync
+  const SUPABASE_DATA_SYNC = false
+  // Subscribe to Supabase Realtime for instant global updates (<2s) — DISABLED for GitHub-only mode
   useEffect(() => {
+    if (!SUPABASE_DATA_SYNC) {
+      setSyncStatus('local')
+      setIsSyncing(false)
+      return
+    }
     if (!isSupabaseEnabled || !supabase) {
       setSyncStatus('local')
       setIsSyncing(false)
@@ -252,10 +258,10 @@ export function PortfolioProvider({ children }) {
     }
   }, [data])
 
-  // Debounced auto-sync to Supabase when admin edits and is authenticated
+  // Debounced auto-sync to Supabase — DISABLED for GitHub-only publication (Supabase for login only)
   useEffect(() => {
+    if (!SUPABASE_DATA_SYNC) return
     if (!isSupabaseEnabled || !supabase) return
-    // Only sync if Supabase-authenticated admin — visitors never write (RLS blocks anon writes)
     if (!supabaseUser) return
     if (isSyncing && !lastRemoteDataRef.current) return
 
