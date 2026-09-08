@@ -25,26 +25,27 @@ export default function LoginPage() {
           setLoading(false)
           return
         }
-        // try real Supabase first to capture exact error — single sign-in, no double call
+        // try real Supabase first to capture exact error — single sign-in
         const { data: signData, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
         if (error) {
           supaError = error.message
           console.warn('[login] supabase error:', supaError)
+          try { localStorage.setItem('last_supabase_error', supaError) } catch {}
         } else if (signData?.user) {
-          // real Supabase success — context onAuthStateChange will set supabaseUser/isAuthenticated
+          try { localStorage.removeItem('last_supabase_error') } catch {}
           console.log('[login] supabase success', signData.user.email)
           setLoading(false)
           navigate('/admin')
           return
         }
         if (supaError) {
-          // real failed — try emergency local fallback
           ok = await login(email, password)
           if (!ok) setError(`Supabase: ${supaError}`)
           else {
-            setError(`Supabase: ${supaError} — EMERGENCY LOCAL (copy this Supabase: line). Entering admin in 4s...`)
+            setError(`Supabase: ${supaError} — EMERGENCY LOCAL. Copy Supabase: line.`)
             setLoading(false)
-            setTimeout(() => navigate('/admin'), 4000)
+            try { localStorage.setItem('last_supabase_error', supaError) } catch {}
+            setTimeout(() => navigate('/admin'), 5000)
             return
           }
         } else if (!ok) {

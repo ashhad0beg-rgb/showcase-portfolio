@@ -298,9 +298,9 @@ export default function AdminDashboard() {
           </div>
         </div>
         <div className="admin-storage-note" style={{ background: sbEnabled ? 'rgba(94,234,212,0.06)' : 'rgba(148,163,184,0.06)', borderColor: sbEnabled ? 'rgba(94,234,212,0.12)' : 'rgba(255,255,255,0.06)' }}>
-          {sbEnabled ? (supabaseUser ? (supabaseUser.id === 'emergency-local' ? <span style={{ color: '#fb923c' }}>⚠ Emergency local — {supabaseUser.email} · Supabase: {lastAuthError || 'login failed (see Console)'} — fix Auth user then re-login for Live</span> : <span style={{ color: '#5eead4' }}>✓ Live sync — {supabaseUser.email}</span>) : <span style={{ color: '#fb923c' }}>○ Signed out — sign in to publish live</span>) : <span>○ Local mode — edits saved in this browser only</span>}
+          {sbEnabled ? (supabaseUser ? (supabaseUser.id === 'emergency-local' ? <span style={{ color: '#fb923c' }}>⚠ Emergency — {supabaseUser.email} · Supabase: {(() => { try { return localStorage.getItem('last_supabase_error') || lastAuthError || 'Invalid login credentials' } catch { return lastAuthError || 'Invalid login credentials' } })()} — fix in Auth → Users then re-login for Live</span> : <span style={{ color: '#5eead4' }}>✓ Live sync — {supabaseUser.email}</span>) : <span style={{ color: '#fb923c' }}>○ Signed out — sign in to publish live</span>) : <span>○ Local mode — edits saved in this browser only</span>}
           {lastSyncError && !lastSyncError.includes('Realtime failed') && <span style={{ color: '#fca5a5', marginLeft: '12px' }}>· {lastSyncError.slice(0,60)}</span>}
-          {lastSyncError && lastSyncError.includes('Realtime failed') && <span style={{ color: '#94a3b8', marginLeft: '12px' }}>· Polling active (Realtime OFF)</span>}
+          {lastSyncError && lastSyncError.includes('Realtime failed') && <span style={{ color: '#94a3b8', marginLeft: '12px' }}>· Polling active</span>}
         </div>
         <div className="admin-content">
           {activeSection === 'dashboard' && <DashboardOverview data={data} updateData={updateData} onSave={triggerSaved} />}
