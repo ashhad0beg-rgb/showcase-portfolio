@@ -25,22 +25,26 @@ export default function LoginPage() {
           setLoading(false)
           return
         }
-        // try real Supabase first to capture exact error
-        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+        // try real Supabase first to capture exact error — single sign-in, no double call
+        const { data: signData, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
         if (error) {
           supaError = error.message
           console.warn('[login] supabase error:', supaError)
-        } else {
-          // supabase succeeded, context will pick up user via onAuthStateChange, but also call login to set isAuthenticated
-          ok = await login(email, password)
+        } else if (signData?.user) {
+          // real Supabase success — context onAuthStateChange will set supabaseUser/isAuthenticated
+          console.log('[login] supabase success', signData.user.email)
+          setLoading(false)
+          navigate('/admin')
+          return
         }
-        if (!ok && supaError) {
+        if (supaError) {
+          // real failed — try emergency local fallback
           ok = await login(email, password)
           if (!ok) setError(`Supabase: ${supaError}`)
           else {
-            setError(`Supabase: ${supaError} — EMERGENCY LOCAL (copy this line). Entering admin in 6s...`)
+            setError(`Supabase: ${supaError} — EMERGENCY LOCAL (copy this Supabase: line). Entering admin in 4s...`)
             setLoading(false)
-            setTimeout(() => navigate('/admin'), 6000)
+            setTimeout(() => navigate('/admin'), 4000)
             return
           }
         } else if (!ok) {
