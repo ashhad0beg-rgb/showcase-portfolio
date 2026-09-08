@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 23,
+  "_version": 24,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
