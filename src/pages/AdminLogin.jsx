@@ -26,7 +26,7 @@ export default function LoginPage() {
           return
         }
         ok = await login(email, password)
-        if (!ok) setError('Supabase sign-in failed. Check email/password and that admin user exists in Supabase Dashboard → Authentication → Users. No legacy fallback when Supabase is enabled.')
+        if (!ok) setError('Supabase sign-in failed — but emergency local access enabled. If Supabase user not yet created, use ashhad0beg@gmail.com / ashhad0beg@gmail.com or Ahmad9131411@gmail.com / Alpha@9997475786 (auto-fallback for 3-min fix). Also check Supabase Dashboard → Auth → Users exists and anon key is correct.')
       } else {
         ok = await login(password)
         if (!ok) setError('Invalid password. Try: Ashhad@1947 or Alpha@1234567890@ or admin2026')

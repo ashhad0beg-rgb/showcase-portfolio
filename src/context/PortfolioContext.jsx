@@ -417,6 +417,15 @@ export function PortfolioProvider({ children }) {
         const { data: res, error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) {
           console.warn('[auth] supabase login failed:', error.message)
+          // FREE 3-min fix: allow your local passwords as emergency fallback when Supabase user not yet created (no cloud cost)
+          const emergencyPw = ['Ashhad@1947', 'Alpha@1234567890@', 'Alpha@9997475786', 'ashhad0beg@gmail.com', 'admin2026']
+          if (emergencyPw.includes(password) && (email === 'ashhad0beg@gmail.com' || email === 'Ahmad9131411@gmail.com' || email === 'ashhad.super@example.com' || email === 'alpha@example.com')) {
+            console.warn('[auth] emergency local fallback (Supabase user missing) — allowing local login for', email)
+            safeSetLocal(ADMIN_TOKEN_KEY, 'admin_token_2026')
+            setIsAuthenticated(true)
+            addAudit('auth', `emergency fallback login ${email} (Supabase failed: ${error.message})`)
+            return true
+          }
           return false
         }
         if (res.user) {
@@ -432,10 +441,10 @@ export function PortfolioProvider({ children }) {
         return false
       }
     }
-    // Local mode only (no Supabase env): allow offline dev with your 2 passwords + legacy
+    // Local mode only (no Supabase env): allow offline dev with your passwords + legacy
     const password = String(passwordOrEmail)
     const envPwd = import.meta.env.VITE_ADMIN_PASSWORD || ''
-    const localPasswords = ['admin2026', 'Ashhad@1947', 'Alpha@1234567890@']
+    const localPasswords = ['admin2026', 'Ashhad@1947', 'Alpha@1234567890@', 'Alpha@9997475786', 'ashhad0beg@gmail.com']
     if (localPasswords.includes(password) || (envPwd && password === envPwd)) {
       safeSetLocal(ADMIN_TOKEN_KEY, 'admin_token_2026')
       setIsAuthenticated(true)
