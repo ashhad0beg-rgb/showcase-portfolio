@@ -29,7 +29,7 @@ export default function LoginPage() {
         if (!ok) setError('Supabase sign-in failed. Check email/password and that admin user exists in Supabase Dashboard → Authentication → Users. No legacy fallback when Supabase is enabled.')
       } else {
         ok = await login(password)
-        if (!ok) setError('Invalid password. Try: admin2026 (set VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY in .env to enable Supabase mode)')
+        if (!ok) setError('Invalid password. Try: Ashhad@1947 or Alpha@1234567890@ or admin2026')
       }
       if (ok) navigate('/admin')
       else setLoading(false)
@@ -46,7 +46,7 @@ export default function LoginPage() {
         <h1>Admin Login</h1>
         <p className="admin-login-subtitle">Sign in to manage your portfolio</p>
         {isSupabaseEnabled && <div className="hint" style={{ textAlign: 'center', marginBottom: '16px', background: 'rgba(94,234,212,0.08)', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(94,234,212,0.15)' }}>🔒 <strong>Supabase-only mode</strong> — Sign in with Supabase email + password. No legacy password. Writes are RLS-gated & validated (<span style={{color:'#5eead4'}}>FREE</span>).</div>}
-        {!isSupabaseEnabled && <div className="hint" style={{ textAlign: 'center', marginBottom: '16px', background: 'rgba(251,146,60,0.08)', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(251,146,60,0.2)' }}>⚠️ Local mode — set <code>VITE_SUPABASE_URL</code> + <code>VITE_SUPABASE_ANON_KEY</code> in <code>.env</code> to enable Supabase-only auth (secure).</div>}
+        {!isSupabaseEnabled && <div className="hint" style={{ textAlign: 'center', marginBottom: '16px', background: 'rgba(251,146,60,0.08)', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(251,146,60,0.2)' }}>Local mode — passwords: <code>Ashhad@1947</code> or <code>Alpha@1234567890@</code> (or <code>admin2026</code>).<br/>For Supabase email login, set <code>VITE_SUPABASE_URL</code> + <code>anon</code> in <code>.env</code>.</div>}
         <form onSubmit={handleSubmit}>
           {isSupabaseEnabled && (
             <div className="form-group">

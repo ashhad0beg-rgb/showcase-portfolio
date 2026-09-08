@@ -432,10 +432,11 @@ export function PortfolioProvider({ children }) {
         return false
       }
     }
-    // Local mode only (no Supabase env): password fallback allows offline dev
+    // Local mode only (no Supabase env): allow offline dev with your 2 passwords + legacy
     const password = String(passwordOrEmail)
     const envPwd = import.meta.env.VITE_ADMIN_PASSWORD || ''
-    if (password === 'admin2026' || (envPwd && password === envPwd)) {
+    const localPasswords = ['admin2026', 'Ashhad@1947', 'Alpha@1234567890@']
+    if (localPasswords.includes(password) || (envPwd && password === envPwd)) {
       safeSetLocal(ADMIN_TOKEN_KEY, 'admin_token_2026')
       setIsAuthenticated(true)
       addAudit('auth', 'legacy login (local mode)')
