@@ -423,6 +423,8 @@ export function PortfolioProvider({ children }) {
             console.warn('[auth] emergency local fallback (Supabase user missing) — allowing local login for', email)
             safeSetLocal(ADMIN_TOKEN_KEY, 'admin_token_2026')
             setIsAuthenticated(true)
+            // mock supabaseUser so UI shows Emergency, not Signed out (still local-only until real Supabase user)
+            setSupabaseUser({ email, id: 'emergency-local', aud: 'authenticated', role: 'authenticated' })
             addAudit('auth', `emergency fallback login ${email} (Supabase failed: ${error.message})`)
             return true
           }
