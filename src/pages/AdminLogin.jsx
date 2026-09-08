@@ -38,9 +38,9 @@ export default function LoginPage() {
           ok = await login(email, password)
           if (!ok) setError(`Supabase: ${supaError}`)
           else {
-            setError(`Supabase: ${supaError} — EMERGENCY LOCAL login (real Supabase failed). Copy this Supabase: line and paste here to fix.`)
+            setError(`Supabase: ${supaError} — EMERGENCY LOCAL (copy this line). Entering admin in 6s...`)
             setLoading(false)
-            // stay on login so you can copy — click Sign In again to enter emergency admin
+            setTimeout(() => navigate('/admin'), 6000)
             return
           }
         } else if (!ok) {
