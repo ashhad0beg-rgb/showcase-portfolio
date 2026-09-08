@@ -277,10 +277,16 @@ export function PortfolioProvider({ children }) {
   const syncToRemote = useCallback(async (newData, reason = 'manual') => {
     if (!isSupabaseEnabled || !supabase) return { ok: false, reason: 'supabase-disabled' }
     const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user || supabaseUser
+    // Require a REAL Supabase session — the emergency-local fallback has no JWT,
+    // so any write would be RLS-blocked. Block it up front with an actionable message.
+    const user = session?.user
     if (!user) {
-      console.warn('[sync] blocked — no supabase user')
-      setLastSyncError('Not authenticated — sign in as admin via Supabase Auth')
+      console.warn('[sync] blocked — no real supabase session')
+      if (supabaseUser?.id === 'emergency-local') {
+        setLastSyncError('⚠ Emergency local — create a real Supabase user (Dashboard → Authentication → Users → Add user) to publish live')
+      } else {
+        setLastSyncError('Not authenticated — sign in as admin via Supabase Auth')
+      }
       return { ok: false, reason: 'not-authenticated' }
     }
     // Rate limit: 1 per 1.2s and 25 per minute — prevents abuse/flood, free-tier safe
