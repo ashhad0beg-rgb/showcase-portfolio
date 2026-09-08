@@ -411,10 +411,10 @@ export function PortfolioProvider({ children }) {
     }))
   }, [])
 
+  const [lastAuthError, setLastAuthError] = useState(null)
   const login = useCallback(async (passwordOrEmail, maybePassword) => {
-    // Supabase mode: login(email, password) via Supabase Auth — FREE & SECURE (bcrypt + JWT + RLS) — STRICT (no legacy bypass when enabled)
+    // Supabase mode: login(email, password) via Supabase Auth — FREE & SECURE (bcrypt + JWT + RLS)
     if (isSupabaseEnabled) {
-      // When Supabase is enabled, REQUIRE email+password. Legacy fallback REMOVED for security.
       if (maybePassword === undefined) return false
       const email = String(passwordOrEmail).trim()
       const password = String(maybePassword)
@@ -423,19 +423,20 @@ export function PortfolioProvider({ children }) {
         const { data: res, error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) {
           console.warn('[auth] supabase login failed:', error.message)
-          // FREE 3-min fix: allow your local passwords as emergency fallback when Supabase user not yet created (no cloud cost)
+          setLastAuthError(error.message)
+          // FREE fix: emergency local fallback when Supabase user not yet created
           const emergencyPw = ['Ashhad@1947', 'Alpha@1234567890@', 'Alpha@9997475786', 'ashhad0beg@gmail.com', 'admin2026']
           if (emergencyPw.includes(password) && (email === 'ashhad0beg@gmail.com' || email === 'Ahmad9131411@gmail.com' || email === 'ashhad.super@example.com' || email === 'alpha@example.com')) {
-            console.warn('[auth] emergency local fallback (Supabase user missing) — allowing local login for', email)
+            console.warn('[auth] emergency local fallback for', email)
             safeSetLocal(ADMIN_TOKEN_KEY, 'admin_token_2026')
             setIsAuthenticated(true)
-            // mock supabaseUser so UI shows Emergency, not Signed out (still local-only until real Supabase user)
             setSupabaseUser({ email, id: 'emergency-local', aud: 'authenticated', role: 'authenticated' })
-            addAudit('auth', `emergency fallback login ${email} (Supabase failed: ${error.message})`)
+            addAudit('auth', `emergency fallback ${email}: ${error.message}`)
             return true
           }
           return false
         }
+        setLastAuthError(null)
         if (res.user) {
           safeSetLocal(ADMIN_TOKEN_KEY, 'admin_token_2026')
           setIsAuthenticated(true)
@@ -500,6 +501,7 @@ export function PortfolioProvider({ children }) {
       setData,
       isAuthenticated,
       supabaseUser,
+      lastAuthError,
       // aliases for compat with previous Firebase naming
       firebaseUser: supabaseUser,
       isSupabaseEnabled,

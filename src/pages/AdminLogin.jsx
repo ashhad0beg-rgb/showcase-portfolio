@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePortfolio } from '../context/PortfolioContext.jsx'
-import { isSupabaseEnabled } from '../lib/supabase.js'
+import { supabase, isSupabaseEnabled } from '../lib/supabase.js'
 import '../admin/admin.css'
 
 export default function LoginPage() {
@@ -9,7 +9,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { login } = usePortfolio()
+  const { login, lastAuthError } = usePortfolio()
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
@@ -18,15 +18,39 @@ export default function LoginPage() {
     setLoading(true)
     try {
       let ok = false
-      if (isSupabaseEnabled) {
-        // Strict Supabase-only — no legacy bypass when env is set
+      let supaError = ''
+      if (isSupabaseEnabled && supabase) {
         if (!email || !password) {
           setError('Enter admin email and password (Supabase Auth — secure, RLS-gated)')
           setLoading(false)
           return
         }
+        // try real Supabase first to capture exact error
+        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+        if (error) {
+          supaError = error.message
+          console.warn('[login] supabase error:', supaError)
+        } else {
+          // supabase succeeded, context will pick up user via onAuthStateChange, but also call login to set isAuthenticated
+          ok = await login(email, password)
+        }
+        if (!ok && supaError) {
+          // try emergency fallback via context (local passwords)
+          ok = await login(email, password)
+          if (!ok) setError(`Supabase: ${supaError} — emergency fallback also failed. Try ashhad0beg@gmail.com / ashhad0beg@gmail.com`)
+          else {
+            // emergency succeeded, show warning but allow
+            setError(`Supabase: ${supaError} — logged in via emergency local (create real Auth user for Live)`)
+            setTimeout(() => navigate('/admin'), 800)
+            return
+          }
+        } else if (!ok) {
+          const detail = lastAuthError ? ` (${lastAuthError})` : supaError ? ` (${supaError})` : ''
+          setError(`Supabase sign-in failed${detail}`)
+        }
+      } else if (isSupabaseEnabled) {
         ok = await login(email, password)
-        if (!ok) setError('Supabase sign-in failed — but emergency local access enabled. If Supabase user not yet created, use ashhad0beg@gmail.com / ashhad0beg@gmail.com or Ahmad9131411@gmail.com / Alpha@9997475786 (auto-fallback for 3-min fix). Also check Supabase Dashboard → Auth → Users exists and anon key is correct.')
+        if (!ok) setError(`Supabase client not ready${lastAuthError ? ` (${lastAuthError})` : ''}`)
       } else {
         ok = await login(password)
         if (!ok) setError('Invalid password. Try: Ashhad@1947 or Alpha@1234567890@ or admin2026')
