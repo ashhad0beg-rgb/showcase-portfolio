@@ -35,19 +35,17 @@ export default function LoginPage() {
           ok = await login(email, password)
         }
         if (!ok && supaError) {
-          // try emergency fallback via context (local passwords)
           ok = await login(email, password)
           if (!ok) setError(`Supabase: ${supaError}`)
           else {
-            // emergency succeeded — show exact Supabase error for 4s before entering admin so you can copy it
-            setError(`Supabase: ${supaError} — logged in via EMERGENCY LOCAL (fix: create real Auth user or reset password via Dashboard → Auth → Users)`)
+            setError(`Supabase: ${supaError} — EMERGENCY LOCAL login (real Supabase failed). Copy this Supabase: line and paste here to fix.`)
             setLoading(false)
-            setTimeout(() => navigate('/admin'), 4000)
+            // stay on login so you can copy — click Sign In again to enter emergency admin
             return
           }
         } else if (!ok) {
-          const detail = lastAuthError ? ` (${lastAuthError})` : supaError ? ` (${supaError})` : ''
-          setError(`Supabase sign-in failed${detail}`)
+          const detail = supaError || lastAuthError || 'unknown'
+          setError(`Supabase: ${detail}`)
         }
       } else if (isSupabaseEnabled) {
         ok = await login(email, password)
