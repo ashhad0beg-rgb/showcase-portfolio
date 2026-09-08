@@ -6,20 +6,22 @@ import { validatePortfolioData } from '../lib/validate.js'
 import '../admin/admin.css'
 
 const sections = [
-  { path: '/admin', label: 'Dashboard', icon: '📊' },
-  { path: '/admin/theme', label: 'Font & Layout', icon: '🎨' },
-  { path: '/admin/hero', label: 'Hero', icon: '🏠' },
-  { path: '/admin/showreel', label: 'Showreel', icon: '🎬' },
-  { path: '/admin/work', label: 'Work', icon: '📁' },
+  { path: '/admin', label: 'Dashboard', icon: '◧' },
+  { path: '/admin/hero', label: 'Hero', icon: '⌖' },
+  { path: '/admin/work', label: 'Work', icon: '▣' },
+  { path: '/admin/about', label: 'About', icon: '○' },
+  { path: '/admin/contact', label: 'Contact', icon: '✉' },
+  { path: '/admin/theme', label: 'Theme', icon: '⬢' },
+  { path: '/admin/settings', label: 'Settings', icon: '⚙' },
+]
+const moreSections = [
+  { path: '/admin/showreel', label: 'Showreel', icon: '▶' },
   { path: '/admin/services', label: 'Services', icon: '⚡' },
-  { path: '/admin/process', label: 'Process', icon: '🔄' },
-  { path: '/admin/about', label: 'About', icon: '👤' },
-  { path: '/admin/tools', label: 'Tools', icon: '🛠️' },
-  { path: '/admin/experience', label: 'Experience', icon: '📋' },
-  { path: '/admin/testimonials', label: 'Testimonials', icon: '💬' },
-  { path: '/admin/faq', label: 'FAQ', icon: '❓' },
-  { path: '/admin/contact', label: 'Contact', icon: '📧' },
-  { path: '/admin/settings', label: 'Settings', icon: '⚙️' },
+  { path: '/admin/process', label: 'Process', icon: '◷' },
+  { path: '/admin/tools', label: 'Tools', icon: '⬡' },
+  { path: '/admin/experience', label: 'Experience', icon: '▭' },
+  { path: '/admin/testimonials', label: 'Quotes', icon: '❝' },
+  { path: '/admin/faq', label: 'FAQ', icon: '?' },
 ]
 
 const getSection = (path) => { const p = path.split('/')[2]; return p || 'dashboard' }
@@ -253,60 +255,51 @@ export default function AdminDashboard() {
     window.open('/showcase-portfolio/', '_blank')
   }
 
+  const handlePublish = () => { if (sbEnabled) handleInstantPublish(); else handleGhPublish() }
+  const publishing = instantPublishing || ghPublishing
+
   return (
     <div className="admin-layout">
       <aside className="admin-sidebar">
-        <div className="admin-sidebar-header"><h2>🛠️ Admin</h2><div style={{ fontSize: '11px', color: sbEnabled ? '#5eead4' : '#fb923c', marginTop: '4px', fontWeight: 700 }}>{sbEnabled ? '🔒 SECURE • Supabase (FREE)' : '⚠️ LOCAL mode'}</div></div>
+        <div className="admin-sidebar-header"><h2>Admin</h2><div style={{ fontSize: '11px', color: sbEnabled ? '#5eead4' : '#94a3b8', marginTop: '4px', fontWeight: 600 }}>{sbEnabled ? '● Live' : '○ Local'}</div></div>
         <nav className="admin-nav">
           {sections.map(s => (
             <button key={s.path} className={`admin-nav-item ${activeSection === getSection(s.path) ? 'active' : ''}`} onClick={() => { setActiveSection(getSection(s.path)); navigate(s.path) }}>
               <span className="admin-nav-icon">{s.icon}</span><span>{s.label}</span>
             </button>
           ))}
+          <details style={{ marginTop: '8px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '8px' }}>
+            <summary style={{ fontSize: '12px', color: '#64748b', cursor: 'pointer', padding: '6px 8px', listStyle: 'none' }}>More ▾</summary>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '4px' }}>
+              {moreSections.map(s => (
+                <button key={s.path} className={`admin-nav-item ${activeSection === getSection(s.path) ? 'active' : ''}`} onClick={() => { setActiveSection(getSection(s.path)); navigate(s.path) }} style={{ fontSize: '13px', minHeight: '36px', opacity: 0.85 }}>
+                  <span className="admin-nav-icon" style={{ fontSize: '14px' }}>{s.icon}</span><span>{s.label}</span>
+                </button>
+              ))}
+            </div>
+          </details>
         </nav>
         <div className="admin-sidebar-footer">
-          <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '8px', wordBreak: 'break-all' }}>{supabaseUser ? `👤 ${supabaseUser.email}` : '👤 Legacy admin'}</div>
+          <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '8px', wordBreak: 'break-all', lineHeight: 1.4 }}>{supabaseUser ? supabaseUser.email : 'Local admin'}</div>
           <button className="btn-logout" onClick={logout}>Logout</button>
         </div>
       </aside>
       <main className="admin-main">
         <div className="admin-topbar">
-          <h1>Portfolio Admin</h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <h1 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Portfolio</h1>
             <SyncBadge status={syncStatus} isSyncing={isSyncing} />
-            {remoteVersion && <span className="hint" style={{ fontSize: '11px' }}>remote v{remoteVersion}</span>}
-            {lastSyncError && <span title={lastSyncError} style={{ fontSize: '11px', color: '#fca5a5', maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>⚠ {lastSyncError.slice(0, 40)}</span>}
           </div>
           <div className="admin-topbar-actions">
-            {saved && <span className="save-indicator">{info || '✓ Saved!'}</span>}
-            {!saved && <span className="autosave-hint">{sbEnabled && supabaseUser ? 'Auto-sync LIVE (FREE)' : 'Auto-saved local'}</span>}
-            {sbEnabled ? (
-              <button className="btn-publish" onClick={handleInstantPublish} disabled={instantPublishing || isSyncing} title="Secure instant publish via Supabase — FREE, auth-gated, validated, RLS protected, realtime <2s">{instantPublishing ? 'Publishing…' : '⚡ Instant Publish'}</button>
-            ) : (
-              <button className="btn-publish" onClick={handleGhPublish} disabled={ghPublishing} title="Publish via GitHub (no Supabase — 1-2 min deploy)">{ghPublishing ? 'Publishing…' : '🌐 Publish to Web'}</button>
-            )}
-            {sbEnabled && <button className="btn-secondary" onClick={handleGhPublish} disabled={ghPublishing} title="Fallback: also commit to GitHub for static backup">{ghPublishing ? '…' : 'GH Backup'}</button>}
-            <button className="btn-save" onClick={handleManualSave} title="Validate & save to localStorage">Save</button>
-            <button className="btn-secondary" onClick={handleViewSite} title="View live site">View Site</button>
-            <button className="btn-secondary" onClick={handleExport} title="Export validated JSON">Export</button>
-            <button className="btn-secondary" onClick={handleCopyJson} title="Copy validated JSON">Copy</button>
-            <button className="btn-secondary" onClick={() => fileRef.current?.click()} title="Import validated JSON">Import</button>
-            <input ref={fileRef} type="file" accept=".json,application/json" hidden onChange={handleImport} />
-            <button className="btn-danger" onClick={handleReset} title="Reset to defaults (history backed)">Reset</button>
+            {saved ? <span className="save-indicator">{info || 'Saved'}</span> : <span className="autosave-hint">Auto-saved</span>}
+            <button className="btn-secondary" onClick={handleViewSite}>Preview</button>
+            <button className="btn-save" onClick={handleManualSave}>Save</button>
+            <button className="btn-publish" onClick={handlePublish} disabled={publishing || isSyncing} title={sbEnabled ? 'Publish LIVE via Supabase' : 'Publish via GitHub'}>{publishing ? 'Publishing…' : sbEnabled ? 'Publish' : 'Publish'}</button>
           </div>
         </div>
-        <div className="admin-storage-note">
-          {sbEnabled ? (
-            <>
-              <strong>🔒 Supabase Secure LIVE sync (FREE):</strong> Edits auto-validate, sanitize (XSS-safe), rate-limited (1/1.2s, 25/min), and <strong>instantly sync to Supabase</strong> when authenticated (<code>portfolio</code> table, id=1). All visitors see updates in ~2s via Realtime <code>postgres_changes</code>. Every publish is <strong>history-backed</strong> to <code>portfolio_history</code> + audit-logged locally. Visitors have <strong>read-only</strong> (RLS: <code>allow read: true; allow write: authenticated only</code>) — <strong>FREE tier</strong> covers Auth, DB, Realtime, no credit card. <strong>GitHub Publish</strong> remains as static backup (1–2 min).<br />
-              {!supabaseUser && <span style={{ color: '#fca5a5' }}>⚠️ Not Supabase-signed in — instant writes blocked by RLS. Login with Supabase email. Local edits still auto-save, but not LIVE until you sign in.</span>}
-              {supabaseUser && <span style={{ color: '#5eead4' }}>✓ Signed in as {supabaseUser.email} — instant writes enabled, history & validation active (FREE).</span>}
-            </>
-          ) : (
-            <>
-              <strong>How publishing works:</strong> ✏️ Edits <strong>auto-save locally</strong> to this browser's <code>localStorage</code> (instant preview, only you see it). 🌐 Supabase not configured — set <code>VITE_SUPABASE_URL</code> + <code>VITE_SUPABASE_ANON_KEY</code> env (FREE project) for instant global sync. Fallback: <strong>Publish to Web</strong> via GitHub Token commits <code>src/data/defaultData.js</code> → live after 1–2 min deploy.
-            </>
-          )}
+        <div className="admin-storage-note" style={{ background: sbEnabled ? 'rgba(94,234,212,0.06)' : 'rgba(148,163,184,0.06)', borderColor: sbEnabled ? 'rgba(94,234,212,0.12)' : 'rgba(255,255,255,0.06)' }}>
+          {sbEnabled ? (supabaseUser ? <span style={{ color: '#5eead4' }}>✓ Live sync — signed in as {supabaseUser.email}</span> : <span style={{ color: '#fb923c' }}>○ Signed out — sign in to publish live</span>) : <span>○ Local mode — edits saved in this browser only</span>}
+          {lastSyncError && <span style={{ color: '#fca5a5', marginLeft: '12px' }}>· {lastSyncError.slice(0,60)}</span>}
         </div>
         <div className="admin-content">
           {activeSection === 'dashboard' && <DashboardOverview data={data} updateData={updateData} onSave={triggerSaved} />}
@@ -337,39 +330,19 @@ function DashboardOverview({ data, updateData, onSave }) {
     { label: 'Tools', value: data.tools?.length || 0 },
     { label: 'FAQ', value: data.faq?.length || 0 },
   ]
-  let audit = []
-  try { audit = JSON.parse(localStorage.getItem('portfolio_audit_log') || '[]').slice(0, 5) } catch {}
   return (
     <div className="admin-section">
-      <h2>Quick Overview</h2>
-      <div className="admin-stats">{counts.map((c, i) => <div key={i} className="admin-stat-card"><span className="admin-stat-value">{c.value}</span><span className="admin-stat-label">{c.label}</span></div>)}</div>
-      <div className="admin-quick-edit" style={{ marginBottom: '16px', background: sbOn ? 'rgba(94,234,212,0.06)' : 'rgba(251,146,60,0.06)', borderColor: sbOn ? 'rgba(94,234,212,0.15)' : 'rgba(251,146,60,0.15)' }}>
-        <h3>{sbOn ? '🔒 Secure Sync — Supabase (FREE)' : '⚠️ Local Mode'}</h3>
-        <div style={{ fontSize: '13px', lineHeight: 1.6, color: '#cbd5e1' }}>
-          {sbOn ? (
-            <>
-              <div>Supabase: <strong>{syncStatus}</strong> {remoteVersion ? `· remote v${remoteVersion}` : ''} · local v{data._version} · <span style={{color:'#5eead4'}}>FREE</span></div>
-              <div>Auth: <strong>{supabaseUser ? supabaseUser.email : 'Not signed in (writes blocked by RLS)'}</strong> · RLS: <strong>visitors read-only, auth write-only</strong></div>
-              <div>Validation: <strong>on</strong> · Sanitization: <strong>on (XSS-safe)</strong> · Rate-limit: <strong>1/1.2s, 25/min</strong> · History: <code>portfolio_history</code> · Realtime: <strong>postgres_changes</strong></div>
-              <div style={{ marginTop: '6px', color: '#94a3b8' }}>All edits are validated, sanitized, and only Supabase-authenticated users can write. Visitors have read-only access. Payload &lt;400KB enforced. Free tier covers everything — no card needed.</div>
-            </>
-          ) : (
-            <div>Set <code>VITE_SUPABASE_URL</code> + <code>VITE_SUPABASE_ANON_KEY</code> in <code>.env</code> and GitHub Secrets to enable &lt;2s global sync (FREE). Currently edits are local-only until GitHub Publish.</div>
-          )}
+      <h2>Overview</h2>
+      <div className="admin-stats" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }}>{counts.map((c, i) => <div key={i} className="admin-stat-card" style={{ padding: '16px' }}><span className="admin-stat-value" style={{ fontSize: '24px' }}>{c.value}</span><span className="admin-stat-label">{c.label}</span></div>)}</div>
+      <div className="admin-quick-edit" style={{ padding: '16px' }}>
+        <div style={{ fontSize: '13px', color: sbOn && supabaseUser ? '#5eead4' : '#94a3b8' }}>
+          {sbOn && supabaseUser ? `Live — ${supabaseUser.email} · v${data._version}` : sbOn ? 'Not signed in — sign in to publish' : 'Local — edits stay in this browser'}
         </div>
       </div>
-      {audit.length > 0 && (
-        <div className="admin-quick-edit" style={{ marginBottom: '16px' }}>
-          <h3>Audit Log (last 5)</h3>
-          <div style={{ fontSize: '12px', color: '#94a3b8', lineHeight: 1.7 }}>
-            {audit.map((a, i) => <div key={i}><span style={{ color: '#64748b' }}>{new Date(a.ts).toLocaleString()}</span> — <strong style={{ color: '#cbd5e1' }}>{a.action}</strong> {a.detail}</div>)}
-          </div>
-        </div>
-      )}
-      <div className="admin-quick-edit">
-        <h3>Site Settings</h3>
-        <div className="form-group"><label>Site Name</label><input type="text" value={data.siteName} onChange={(e) => { updateData('siteName', e.target.value); onSave('Saved') }} /></div>
-        <div className="form-group"><label>Meta Description</label><input type="text" value={data.siteDescription} onChange={(e) => { updateData('siteDescription', e.target.value); onSave('Saved') }} /></div>
+      <div className="admin-quick-edit" style={{ marginTop: '16px' }}>
+        <h3 style={{ fontSize: '14px', marginBottom: '12px' }}>Site</h3>
+        <div className="form-group" style={{ marginBottom: '12px' }}><label>Site Name</label><input type="text" value={data.siteName} onChange={(e) => { updateData('siteName', e.target.value); onSave('Saved') }} /></div>
+        <div className="form-group" style={{ marginBottom: 0 }}><label>Description</label><input type="text" value={data.siteDescription} onChange={(e) => { updateData('siteDescription', e.target.value); onSave('Saved') }} /></div>
       </div>
     </div>
   )
@@ -726,111 +699,57 @@ function SettingsEdit({ onSave, ghToken, setGhToken, ghPublishing, onGhPublish, 
       <div className="form-group"><label>Footer Name</label><input type="text" value={f.name} onChange={(e) => { updateSection('footer', { name: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Footer Role</label><input type="text" value={f.role} onChange={(e) => { updateSection('footer', { role: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Footer Copyright</label><input type="text" value={f.copyright} onChange={(e) => { updateSection('footer', { copyright: e.target.value }); onSave('Saved') }} /></div>
-      {sbOn ? (
-        <div className="hint" style={{ background: 'rgba(94,234,212,0.06)', padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(94,234,212,0.12)', fontSize: '12px' }}>🔒 Supabase-only auth active — legacy password <code>admin2026</code> is <strong>disabled</strong>. Manage credentials below or in Supabase Dashboard.</div>
-      ) : (
-        <div className="hint" style={{ background: 'rgba(251,146,60,0.08)', padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(251,146,60,0.15)', fontSize: '12px' }}>⚠️ Local mode — legacy password <code>admin2026</code> active. Set Supabase env to switch to secure mode.</div>
-      )}
+      <div className="hint" style={{ background: sbOn ? 'rgba(94,234,212,0.06)' : 'rgba(148,163,184,0.06)', padding: '8px 10px', borderRadius: '8px', border: `1px solid ${sbOn ? 'rgba(94,234,212,0.12)' : 'rgba(255,255,255,0.06)'}`, fontSize: '12px' }}>{sbOn ? `Live auth — ${supabaseUser?.email || 'not signed in'}` : 'Local mode — set Supabase env for secure login'}</div>
 
-      <div className="settings-divider" style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '24px 0' }} />
-      <h3 style={{ fontFamily: 'Poppins', fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>🔒 Supabase Security — FREE</h3>
-      <div className="admin-publish-box" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${sbOn ? 'rgba(94,234,212,0.2)' : 'rgba(251,146,60,0.2)'}`, borderRadius: '12px', padding: '16px' }}>
-        <div style={{ display: 'grid', gap: '10px', fontSize: '13px', lineHeight: 1.6 }}>
-          <div><strong>Supabase:</strong> {sbOn ? <span style={{ color: '#5eead4' }}>✓ Enabled (FREE) · {supabaseUser ? `signed in as ${supabaseUser.email}` : 'not signed in (writes blocked by RLS)'}</span> : <span style={{ color: '#fb923c' }}>⚠ Not configured — set VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY (free project)</span>}</div>
-          <div><strong>Sync:</strong> {syncStatus} {isSyncing ? '(syncing…)' : ''} {remoteVersion ? `· remote v${remoteVersion}` : ''} · local v{data._version} · <span style={{ color: '#5eead4', fontWeight: 700 }}>FREE</span></div>
-          <div><strong>RLS:</strong> {sbOn ? 'Postgres Row Level Security: `anon SELECT true, authenticated INSERT/UPDATE/DELETE only` — visitors read-only' : 'Local + GitHub only'}</div>
-          <div><strong>Validation:</strong> All writes validated & sanitized (XSS, URL, size &lt;400KB, array caps)</div>
-          <div><strong>Rate-limit:</strong> 1 / 1.2s + 25 / min · History: <code>portfolio_history</code> · Realtime: <code>postgres_changes</code> · Audit: localStorage(50)</div>
-          {lastSyncError && <div style={{ color: '#fca5a5', background: 'rgba(239,68,68,0.08)', padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.15)' }}><strong>Last error:</strong> {lastSyncError}</div>}
-        </div>
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}>
-          <button className="btn-publish" onClick={onInstantPublish} disabled={instantPublishing || !sbOn || !supabaseUser} title={!sbOn ? 'Supabase not configured (FREE)' : !supabaseUser ? 'Sign in with Supabase first — RLS blocks anon' : 'Instant sync via Supabase (FREE)'}>
-            {instantPublishing ? '⏳ Publishing…' : '⚡ Instant Publish (Supabase FREE)'}
-          </button>
-          <button className="btn-secondary" onClick={onGhPublish} disabled={ghPublishing}>{ghPublishing ? 'Publishing…' : 'GH Backup Publish'}</button>
-          <button className="btn-secondary" onClick={() => setShowAudit(!showAudit)}>{showAudit ? 'Hide Audit' : `View Audit (${audit.length})`}</button>
-        </div>
-        {showAudit && (
-          <div style={{ marginTop: '12px', maxHeight: '220px', overflowY: 'auto', background: 'rgba(0,0,0,0.2)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)', fontSize: '11px', lineHeight: 1.6 }}>
-            {audit.length === 0 ? <span style={{ color: '#64748b' }}>No entries yet</span> : audit.map((a, i) => <div key={i}><span style={{ color: '#64748b' }}>{new Date(a.ts).toLocaleString()}</span> <strong style={{ color: '#5eead4' }}>{a.action}</strong> — {a.detail}</div>)}
-            <button className="btn-secondary" style={{ marginTop: '8px', fontSize: '11px', padding: '4px 8px' }} onClick={() => { try { localStorage.removeItem('portfolio_audit_log'); window.location.reload() } catch {} }}>Clear Audit</button>
-          </div>
-        )}
-      </div>
-
-      <div className="settings-divider" style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '24px 0' }} />
-      <h3 style={{ fontFamily: 'Poppins', fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>🔑 Change Admin Credentials (Supabase)</h3>
+      <h3 style={{ fontSize: '15px', fontWeight: 700, margin: '20px 0 12px' }}>Change Password</h3>
       <div className="admin-publish-box" style={{ background: sbOn && supabaseUser ? 'rgba(94,234,212,0.04)' : 'rgba(255,255,255,0.03)', border: `1px solid ${sbOn && supabaseUser ? 'rgba(94,234,212,0.2)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '12px', padding: '16px' }}>
         {!sbOn ? (
-          <div className="hint" style={{ background: 'rgba(251,146,60,0.08)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(251,146,60,0.15)', color: '#fb923c' }}>⚠️ Supabase not configured — set <code>VITE_SUPABASE_URL</code> + <code>VITE_SUPABASE_ANON_KEY</code> to enable credential changes. Currently only legacy local password (<code>admin2026</code>) works.</div>
+          <div className="hint" style={{ color: '#fb923c', marginBottom: '12px' }}>Supabase not configured</div>
         ) : !supabaseUser ? (
-          <div className="hint" style={{ background: 'rgba(239,68,68,0.08)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.15)', color: '#fca5a5' }}>🔒 Not signed in — sign in via <code>/admin/login</code> with Supabase email first, then you can change email/password here.</div>
+          <div className="hint" style={{ color: '#fca5a5', marginBottom: '12px' }}>Not signed in — sign in first</div>
         ) : (
-          <div className="hint" style={{ background: 'rgba(94,234,212,0.08)', padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(94,234,212,0.15)', color: '#5eead4', marginBottom: '12px' }}>✓ Signed in as <strong>{supabaseUser.email}</strong> — you can update this account's email/password below (bcrypt-hashed in Supabase Auth).</div>
+          <div className="hint" style={{ color: '#5eead4', marginBottom: '12px' }}>Signed in as {supabaseUser.email}</div>
         )}
-        <div style={{ display: 'grid', gap: '14px' }}>
+        <div style={{ display: 'grid', gap: '12px' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label>New Admin Email {supabaseUser ? `(current: ${supabaseUser.email})` : ''}</label>
+            <label>New Email {supabaseUser ? `(${supabaseUser.email})` : ''}</label>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder={supabaseUser?.email || 'new-admin@example.com'} style={{ flex: 1 }} disabled={!sbOn || !supabaseUser || changing} />
-              <button className="btn-publish" onClick={handleUpdateEmail} disabled={!sbOn || !supabaseUser || changing || !newEmail.trim()}>{changing ? '…' : 'Update Email'}</button>
+              <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="new email" style={{ flex: 1 }} disabled={!sbOn || !supabaseUser || changing} />
+              <button className="btn-save" onClick={handleUpdateEmail} disabled={!sbOn || !supabaseUser || changing || !newEmail.trim()}>{changing ? '…' : 'Update'}</button>
             </div>
-            <p className="hint" style={{ marginTop: '6px' }}>Calls <code>supabase.auth.updateUser({`{ email }`})</code>. New email must confirm via inbox if confirmation is on.</p>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label>New Password (≥8 chars)</label>
+            <label>New Password</label>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <input type={showPw ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" style={{ flex: 1 }} disabled={!sbOn || !supabaseUser || changing} autoComplete="new-password" />
+              <input type={showPw ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="≥8 chars" style={{ flex: 1 }} disabled={!sbOn || !supabaseUser || changing} autoComplete="new-password" />
               <input type={showPw ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm" style={{ flex: 1 }} disabled={!sbOn || !supabaseUser || changing} autoComplete="new-password" />
             </div>
             <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-              <button className="btn-secondary" type="button" onClick={() => setShowPw(!showPw)}>{showPw ? 'Hide' : 'Show'}</button>
-              <button className="btn-publish" onClick={handleUpdatePassword} disabled={!sbOn || !supabaseUser || changing || !newPassword || !confirmPassword}>{changing ? 'Updating…' : 'Update Password'}</button>
-              <button className="btn-secondary" onClick={handleSendReset} disabled={!sbOn || changing} title="Send reset link to email">{changing ? '…' : 'Send Reset Link'}</button>
+              <button className="btn-secondary" type="button" onClick={() => setShowPw(!showPw)} style={{ fontSize: '12px' }}>{showPw ? 'Hide' : 'Show'}</button>
+              <button className="btn-save" onClick={handleUpdatePassword} disabled={!sbOn || !supabaseUser || changing || !newPassword || !confirmPassword}>{changing ? '…' : 'Update Password'}</button>
+              <button className="btn-secondary" onClick={handleSendReset} disabled={!sbOn || changing} style={{ fontSize: '12px' }}>Send Reset Link</button>
             </div>
-            <p className="hint" style={{ marginTop: '6px' }}><code>supabase.auth.updateUser({`{ password }`})</code> — bcrypt hashed. Or <code>resetPasswordForEmail()</code> sends link to <code>{newEmail || supabaseUser?.email || 'admin email'}</code> with redirect to <code>/admin/login</code>.</p>
           </div>
-          {changeErr && <div style={{ background: 'rgba(239,68,68,0.08)', color: '#fca5a5', padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.15)', fontSize: '13px' }}>✗ {changeErr}</div>}
-          {changeMsg && <div style={{ background: 'rgba(94,234,212,0.08)', color: '#5eead4', padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(94,234,212,0.15)', fontSize: '13px' }}>{changeMsg}</div>}
-          <p className="hint" style={{ fontSize: '11px', lineHeight: 1.6 }}>Alternative: Supabase Dashboard → Authentication → Users → select user → Reset password / Change email (same effect, admin UI). This panel is shortcut when you’re already signed in.</p>
+          {changeErr && <div style={{ color: '#fca5a5', fontSize: '13px' }}>✗ {changeErr}</div>}
+          {changeMsg && <div style={{ color: '#5eead4', fontSize: '13px' }}>✓ {changeMsg}</div>}
         </div>
       </div>
 
-      <div className="settings-divider" style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '24px 0' }} />
-      <h3 style={{ fontFamily: 'Poppins', fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>🌐 GitHub Backup Publish</h3>
-      <div className="admin-publish-box" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '16px' }}>
-        <div className="form-group" style={{ marginBottom: '12px' }}>
-          <label>GitHub Publish Token (PAT) — fallback static backup</label>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <input
-              type={showToken ? 'text' : 'password'}
-              value={ghToken}
-              onChange={(e) => setGhToken(e.target.value)}
-              placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-              style={{ flex: 1 }}
-              autoComplete="off"
-            />
-            <button className="btn-secondary" type="button" onClick={() => setShowToken(!showToken)} style={{ whiteSpace: 'nowrap' }}>{showToken ? 'Hide' : 'Show'}</button>
-            {ghToken && <button className="btn-secondary" type="button" onClick={() => { setGhToken(''); try { localStorage.removeItem('github_pat') } catch {} }} title="Clear token">Clear</button>}
+      <details style={{ marginTop: '20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '12px' }}>
+        <summary style={{ fontSize: '13px', fontWeight: 600, cursor: 'pointer', color: '#94a3b8' }}>Advanced</summary>
+        <div style={{ marginTop: '12px', display: 'grid', gap: '12px' }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label>GitHub Token (optional fallback)</label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input type={showToken ? 'text' : 'password'} value={ghToken} onChange={(e) => setGhToken(e.target.value)} placeholder="ghp_..." style={{ flex: 1 }} />
+              <button className="btn-secondary" type="button" onClick={() => setShowToken(!showToken)}>{showToken ? 'Hide' : 'Show'}</button>
+              {ghToken && <button className="btn-secondary" type="button" onClick={() => { setGhToken(''); try { localStorage.removeItem('github_pat') } catch {} }}>Clear</button>}
+            </div>
+            <p className="hint" style={{ marginTop: '6px' }}>Stored locally. Create at <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener noreferrer" style={{ color: '#5eead4' }}>github.com/settings/tokens/new</a> (scope `repo`)</p>
           </div>
-          <p className="hint" style={{ marginTop: '8px', lineHeight: 1.6 }}>
-            Stored only in <code>localStorage</code> on this browser. Required scope: <code>repo</code> (classic PAT).<br />
-            Create: <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener noreferrer" style={{ color: '#5eead4', textDecoration: 'underline' }}>github.com/settings/tokens/new</a> → select <code>repo</code> → Generate → paste here.<br />
-            For fine-grained PAT: repo <code>ashhad0beg-rgb/showcase-portfolio</code> → Permissions: Contents: Read & write.
-          </p>
-          {ghToken ? <span className="hint" style={{ color: '#5eead4' }}>✓ Token saved locally ({ghToken.length} chars, {ghToken.slice(0, 4)}…{ghToken.slice(-4)})</span> : <span className="hint" style={{ color: '#fca5a5' }}>No token — GitHub publish will prompt.</span>}
+          <div className="hint" style={{ fontSize: '11px', color: '#64748b' }}>Supabase is primary. GitHub publish commits <code>src/data/defaultData.js</code> (1-2 min deploy).</div>
         </div>
-        <div className="hint" style={{ marginTop: '12px', background: 'rgba(255,255,255,0.04)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <strong>Setup Supabase for instant & super-safe sync (FREE — no card):</strong><br />
-          1. Go to <a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer" style={{color:'#5eead4', textDecoration:'underline'}}>supabase.com/dashboard</a> → New project (free)<br />
-          2. Copy <code>Project URL</code> + <code>anon public key</code> → set <code>VITE_SUPABASE_URL</code> + <code>VITE_SUPABASE_ANON_KEY</code> in <code>.env</code><br />
-          3. SQL Editor → paste setup SQL (portfolio + portfolio_history + RLS, saved in DB) → Run<br />
-          4. Authentication → Users → Add user → admin email+password<br />
-          5. Database → Realtime → enable for <code>portfolio</code> table<br />
-          6. Add same env vars to GitHub → Settings → Secrets and variables → Actions → New repository secret → redeploy.<br />
-          Visitors then get &lt;2s global updates, fully validated & RLS-gated — <strong>all FREE</strong>.
-        </div>
-      </div>
+      </details>
     </div>
   )
 }
