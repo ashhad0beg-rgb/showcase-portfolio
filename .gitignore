@@ -5,3 +5,6 @@ dist
 .env
 .env.*
 !.env.example
+
+# SQL setup saved in DB, not tracked in repo
+supabase.sql

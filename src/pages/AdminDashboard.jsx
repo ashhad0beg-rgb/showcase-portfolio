@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { usePortfolio } from '../context/PortfolioContext.jsx'
-import { isSupabaseEnabled } from '../lib/supabase.js'
+import { supabase, isSupabaseEnabled } from '../lib/supabase.js'
 import { validatePortfolioData } from '../lib/validate.js'
 import '../admin/admin.css'
 
@@ -102,7 +102,7 @@ export default function AdminDashboard() {
         if (res.reason === 'rate-limited') msg = `Rate-limited — wait ${Math.ceil((res.retryAfter || 1200) / 1000)}s and retry.`
         if (res.reason === 'supabase-disabled') msg = 'Supabase not configured — set VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY.'
         if (res.reason === 'validation-failed') msg = 'Validation rejected: ' + res.error
-        if (res.reason === 'supabase-error') msg = 'Supabase error: ' + (res.error || 'check RLS policies & that portfolio table exists — run supabase.sql')
+        if (res.reason === 'supabase-error') msg = 'Supabase error: ' + (res.error || 'check RLS policies & that portfolio table exists — run setup SQL in DB')
         alert(msg)
         triggerSaved('Publish blocked')
       }
@@ -663,8 +663,62 @@ function SettingsEdit({ onSave, ghToken, setGhToken, ghPublishing, onGhPublish, 
   const f = data.footer
   const [showToken, setShowToken] = useState(false)
   const [showAudit, setShowAudit] = useState(false)
+  // Change credentials (Supabase) — allows admin to update email/password without Dashboard
+  const [newEmail, setNewEmail] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [changeMsg, setChangeMsg] = useState('')
+  const [changeErr, setChangeErr] = useState('')
+  const [changing, setChanging] = useState(false)
+  const [showPw, setShowPw] = useState(false)
   let audit = []
   try { audit = JSON.parse(localStorage.getItem('portfolio_audit_log') || '[]') } catch {}
+
+  const handleUpdateEmail = async () => {
+    setChangeMsg(''); setChangeErr('')
+    const email = newEmail.trim()
+    if (!email || !email.includes('@')) { setChangeErr('Enter valid new email'); return }
+    if (!sbOn || !supabase || !supabaseUser) { setChangeErr('Supabase not enabled or not signed in — sign in first'); return }
+    if (!confirm(`Change admin email from ${supabaseUser.email} → ${email}?\n\nYou may need to confirm via new email (check inbox).`)) return
+    setChanging(true)
+    try {
+      const { error } = await supabase.auth.updateUser({ email })
+      if (error) throw error
+      setChangeMsg(`✓ Email update requested to ${email}. Check new email inbox to confirm (if confirmation enabled). You may need to re-login.`)
+      setNewEmail('')
+    } catch (e) { setChangeErr(e.message || 'Email update failed') }
+    finally { setChanging(false) }
+  }
+  const handleUpdatePassword = async () => {
+    setChangeMsg(''); setChangeErr('')
+    if (!newPassword || newPassword.length < 8) { setChangeErr('Password must be ≥8 characters'); return }
+    if (newPassword !== confirmPassword) { setChangeErr('Passwords do not match'); return }
+    if (!sbOn || !supabase || !supabaseUser) { setChangeErr('Supabase not enabled or not signed in'); return }
+    if (!confirm(`Change password for ${supabaseUser.email}?\n\nYou will stay signed in, but use new password next login.`)) return
+    setChanging(true)
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword })
+      if (error) throw error
+      setChangeMsg('✓ Password updated! Use new password on next login. (Supabase Auth, bcrypt-hashed)')
+      setNewPassword(''); setConfirmPassword('')
+    } catch (e) { setChangeErr(e.message || 'Password update failed') }
+    finally { setChanging(false) }
+  }
+  const handleSendReset = async () => {
+    setChangeMsg(''); setChangeErr('')
+    const email = (newEmail.trim() || supabaseUser?.email || '').trim()
+    if (!email || !email.includes('@')) { setChangeErr('Enter email to send reset link, or sign in first'); return }
+    if (!sbOn || !supabase) { setChangeErr('Supabase not configured'); return }
+    setChanging(true)
+    try {
+      const redirectTo = window.location.origin + '/showcase-portfolio/admin/login'
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
+      if (error) throw error
+      setChangeMsg(`✓ Reset link sent to ${email}. Check inbox/spam. Link redirects to /admin/login.`)
+    } catch (e) { setChangeErr(e.message || 'Reset failed') }
+    finally { setChanging(false) }
+  }
+
   return (
     <div className="admin-section"><h2>Site Settings</h2>
       <div className="form-group"><label>Site Name</label><input type="text" value={data.siteName} onChange={(e) => { updateData('siteName', e.target.value); onSave('Saved') }} /></div>
@@ -672,7 +726,11 @@ function SettingsEdit({ onSave, ghToken, setGhToken, ghPublishing, onGhPublish, 
       <div className="form-group"><label>Footer Name</label><input type="text" value={f.name} onChange={(e) => { updateSection('footer', { name: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Footer Role</label><input type="text" value={f.role} onChange={(e) => { updateSection('footer', { role: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Footer Copyright</label><input type="text" value={f.copyright} onChange={(e) => { updateSection('footer', { copyright: e.target.value }); onSave('Saved') }} /></div>
-      <div className="form-group"><label>Admin Password (legacy local)</label><p className="hint">Legacy: <code>admin2026</code> + <code>VITE_ADMIN_PASSWORD</code> env. Supabase Auth is primary when enabled (FREE).</p></div>
+      {sbOn ? (
+        <div className="hint" style={{ background: 'rgba(94,234,212,0.06)', padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(94,234,212,0.12)', fontSize: '12px' }}>🔒 Supabase-only auth active — legacy password <code>admin2026</code> is <strong>disabled</strong>. Manage credentials below or in Supabase Dashboard.</div>
+      ) : (
+        <div className="hint" style={{ background: 'rgba(251,146,60,0.08)', padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(251,146,60,0.15)', fontSize: '12px' }}>⚠️ Local mode — legacy password <code>admin2026</code> active. Set Supabase env to switch to secure mode.</div>
+      )}
 
       <div className="settings-divider" style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '24px 0' }} />
       <h3 style={{ fontFamily: 'Poppins', fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>🔒 Supabase Security — FREE</h3>
@@ -698,6 +756,44 @@ function SettingsEdit({ onSave, ghToken, setGhToken, ghPublishing, onGhPublish, 
             <button className="btn-secondary" style={{ marginTop: '8px', fontSize: '11px', padding: '4px 8px' }} onClick={() => { try { localStorage.removeItem('portfolio_audit_log'); window.location.reload() } catch {} }}>Clear Audit</button>
           </div>
         )}
+      </div>
+
+      <div className="settings-divider" style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '24px 0' }} />
+      <h3 style={{ fontFamily: 'Poppins', fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>🔑 Change Admin Credentials (Supabase)</h3>
+      <div className="admin-publish-box" style={{ background: sbOn && supabaseUser ? 'rgba(94,234,212,0.04)' : 'rgba(255,255,255,0.03)', border: `1px solid ${sbOn && supabaseUser ? 'rgba(94,234,212,0.2)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '12px', padding: '16px' }}>
+        {!sbOn ? (
+          <div className="hint" style={{ background: 'rgba(251,146,60,0.08)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(251,146,60,0.15)', color: '#fb923c' }}>⚠️ Supabase not configured — set <code>VITE_SUPABASE_URL</code> + <code>VITE_SUPABASE_ANON_KEY</code> to enable credential changes. Currently only legacy local password (<code>admin2026</code>) works.</div>
+        ) : !supabaseUser ? (
+          <div className="hint" style={{ background: 'rgba(239,68,68,0.08)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.15)', color: '#fca5a5' }}>🔒 Not signed in — sign in via <code>/admin/login</code> with Supabase email first, then you can change email/password here.</div>
+        ) : (
+          <div className="hint" style={{ background: 'rgba(94,234,212,0.08)', padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(94,234,212,0.15)', color: '#5eead4', marginBottom: '12px' }}>✓ Signed in as <strong>{supabaseUser.email}</strong> — you can update this account's email/password below (bcrypt-hashed in Supabase Auth).</div>
+        )}
+        <div style={{ display: 'grid', gap: '14px' }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label>New Admin Email {supabaseUser ? `(current: ${supabaseUser.email})` : ''}</label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder={supabaseUser?.email || 'new-admin@example.com'} style={{ flex: 1 }} disabled={!sbOn || !supabaseUser || changing} />
+              <button className="btn-publish" onClick={handleUpdateEmail} disabled={!sbOn || !supabaseUser || changing || !newEmail.trim()}>{changing ? '…' : 'Update Email'}</button>
+            </div>
+            <p className="hint" style={{ marginTop: '6px' }}>Calls <code>supabase.auth.updateUser({`{ email }`})</code>. New email must confirm via inbox if confirmation is on.</p>
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label>New Password (≥8 chars)</label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input type={showPw ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" style={{ flex: 1 }} disabled={!sbOn || !supabaseUser || changing} autoComplete="new-password" />
+              <input type={showPw ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm" style={{ flex: 1 }} disabled={!sbOn || !supabaseUser || changing} autoComplete="new-password" />
+            </div>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+              <button className="btn-secondary" type="button" onClick={() => setShowPw(!showPw)}>{showPw ? 'Hide' : 'Show'}</button>
+              <button className="btn-publish" onClick={handleUpdatePassword} disabled={!sbOn || !supabaseUser || changing || !newPassword || !confirmPassword}>{changing ? 'Updating…' : 'Update Password'}</button>
+              <button className="btn-secondary" onClick={handleSendReset} disabled={!sbOn || changing} title="Send reset link to email">{changing ? '…' : 'Send Reset Link'}</button>
+            </div>
+            <p className="hint" style={{ marginTop: '6px' }}><code>supabase.auth.updateUser({`{ password }`})</code> — bcrypt hashed. Or <code>resetPasswordForEmail()</code> sends link to <code>{newEmail || supabaseUser?.email || 'admin email'}</code> with redirect to <code>/admin/login</code>.</p>
+          </div>
+          {changeErr && <div style={{ background: 'rgba(239,68,68,0.08)', color: '#fca5a5', padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.15)', fontSize: '13px' }}>✗ {changeErr}</div>}
+          {changeMsg && <div style={{ background: 'rgba(94,234,212,0.08)', color: '#5eead4', padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(94,234,212,0.15)', fontSize: '13px' }}>{changeMsg}</div>}
+          <p className="hint" style={{ fontSize: '11px', lineHeight: 1.6 }}>Alternative: Supabase Dashboard → Authentication → Users → select user → Reset password / Change email (same effect, admin UI). This panel is shortcut when you’re already signed in.</p>
+        </div>
       </div>
 
       <div className="settings-divider" style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '24px 0' }} />
@@ -728,7 +824,7 @@ function SettingsEdit({ onSave, ghToken, setGhToken, ghPublishing, onGhPublish, 
           <strong>Setup Supabase for instant & super-safe sync (FREE — no card):</strong><br />
           1. Go to <a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer" style={{color:'#5eead4', textDecoration:'underline'}}>supabase.com/dashboard</a> → New project (free)<br />
           2. Copy <code>Project URL</code> + <code>anon public key</code> → set <code>VITE_SUPABASE_URL</code> + <code>VITE_SUPABASE_ANON_KEY</code> in <code>.env</code><br />
-          3. SQL Editor → paste <code>supabase.sql</code> (in repo) → Run (creates <code>portfolio</code> + <code>portfolio_history</code> + RLS)<br />
+          3. SQL Editor → paste setup SQL (portfolio + portfolio_history + RLS, saved in DB) → Run<br />
           4. Authentication → Users → Add user → admin email+password<br />
           5. Database → Realtime → enable for <code>portfolio</code> table<br />
           6. Add same env vars to GitHub → Settings → Secrets and variables → Actions → New repository secret → redeploy.<br />

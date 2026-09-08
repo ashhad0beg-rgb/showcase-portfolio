@@ -108,14 +108,14 @@ export function PortfolioProvider({ children }) {
           .single()
         if (cancelled) return
         if (error) {
-          // PGRST116 = no rows, 42P01 / PGRST205 = table not exist yet (user hasn't run supabase.sql)
+          // PGRST116 = no rows, 42P01 / PGRST205 = table not exist yet (DB not initialized)
           if (error.code === 'PGRST116' || error.message?.includes('0 rows')) {
             setSyncStatus('no-remote')
             console.log('[supabase] no remote row yet — will create on first authenticated write')
           } else if (error.code === '42P01' || error.code === 'PGRST205' || error.message?.includes("Could not find the table 'public.portfolio") || error.message?.includes('schema cache')) {
             setSyncStatus('no-remote')
-            setLastSyncError("Supabase table 'public.portfolio' missing — run supabase.sql in SQL Editor then NOTIFY pgrst, 'reload schema'")
-            console.warn('[supabase] table missing — run supabase.sql + NOTIFY pgrst reload:', error.message)
+            setLastSyncError("Supabase table 'public.portfolio' missing — run setup SQL in SQL Editor then NOTIFY pgrst, 'reload schema' (SQL saved in DB)")
+            console.warn('[supabase] table missing — run setup SQL + NOTIFY pgrst reload (SQL in DB):', error.message)
           } else {
             console.warn('[supabase] fetch initial failed:', error.message)
             setSyncStatus('error')
@@ -352,7 +352,7 @@ export function PortfolioProvider({ children }) {
       setLastSyncError(msg)
       // Common Supabase RLS error -> clearer message
       if (msg.includes('row-level security') || msg.includes('RLS') || e.code === '42501') {
-        setLastSyncError('RLS blocked — check supabase.sql policies & that you are signed in')
+        setLastSyncError('RLS blocked — check DB RLS policies & that you are signed in')
       }
       addAudit('error', `sync failed: ${msg}`)
       return { ok: false, reason: 'supabase-error', error: msg }
@@ -406,8 +406,10 @@ export function PortfolioProvider({ children }) {
   }, [])
 
   const login = useCallback(async (passwordOrEmail, maybePassword) => {
-    // Supabase mode: login(email, password) via Supabase Auth — FREE & SECURE (bcrypt + JWT + RLS)
-    if (isSupabaseEnabled && maybePassword !== undefined) {
+    // Supabase mode: login(email, password) via Supabase Auth — FREE & SECURE (bcrypt + JWT + RLS) — STRICT (no legacy bypass when enabled)
+    if (isSupabaseEnabled) {
+      // When Supabase is enabled, REQUIRE email+password. Legacy fallback REMOVED for security.
+      if (maybePassword === undefined) return false
       const email = String(passwordOrEmail).trim()
       const password = String(maybePassword)
       if (!email || !password) return false
@@ -415,13 +417,6 @@ export function PortfolioProvider({ children }) {
         const { data: res, error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) {
           console.warn('[auth] supabase login failed:', error.message)
-          // Try legacy fallback if password is legacy token (allows local access without Supabase user)
-          if (password === 'admin2026' || password === (import.meta.env.VITE_ADMIN_PASSWORD || '')) {
-            safeSetLocal(ADMIN_TOKEN_KEY, 'admin_token_2026')
-            setIsAuthenticated(true)
-            addAudit('auth', 'legacy fallback login (supabase enabled, auth failed)')
-            return true
-          }
           return false
         }
         if (res.user) {
@@ -437,13 +432,13 @@ export function PortfolioProvider({ children }) {
         return false
       }
     }
-    // Legacy fallback: password only ('admin2026') — local mode or emergency access
+    // Local mode only (no Supabase env): password fallback allows offline dev
     const password = String(passwordOrEmail)
     const envPwd = import.meta.env.VITE_ADMIN_PASSWORD || ''
     if (password === 'admin2026' || (envPwd && password === envPwd)) {
       safeSetLocal(ADMIN_TOKEN_KEY, 'admin_token_2026')
       setIsAuthenticated(true)
-      addAudit('auth', 'legacy login')
+      addAudit('auth', 'legacy login (local mode)')
       return true
     }
     return false

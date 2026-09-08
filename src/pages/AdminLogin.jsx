@@ -19,17 +19,17 @@ export default function LoginPage() {
     try {
       let ok = false
       if (isSupabaseEnabled) {
-        // Secure: Supabase Auth email+password — only this can write globally (RLS)
+        // Strict Supabase-only — no legacy bypass when env is set
         if (!email || !password) {
-          setError('Enter admin email and password (Supabase Auth — free & secure)')
+          setError('Enter admin email and password (Supabase Auth — secure, RLS-gated)')
           setLoading(false)
           return
         }
         ok = await login(email, password)
-        if (!ok) setError('Supabase sign-in failed. Check email/password and that admin user exists in Supabase Auth. Fallback: try legacy password admin2026 in password field for local-only access.')
+        if (!ok) setError('Supabase sign-in failed. Check email/password and that admin user exists in Supabase Dashboard → Authentication → Users. No legacy fallback when Supabase is enabled.')
       } else {
         ok = await login(password)
-        if (!ok) setError('Invalid password. Try: admin2026')
+        if (!ok) setError('Invalid password. Try: admin2026 (set VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY in .env to enable Supabase mode)')
       }
       if (ok) navigate('/admin')
       else setLoading(false)
@@ -45,8 +45,8 @@ export default function LoginPage() {
         <div className="admin-login-icon">🔐</div>
         <h1>Admin Login</h1>
         <p className="admin-login-subtitle">Sign in to manage your portfolio</p>
-        {isSupabaseEnabled && <div className="hint" style={{ textAlign: 'center', marginBottom: '16px', background: 'rgba(94,234,212,0.08)', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(94,234,212,0.15)' }}>🔒 <strong>Secure mode — Supabase Auth (free)</strong>. Use your Supabase admin email + password. Writes are RLS-gated & validated (<span style={{color:'#5eead4'}}>FREE</span>).</div>}
-        {!isSupabaseEnabled && <div className="hint" style={{ textAlign: 'center', marginBottom: '16px', background: 'rgba(251,146,60,0.08)', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(251,146,60,0.2)' }}>⚠️ Local mode — set <code>VITE_SUPABASE_URL</code> + <code>VITE_SUPABASE_ANON_KEY</code> in <code>.env</code> to enable secure global sync (free).</div>}
+        {isSupabaseEnabled && <div className="hint" style={{ textAlign: 'center', marginBottom: '16px', background: 'rgba(94,234,212,0.08)', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(94,234,212,0.15)' }}>🔒 <strong>Supabase-only mode</strong> — Sign in with Supabase email + password. No legacy password. Writes are RLS-gated & validated (<span style={{color:'#5eead4'}}>FREE</span>).</div>}
+        {!isSupabaseEnabled && <div className="hint" style={{ textAlign: 'center', marginBottom: '16px', background: 'rgba(251,146,60,0.08)', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(251,146,60,0.2)' }}>⚠️ Local mode — set <code>VITE_SUPABASE_URL</code> + <code>VITE_SUPABASE_ANON_KEY</code> in <code>.env</code> to enable Supabase-only auth (secure).</div>}
         <form onSubmit={handleSubmit}>
           {isSupabaseEnabled && (
             <div className="form-group">
@@ -58,11 +58,10 @@ export default function LoginPage() {
             <label htmlFor="password">{isSupabaseEnabled ? 'Password (Supabase)' : 'Password'}</label>
             <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={isSupabaseEnabled ? 'Supabase password' : 'Enter admin password'} autoComplete="current-password" />
           </div>
-          {isSupabaseEnabled && <div className="hint" style={{ marginBottom: '12px' }}>Legacy fallback: enter <code>admin2026</code> as password to access locally (no global write — RLS blocks anon).</div>}
           {error && <div className="form-error">{error}</div>}
           <button type="submit" className="btn-login" disabled={loading}>{loading ? 'Signing in…' : 'Sign In'}</button>
         </form>
-        {isSupabaseEnabled && <p className="hint" style={{ marginTop: '14px', textAlign: 'center' }}>Create admin user: Supabase Dashboard → Authentication → Users → Add user (email+password)</p>}
+        {isSupabaseEnabled && <p className="hint" style={{ marginTop: '14px', textAlign: 'center' }}>Create/change admin: Supabase Dashboard → Authentication → Users → Add/Reset user · Or use <strong>Admin → Settings → Change Credentials</strong> when signed in.</p>}
       </div>
     </div>
   )
