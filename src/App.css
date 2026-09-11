@@ -141,8 +141,9 @@ body:has(.admin-layout), body:has(.admin-login) { cursor: auto !important; }
 .particles-background {
   position: absolute; inset: 0; z-index: 0;
 }
-.particles-background canvas { position: absolute; top: 0; left: 0; }
+.particles-background canvas { position: absolute; top: 0; left: 0; will-change: transform; transform: translateZ(0); }
 .hero > *:not(.particles-background) { position: relative; z-index: 1; }
+@media (pointer: coarse) { .particles-background { opacity: 0.7; } .particles-background canvas { opacity: 0.9; } }
 @media (prefers-reduced-motion: reduce) {
   .particles-background { display: none; }
 }

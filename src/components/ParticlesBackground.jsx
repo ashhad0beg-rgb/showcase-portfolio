@@ -13,29 +13,26 @@ function ParticlesBackground() {
     let entry
     try {
       if (!Array.isArray(window.pJSDom)) window.pJSDom = []
-      // Mobile: lighter config for performance + visible spider effect
+      // Mobile: light spider web — 28 dots + faint lines, 60fps (no hover, retina off)
       const cfg = isCoarse
         ? {
             ...particlesConfig,
             particles: {
               ...particlesConfig.particles,
-              number: { value: 55, density: { enable: true, value_area: 700 } },
-              size: { ...particlesConfig.particles.size, value: 2.2 },
-              move: { ...particlesConfig.particles.move, speed: 0.6 },
-              line_linked: { ...particlesConfig.particles.line_linked, enable: true, distance: 120, opacity: 0.25, width: 1 },
+              number: { value: 32, density: { enable: true, value_area: 900 } },
+              size: { ...particlesConfig.particles.size, value: 1.9, random: true },
+              opacity: { ...particlesConfig.particles.opacity, value: 0.75 },
+              move: { ...particlesConfig.particles.move, speed: 0.5, random: true },
+              line_linked: { enable: true, distance: 110, color: '#ffffff', opacity: 0.18, width: 0.8 },
             },
             interactivity: {
-              ...particlesConfig.interactivity,
-              events: {
-                ...particlesConfig.interactivity.events,
-                onhover: { enable: true, mode: 'grab' },
-                onclick: { enable: true, mode: 'push' },
-              },
+              detect_on: 'canvas',
+              events: { onhover: { enable: false }, onclick: { enable: false }, resize: true },
+              modes: {},
             },
+            retina_detect: false,
           }
         : particlesConfig
-      // enable spider lines on mobile too (grab)
-      if (isCoarse) cfg.particles.line_linked.enable = true
       window.particlesJS(id, cfg)
       entry = window.pJSDom[window.pJSDom.length - 1]
     } catch {
