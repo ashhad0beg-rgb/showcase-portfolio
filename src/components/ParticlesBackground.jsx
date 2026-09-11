@@ -13,23 +13,19 @@ function ParticlesBackground() {
     let entry
     try {
       if (!Array.isArray(window.pJSDom)) window.pJSDom = []
-      // Mobile: light spider web — 28 dots + faint lines, 60fps (no hover, retina off)
+      // Mobile: dots only, ultra-light 60fps — no lines/hover (was laggy + animations blocked)
       const cfg = isCoarse
         ? {
             ...particlesConfig,
             particles: {
               ...particlesConfig.particles,
-              number: { value: 32, density: { enable: true, value_area: 900 } },
-              size: { ...particlesConfig.particles.size, value: 1.9, random: true },
-              opacity: { ...particlesConfig.particles.opacity, value: 0.75 },
-              move: { ...particlesConfig.particles.move, speed: 0.5, random: true },
-              line_linked: { enable: true, distance: 110, color: '#ffffff', opacity: 0.18, width: 0.8 },
+              number: { value: 22, density: { enable: true, value_area: 1200 } },
+              size: { ...particlesConfig.particles.size, value: 1.5, random: true },
+              opacity: { ...particlesConfig.particles.opacity, value: 0.6, random: true },
+              move: { ...particlesConfig.particles.move, speed: 0.32, random: true },
+              line_linked: { enable: false },
             },
-            interactivity: {
-              detect_on: 'canvas',
-              events: { onhover: { enable: false }, onclick: { enable: false }, resize: true },
-              modes: {},
-            },
+            interactivity: { detect_on: 'canvas', events: { onhover: { enable: false }, onclick: { enable: false }, resize: true }, modes: {} },
             retina_detect: false,
           }
         : particlesConfig

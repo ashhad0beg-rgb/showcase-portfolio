@@ -97,14 +97,14 @@ function Hero() {
       <ParticlesBackground />
       <motion.div className="hero-eyebrow" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>{h.eyebrow}</motion.div>
       <h1 className="hero-title">{lines.map((line, i) => (
-        <span className="line" key={i}><motion.span className="word" initial={{ y: '110%', filter: 'blur(8px)' }} animate={{ y: 0, filter: 'blur(0px)' }} transition={r ? { duration: 0 } : { duration: 0.7, delay: 0.2 + i * 0.12, ease: [0.16, 1, 0.3, 1] }}>{line}</motion.span></span>
+        <span className="line" key={i}><motion.span className="word" initial={{ y: '110%', filter: 'blur(8px)' }} animate={{ y: 0, filter: 'blur(0px)' }} transition={r ? { duration: 0.2, delay: 0.1 + i * 0.05 } : { duration: 0.7, delay: 0.2 + i * 0.12, ease: [0.16, 1, 0.3, 1] }}>{line}</motion.span></span>
       ))}</h1>
-      <motion.p className="hero-desc" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={r ? { duration: 0 } : { duration: 0.5, delay: 0.7 }}>{h.description}</motion.p>
-      <motion.div className="hero-buttons" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={r ? { duration: 0 } : { duration: 0.5, delay: 0.9 }}>
+      <motion.p className="hero-desc" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={r ? { duration: 0.22 } : { duration: 0.5, delay: 0.7 }}>{h.description}</motion.p>
+      <motion.div className="hero-buttons" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={r ? { duration: 0.22 } : { duration: 0.5, delay: 0.9 }}>
         <a href="#showreel" className="btn btn-primary">{h.buttonPrimary} <span className="btn-arrow">→</span></a>
         <a href="#contact" className="btn btn-outline">{h.buttonSecondary}</a>
       </motion.div>
-      <motion.div className="hero-scroll" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={r ? { duration: 0 } : { duration: 0.5, delay: 1.2 }}>
+      <motion.div className="hero-scroll" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={r ? { duration: 0.22 } : { duration: 0.5, delay: 1.2 }}>
         <span className="hero-scroll-line" /> SCROLL TO EXPLORE <span className="hero-scroll-arrow">↓</span>
       </motion.div>
     </section>
@@ -131,8 +131,8 @@ function Showreel() {
   return (
     <section id="showreel" className="showreel">
       <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>{s.label}</motion.div>
-      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>{s.title}</motion.h2>
-      <motion.div className="showreel-player" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.7, delay: 0.2 }}>
+      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.1 }}>{s.title}</motion.h2>
+      <motion.div className="showreel-player" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.7, delay: 0.2 }}>
         {s.videoUrl && !playing ? (
           <>
             {s.posterUrl && <img src={s.posterUrl} alt="Showreel poster" />}
@@ -168,11 +168,11 @@ function Work() {
       <div className="work-header">
         <div>
           <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>PORTFOLIO</motion.div>
-          <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>SELECTED WORK</motion.h2>
+          <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.1 }}>SELECTED WORK</motion.h2>
         </div>
       </div>
       <div className="work-grid">{data.work.map((p, i) => (
-        <motion.div className="work-item" key={i} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={r ? { duration: 0 } : { duration: 0.6, delay: i * 0.05 }} onClick={() => setSelected(p)}>
+        <motion.div className="work-item" key={i} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: i * 0.05 }} onClick={() => setSelected(p)}>
           <div className="work-item-visual">{p.image ? <img src={p.image} alt={p.title} loading="lazy" /> : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(0,255,136,0.06), var(--color-surface))' }} />}</div>
           <div className="work-item-info">
             <div className="work-item-category">{p.category}</div>
@@ -208,9 +208,9 @@ function Services() {
   return (
     <section id="services" className="services">
       <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>WHAT I DO</motion.div>
-      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>SERVICES</motion.h2>
+      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.1 }}>SERVICES</motion.h2>
       <div className="services-list">{data.services.map((s, i) => (
-        <motion.div className={`service-item${open === i ? ' open' : ''}`} key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.5, delay: i * 0.05 }} onClick={() => setOpen(open === i ? null : i)}>
+        <motion.div className={`service-item${open === i ? ' open' : ''}`} key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.5, delay: i * 0.05 }} onClick={() => setOpen(open === i ? null : i)}>
           <div className="service-header"><span className="service-number">{s.number}</span><h3 className="service-name">{s.name}</h3></div>
           <div className="service-desc"><p>{s.description}</p></div>
         </motion.div>
@@ -226,9 +226,9 @@ function Process() {
   return (
     <section id="process" className="process">
       <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>HOW I WORK</motion.div>
-      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>PROCESS</motion.h2>
+      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.1 }}>PROCESS</motion.h2>
       <div className="process-grid">{data.process.map((s, i) => (
-        <motion.div className="process-step" key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.5, delay: i * 0.08 }}>
+        <motion.div className="process-step" key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.5, delay: i * 0.08 }}>
           <div className="process-step-number">{s.number}</div>
           <h3 className="process-step-name">{s.name}</h3>
           <p className="process-step-desc">{s.description}</p>
@@ -247,7 +247,7 @@ function About() {
     <section id="about" className="about">
       <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>ABOUT</motion.div>
       <div className="about-grid">
-        <motion.div className="about-content" initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6 }}>
+        <motion.div className="about-content" initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6 }}>
           <h2 className="section-title" style={{ marginBottom: '32px' }}>{a.title}</h2>
           <div className="highlight">{a.highlight}</div>
           <p>{a.content}</p>
@@ -255,7 +255,7 @@ function About() {
             <div className="about-detail" key={i}><span className="about-detail-label">{d.label}</span><span>{d.value}</span></div>
           ))}</div>
         </motion.div>
-        <motion.div className="about-image" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.15 }}>
+        <motion.div className="about-image" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.15 }}>
           {a.image ? <img src={a.image} alt="Portrait" /> : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(0,255,136,0.06), var(--color-surface))' }} />}
         </motion.div>
       </div>
@@ -284,13 +284,13 @@ function Experience() {
   return (
     <section id="experience" className={`experience experience-${layout}`}>
       <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>EXPERIENCE</motion.div>
-      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>EXPERIENCE</motion.h2>
+      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.1 }}>EXPERIENCE</motion.h2>
       {layout === 'cards' ? (
         <div className="experience-cards">{items.map((e, i) => {
           const company = e.company || e.client || ''
           const duration = e.duration || e.year || ''
           return (
-            <motion.div className="experience-card" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.4, delay: i * 0.05 }}>
+            <motion.div className="experience-card" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.4, delay: i * 0.05 }}>
               <div className="experience-card-company">{company}</div>
               <div className="experience-card-duration">{duration}</div>
               <div className="experience-card-role">{e.role}</div>
@@ -303,7 +303,7 @@ function Experience() {
           const company = e.company || e.client || ''
           const duration = e.duration || e.year || ''
           return (
-            <motion.div className="experience-item" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.4, delay: i * 0.05 }}>
+            <motion.div className="experience-item" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.4, delay: i * 0.05 }}>
               <span className="experience-year">{duration}</span>
               <span className="experience-role">{e.role}</span>
               <span className="experience-client">{company}</span>
@@ -315,7 +315,7 @@ function Experience() {
           const company = e.company || e.client || ''
           const duration = e.duration || e.year || ''
           return (
-            <motion.div className="experience-timeline-item" key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.4, delay: i * 0.05 }}>
+            <motion.div className="experience-timeline-item" key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.4, delay: i * 0.05 }}>
               <div className="experience-timeline-dot" />
               <div className="experience-timeline-content">
                 <div className="experience-timeline-header"><span className="experience-timeline-company">{company}</span><span className="experience-timeline-duration">{duration}</span></div>
@@ -346,7 +346,7 @@ function Testimonials() {
     <section className="testimonials">
       <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>TESTIMONIALS</motion.div>
       <AnimatePresence mode="wait">
-        <motion.div key={idx} className="testimonials-quote" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={r ? { duration: 0 } : { duration: 0.5 }}>
+        <motion.div key={idx} className="testimonials-quote" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={r ? { duration: 0.22 } : { duration: 0.5 }}>
           {t[idx].quote}
           <div className="testimonials-author"><strong>{t[idx].author}</strong> — {t[idx].company}</div>
         </motion.div>
@@ -363,9 +363,9 @@ function Faq() {
   return (
     <section id="faq" className="faq">
       <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>FAQ</motion.div>
-      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>QUESTIONS</motion.h2>
+      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.1 }}>QUESTIONS</motion.h2>
       <div className="faq-list">{data.faq.map((f, i) => (
-        <motion.div className={`faq-item${open === i ? ' open' : ''}`} key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.4, delay: i * 0.04 }}>
+        <motion.div className={`faq-item${open === i ? ' open' : ''}`} key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.4, delay: i * 0.04 }}>
           <button className="faq-question" onClick={() => setOpen(open === i ? null : i)}><span>{f.question}</span><span className="faq-icon">+</span></button>
           <div className="faq-answer"><p>{f.answer}</p></div>
         </motion.div>
@@ -382,13 +382,13 @@ function Contact() {
   return (
     <section id="contact" className="contact">
       <motion.div className="contact-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>{c.label}</motion.div>
-      <motion.h2 className="contact-title" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>{c.title}</motion.h2>
-      <motion.div className="contact-subtitle" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.2 }}>{c.subtitle}</motion.div>
-      <motion.div className="contact-buttons" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.5, delay: 0.35 }}>
+      <motion.h2 className="contact-title" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.1 }}>{c.title}</motion.h2>
+      <motion.div className="contact-subtitle" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.2 }}>{c.subtitle}</motion.div>
+      <motion.div className="contact-buttons" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.5, delay: 0.35 }}>
         <a href={`mailto:${c.email}`} className="btn btn-primary">{c.buttonPrimary} <span className="btn-arrow">→</span></a>
         <a href={`mailto:${c.email}`} className="btn btn-outline">EMAIL ME</a>
       </motion.div>
-      <motion.div className="contact-social" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.5, delay: 0.5 }}>
+      <motion.div className="contact-social" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.5, delay: 0.5 }}>
         {c.social.map(s => <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer">{s.name}</a>)}
       </motion.div>
     </section>
