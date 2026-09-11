@@ -415,24 +415,27 @@ const row2 = ['EDITING', 'ANIMATION', 'BRANDING', 'COLOR GRADING', 'TYPOGRAPHY']
 
 /* ====== PORTFOLIO SITE ====== */
 function PortfolioSite() {
+  const { data } = usePortfolio()
+  const v = data.visibility || {}
+  const vis = (k) => v[k] !== false
   return (
     <>
       <CustomCursor />
       <Navbar />
       <main>
-        <Hero />
+        {vis('hero') && <Hero />}
         <MarqueeBanner items={row1} />
-        <Showreel />
-        <Work />
-        <Services />
-        <Process />
-        <About />
-        <Tools />
-        <Experience />
+        {vis('showreel') && <Showreel />}
+        {vis('work') && <Work />}
+        {vis('services') && <Services />}
+        {vis('process') && <Process />}
+        {vis('about') && <About />}
+        {vis('tools') && <Tools />}
+        {vis('experience') && <Experience />}
         <MarqueeBanner items={row2} reverse />
-        <Testimonials />
-        <Faq />
-        <Contact />
+        {vis('testimonials') && <Testimonials />}
+        {vis('faq') && <Faq />}
+        {vis('contact') && <Contact />}
       </main>
       <Footer />
     </>

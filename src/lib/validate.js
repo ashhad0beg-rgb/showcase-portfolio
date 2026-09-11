@@ -80,7 +80,7 @@ export function validatePortfolioData(input) {
   }
   if (!out.hero.title) throw new Error('hero.title required')
 
-  // showreel — enabled toggle
+  // showreel — enabled toggle (also synced with visibility.showreel)
   if (!input.showreel) throw new Error('Missing showreel')
   out.showreel = {
     enabled: input.showreel.enabled !== false,
@@ -90,6 +90,16 @@ export function validatePortfolioData(input) {
     posterUrl: sanitizeUrl(input.showreel.posterUrl || ''),
     tags: sanitizeArray(input.showreel.tags, t => sanitizeString(t, 60), 20),
   }
+  // visibility — toggles for each section (top of admin page)
+  const visKeys = ['hero','showreel','work','services','process','about','tools','experience','testimonials','faq','contact']
+  out.visibility = {}
+  for (const k of visKeys) {
+    let v = true
+    if (input.visibility && typeof input.visibility[k] === 'boolean') v = input.visibility[k]
+    else if (k === 'showreel' && typeof input.showreel?.enabled === 'boolean') v = input.showreel.enabled
+    out.visibility[k] = v
+  }
+  out.showreel.enabled = out.visibility.showreel
 
   // work
   out.work = sanitizeArray(input.work, p => {
@@ -194,7 +204,7 @@ export function validatePortfolioData(input) {
 }
 
 export function sanitizeField(key, value) {
-  const allowed = ['hero', 'showreel', 'work', 'services', 'process', 'about', 'tools', 'experience', 'experienceLayout', 'testimonials', 'faq', 'contact', 'footer', 'siteName', 'siteDescription', '_version', 'theme']
+  const allowed = ['hero', 'showreel', 'work', 'services', 'process', 'about', 'tools', 'experience', 'experienceLayout', 'visibility', 'testimonials', 'faq', 'contact', 'footer', 'siteName', 'siteDescription', '_version', 'theme']
   if (!allowed.includes(key)) throw new Error(`Forbidden key: ${key}`)
   return value
 }

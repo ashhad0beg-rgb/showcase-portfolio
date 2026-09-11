@@ -1,5 +1,18 @@
 const defaultData = {
-  "_version": 25,
+  "_version": 26,
+  "visibility": {
+    "hero": true,
+    "showreel": true,
+    "work": true,
+    "services": true,
+    "process": true,
+    "about": true,
+    "tools": true,
+    "experience": true,
+    "testimonials": true,
+    "faq": true,
+    "contact": true
+  },
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",

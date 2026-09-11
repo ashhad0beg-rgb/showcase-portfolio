@@ -46,6 +46,24 @@ function ImageDropField({ label, value, onChange, onSave }) {
   )
 }
 
+function SectionVisibility({ sectionKey, onSave }) {
+  const { data, updateData, updateSection } = usePortfolio()
+  const vis = data.visibility?.[sectionKey] !== false
+  return (
+    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', background: vis ? 'rgba(94,234,212,0.08)' : 'rgba(239,68,68,0.08)', padding: '6px 10px', borderRadius: '20px', border: `1px solid ${vis ? 'rgba(94,234,212,0.15)' : 'rgba(239,68,68,0.15)'}`, color: vis ? '#5eead4' : '#fca5a5' }}>
+      <input type="checkbox" checked={vis} onChange={(e) => {
+        const v = e.target.checked
+        const next = { ...(data.visibility || {}), [sectionKey]: v }
+        // keep showreel.enabled in sync
+        if (sectionKey === 'showreel') updateSection('showreel', { enabled: v })
+        updateData('visibility', next)
+        onSave(v ? 'Visible on main site' : 'Hidden from main site')
+      }} />
+      {vis ? 'Visible' : 'Hidden'}
+    </label>
+  )
+}
+
 const sections = [
   { path: '/admin', label: 'Dashboard', icon: '◧' },
   { path: '/admin/hero', label: 'Hero', icon: '⌖' },
@@ -393,7 +411,7 @@ function HeroEdit({ onSave }) {
   const { data, updateSection } = usePortfolio()
   const h = data.hero
   return (
-    <div className="admin-section"><h2>Hero Section</h2>
+    <div className="admin-section"><div className="section-header-row"><h2>Hero Section</h2><SectionVisibility sectionKey="hero" onSave={onSave} /></div>
       <div className="form-group"><label>Eyebrow Text</label><input type="text" value={h.eyebrow} onChange={(e) => { updateSection('hero', { eyebrow: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Title (one line per row)</label><textarea value={h.title} onChange={(e) => { updateSection('hero', { title: e.target.value }); onSave('Saved') }} rows={4} /></div>
       <div className="form-group"><label>Description</label><textarea value={h.description} onChange={(e) => { updateSection('hero', { description: e.target.value }); onSave('Saved') }} rows={3} /></div>
@@ -407,9 +425,9 @@ function HeroEdit({ onSave }) {
 function ShowreelEdit({ onSave }) {
   const { data, updateSection } = usePortfolio()
   const s = data.showreel
-  const enabled = s.enabled !== false
+  const enabled = (data.visibility?.showreel ?? s.enabled) !== false
   return (
-    <div className="admin-section"><div className="section-header-row"><h2>Showreel</h2><label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}><input type="checkbox" checked={enabled} onChange={(e) => { updateSection('showreel', { enabled: e.target.checked }); onSave(e.target.checked ? 'Showreel enabled' : 'Showreel hidden') }} /> Enable Showreel</label></div>
+    <div className="admin-section"><div className="section-header-row"><h2>Showreel</h2><SectionVisibility sectionKey="showreel" onSave={onSave} /></div>
       {!enabled && <div className="hint" style={{ marginBottom: '16px', background: 'rgba(148,163,184,0.08)', padding: '10px', borderRadius: '8px' }}>Showreel is hidden on the site. Enable to show.</div>}
       <div style={{ opacity: enabled ? 1 : 0.45, pointerEvents: enabled ? 'auto' : 'none' }}>
         <div className="form-group"><label>Label</label><input type="text" value={s.label} onChange={(e) => { updateSection('showreel', { label: e.target.value }); onSave('Saved') }} /></div>
@@ -426,7 +444,7 @@ function WorkEdit({ onSave }) {
   const { data, updateArrayItem, addArrayItem, removeArrayItem } = usePortfolio()
   return (
     <div className="admin-section">
-      <div className="section-header-row"><h2>Work ({data.work.length})</h2><button className="btn-add" onClick={() => { addArrayItem('work', { title: '', client: '', year: '', role: '', category: '', image: '', description: '' }); onSave('Added') }}>+ Add Project</button></div>
+      <div className="section-header-row"><h2>Work ({data.work.length})</h2><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><SectionVisibility sectionKey="work" onSave={onSave} /><button className="btn-add" onClick={() => { addArrayItem('work', { title: '', client: '', year: '', role: '', category: '', image: '', description: '' }); onSave('Added') }}>+ Add Project</button></div></div>
       {data.work.map((p, i) => (
         <div key={i} className="edit-card edit-card-lg">
           <div className="edit-card-header"><span>Project #{i + 1}</span><button className="btn-remove" onClick={() => { removeArrayItem('work', i); onSave('Removed') }}>×</button></div>
@@ -449,7 +467,7 @@ function ServicesEdit({ onSave }) {
   const { data, updateArrayItem, addArrayItem, removeArrayItem } = usePortfolio()
   return (
     <div className="admin-section">
-      <div className="section-header-row"><h2>Services ({data.services.length})</h2><button className="btn-add" onClick={() => { addArrayItem('services', { number: String(data.services.length + 1).padStart(2, '0'), name: '', description: '' }); onSave('Added') }}>+ Add Service</button></div>
+      <div className="section-header-row"><h2>Services ({data.services.length})</h2><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><SectionVisibility sectionKey="services" onSave={onSave} /><button className="btn-add" onClick={() => { addArrayItem('services', { number: String(data.services.length + 1).padStart(2, '0'), name: '', description: '' }); onSave('Added') }}>+ Add Service</button></div></div>
       {data.services.map((s, i) => (
         <div key={i} className="edit-card edit-card-lg">
           <div className="edit-card-header"><span>{s.number}</span><button className="btn-remove" onClick={() => { removeArrayItem('services', i); onSave('Removed') }}>×</button></div>
@@ -465,7 +483,7 @@ function ProcessEdit({ onSave }) {
   const { data, updateArrayItem, addArrayItem, removeArrayItem } = usePortfolio()
   return (
     <div className="admin-section">
-      <div className="section-header-row"><h2>Process ({data.process.length})</h2><button className="btn-add" onClick={() => { addArrayItem('process', { number: String(data.process.length + 1).padStart(2, '0'), name: '', description: '' }); onSave('Added') }}>+ Add Step</button></div>
+      <div className="section-header-row"><h2>Process ({data.process.length})</h2><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><SectionVisibility sectionKey="process" onSave={onSave} /><button className="btn-add" onClick={() => { addArrayItem('process', { number: String(data.process.length + 1).padStart(2, '0'), name: '', description: '' }); onSave('Added') }}>+ Add Step</button></div></div>
       {data.process.map((s, i) => (
         <div key={i} className="edit-card">
           <input type="text" placeholder="Name" value={s.name} onChange={(e) => { updateArrayItem('process', i, { name: e.target.value }); onSave('Saved') }} />
@@ -481,7 +499,7 @@ function AboutEdit({ onSave }) {
   const { data, updateSection } = usePortfolio()
   const a = data.about
   return (
-    <div className="admin-section"><h2>About</h2>
+    <div className="admin-section"><div className="section-header-row"><h2>About</h2><SectionVisibility sectionKey="about" onSave={onSave} /></div>
       <div className="form-group"><label>Title</label><input type="text" value={a.title} onChange={(e) => { updateSection('about', { title: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Highlight</label><input type="text" value={a.highlight} onChange={(e) => { updateSection('about', { highlight: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Content</label><textarea value={a.content} onChange={(e) => { updateSection('about', { content: e.target.value }); onSave('Saved') }} rows={4} /></div>
@@ -493,7 +511,7 @@ function AboutEdit({ onSave }) {
 function ToolsEdit({ onSave }) {
   const { data, updateData } = usePortfolio()
   return (
-    <div className="admin-section"><h2>Tools</h2>
+    <div className="admin-section"><div className="section-header-row"><h2>Tools</h2><SectionVisibility sectionKey="tools" onSave={onSave} /></div>
       <div className="form-group"><label>Tools (comma separated)</label><textarea value={data.tools.join(', ')} onChange={(e) => { updateData('tools', e.target.value.split(',').map(t => t.trim()).filter(Boolean)); onSave('Saved') }} rows={3} /></div>
     </div>
   )
@@ -504,7 +522,7 @@ function ExperienceEdit({ onSave }) {
   const layout = data.experienceLayout || 'timeline'
   return (
     <div className="admin-section">
-      <div className="section-header-row"><h2>Experience ({data.experience.length})</h2><button className="btn-add" onClick={() => { addArrayItem('experience', { company: '', duration: '', role: '', responsibilities: '' }); onSave('Added') }}>+ Add Experience</button></div>
+      <div className="section-header-row"><h2>Experience ({data.experience.length})</h2><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><SectionVisibility sectionKey="experience" onSave={onSave} /><button className="btn-add" onClick={() => { addArrayItem('experience', { company: '', duration: '', role: '', responsibilities: '' }); onSave('Added') }}>+ Add Experience</button></div></div>
       <div className="form-group" style={{ maxWidth: '280px' }}><label>Layout</label><select value={layout} onChange={(e) => { updateData('experienceLayout', e.target.value); onSave('Layout saved') }}><option value="timeline">Timeline (vertical)</option><option value="cards">Cards (grid)</option><option value="list">List (simple)</option></select><p className="hint" style={{ marginTop: '6px' }}>Timeline shows company + duration + role + responsibilities with dot line. Cards is grid. List is minimal.</p></div>
       {data.experience.map((e, i) => (
         <div key={i} className="edit-card edit-card-lg">
@@ -525,7 +543,7 @@ function TestimonialsEdit({ onSave }) {
   const { data, updateArrayItem, addArrayItem, removeArrayItem } = usePortfolio()
   return (
     <div className="admin-section">
-      <div className="section-header-row"><h2>Testimonials ({data.testimonials.length})</h2><button className="btn-add" onClick={() => { addArrayItem('testimonials', { quote: '', author: '', company: '' }); onSave('Added') }}>+ Add</button></div>
+      <div className="section-header-row"><h2>Testimonials ({data.testimonials.length})</h2><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><SectionVisibility sectionKey="testimonials" onSave={onSave} /><button className="btn-add" onClick={() => { addArrayItem('testimonials', { quote: '', author: '', company: '' }); onSave('Added') }}>+ Add</button></div></div>
       {data.testimonials.map((t, i) => (
         <div key={i} className="edit-card edit-card-lg">
           <div className="edit-card-header"><span>#{i + 1}</span><button className="btn-remove" onClick={() => { removeArrayItem('testimonials', i); onSave('Removed') }}>×</button></div>
@@ -542,7 +560,7 @@ function FaqEdit({ onSave }) {
   const { data, updateArrayItem, addArrayItem, removeArrayItem } = usePortfolio()
   return (
     <div className="admin-section">
-      <div className="section-header-row"><h2>FAQ ({data.faq.length})</h2><button className="btn-add" onClick={() => { addArrayItem('faq', { question: '', answer: '' }); onSave('Added') }}>+ Add Question</button></div>
+      <div className="section-header-row"><h2>FAQ ({data.faq.length})</h2><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><SectionVisibility sectionKey="faq" onSave={onSave} /><button className="btn-add" onClick={() => { addArrayItem('faq', { question: '', answer: '' }); onSave('Added') }}>+ Add Question</button></div></div>
       {data.faq.map((f, i) => (
         <div key={i} className="edit-card edit-card-lg">
           <div className="edit-card-header"><span>#{i + 1}</span><button className="btn-remove" onClick={() => { removeArrayItem('faq', i); onSave('Removed') }}>×</button></div>
@@ -558,7 +576,7 @@ function ContactEdit({ onSave }) {
   const { data, updateSection } = usePortfolio()
   const c = data.contact
   return (
-    <div className="admin-section"><h2>Contact / Final CTA</h2>
+    <div className="admin-section"><div className="section-header-row"><h2>Contact / Final CTA</h2><SectionVisibility sectionKey="contact" onSave={onSave} /></div>
       <div className="form-group"><label>Label</label><input type="text" value={c.label} onChange={(e) => { updateSection('contact', { label: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Title</label><input type="text" value={c.title} onChange={(e) => { updateSection('contact', { title: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Subtitle</label><input type="text" value={c.subtitle} onChange={(e) => { updateSection('contact', { subtitle: e.target.value }); onSave('Saved') }} /></div>
