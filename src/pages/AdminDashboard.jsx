@@ -5,6 +5,47 @@ import { supabase, isSupabaseEnabled } from '../lib/supabase.js'
 import { validatePortfolioData } from '../lib/validate.js'
 import '../admin/admin.css'
 
+// Drag & drop image helper — reads as data URL for GitHub publish (base64), keeps URL option too
+function useImageDrop(onChange, onSave) {
+  const [dragOver, setDragOver] = useState(false)
+  const readFile = (file) => {
+    if (!file || !file.type.startsWith('image/')) { alert('Drop an image file (jpg, png, webp)'); return }
+    if (file.size > 900 * 1024) { alert('Image too large — max 900KB (keeps payload <400KB). Compress first.'); return }
+    const reader = new FileReader()
+    reader.onload = (e) => { onChange(e.target.result); onSave && onSave('Image dropped') }
+    reader.readAsDataURL(file)
+  }
+  const handlers = {
+    onDragOver: (e) => { e.preventDefault(); setDragOver(true) },
+    onDragLeave: () => setDragOver(false),
+    onDrop: (e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if (f) readFile(f) },
+  }
+  const onFilePick = (e) => { const f = e.target.files?.[0]; if (f) readFile(f); e.target.value = '' }
+  return { dragOver, handlers, onFilePick }
+}
+
+function ImageDropField({ label, value, onChange, onSave }) {
+  const { dragOver, handlers, onFilePick } = useImageDrop(onChange, onSave)
+  return (
+    <div className="form-group">
+      <label>{label}</label>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+        <input type="text" placeholder="https://... or drop image below" value={value || ''} onChange={(e) => { onChange(e.target.value); onSave && onSave('Saved') }} style={{ flex: 1 }} />
+        <label className="btn-secondary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+          Browse
+          <input type="file" accept="image/*" hidden onChange={onFilePick} />
+        </label>
+        {value && <button type="button" className="btn-secondary" onClick={() => { onChange(''); onSave && onSave('Cleared') }}>Clear</button>}
+      </div>
+      <div {...handlers} style={{ border: `1.5px dashed ${dragOver ? '#5eead4' : 'rgba(255,255,255,0.12)'}`, background: dragOver ? 'rgba(94,234,212,0.08)' : 'rgba(255,255,255,0.02)', borderRadius: '10px', padding: '14px', textAlign: 'center', cursor: 'pointer', transition: 'all 150ms' }}>
+        <div style={{ fontSize: '13px', color: dragOver ? '#5eead4' : '#94a3b8' }}>{dragOver ? 'Drop image here' : 'Drag & drop image here'}</div>
+        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>JPG/PNG/WEBP, max 900KB — stored as data URL for GitHub publish</div>
+      </div>
+      {value && <div className="image-preview"><label>Preview:</label><img src={value} alt="Preview" /></div>}
+    </div>
+  )
+}
+
 const sections = [
   { path: '/admin', label: 'Dashboard', icon: '◧' },
   { path: '/admin/hero', label: 'Hero', icon: '⌖' },
@@ -358,7 +399,7 @@ function HeroEdit({ onSave }) {
       <div className="form-group"><label>Description</label><textarea value={h.description} onChange={(e) => { updateSection('hero', { description: e.target.value }); onSave('Saved') }} rows={3} /></div>
       <div className="form-group"><label>Primary Button</label><input type="text" value={h.buttonPrimary} onChange={(e) => { updateSection('hero', { buttonPrimary: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Secondary Button</label><input type="text" value={h.buttonSecondary} onChange={(e) => { updateSection('hero', { buttonSecondary: e.target.value }); onSave('Saved') }} /></div>
-      <div className="form-group"><label>Hero Image URL</label><input type="text" value={h.image || ''} onChange={(e) => { updateSection('hero', { image: e.target.value }); onSave('Saved') }} /></div>
+      <ImageDropField label="Hero Image — drag & drop or URL" value={h.image || ''} onChange={(v) => updateSection('hero', { image: v })} onSave={onSave} />
     </div>
   )
 }
@@ -374,7 +415,7 @@ function ShowreelEdit({ onSave }) {
         <div className="form-group"><label>Label</label><input type="text" value={s.label} onChange={(e) => { updateSection('showreel', { label: e.target.value }); onSave('Saved') }} /></div>
         <div className="form-group"><label>Title</label><input type="text" value={s.title} onChange={(e) => { updateSection('showreel', { title: e.target.value }); onSave('Saved') }} /></div>
         <div className="form-group"><label>Video URL</label><input type="text" value={s.videoUrl} onChange={(e) => { updateSection('showreel', { videoUrl: e.target.value }); onSave('Saved') }} /></div>
-        <div className="form-group"><label>Poster Image URL</label><input type="text" value={s.posterUrl} onChange={(e) => { updateSection('showreel', { posterUrl: e.target.value }); onSave('Saved') }} /></div>
+        <ImageDropField label="Poster Image — drag & drop or URL" value={s.posterUrl || ''} onChange={(v) => updateSection('showreel', { posterUrl: v })} onSave={onSave} />
         <div className="form-group"><label>Tags (comma separated)</label><input type="text" value={s.tags.join(', ')} onChange={(e) => { updateSection('showreel', { tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) }); onSave('Saved') }} /></div>
       </div>
     </div>
@@ -397,8 +438,7 @@ function WorkEdit({ onSave }) {
           <input type="text" placeholder="Role" value={p.role} onChange={(e) => { updateArrayItem('work', i, { role: e.target.value }); onSave('Saved') }} />
           <input type="text" placeholder="Category" value={p.category} onChange={(e) => { updateArrayItem('work', i, { category: e.target.value }); onSave('Saved') }} />
           <textarea placeholder="Description" value={p.description} onChange={(e) => { updateArrayItem('work', i, { description: e.target.value }); onSave('Saved') }} rows={2} />
-          <div className="tags-edit"><label>Image URL:</label><input type="text" placeholder="https://..." value={p.image || ''} onChange={(e) => { updateArrayItem('work', i, { image: e.target.value }); onSave('Saved') }} /></div>
-          {p.image && <div className="image-preview"><label>Preview:</label><img src={p.image} alt="Preview" /></div>}
+          <ImageDropField label="Project Image — drag & drop or URL" value={p.image || ''} onChange={(v) => updateArrayItem('work', i, { image: v })} onSave={onSave} />
         </div>
       ))}
     </div>
@@ -445,8 +485,7 @@ function AboutEdit({ onSave }) {
       <div className="form-group"><label>Title</label><input type="text" value={a.title} onChange={(e) => { updateSection('about', { title: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Highlight</label><input type="text" value={a.highlight} onChange={(e) => { updateSection('about', { highlight: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Content</label><textarea value={a.content} onChange={(e) => { updateSection('about', { content: e.target.value }); onSave('Saved') }} rows={4} /></div>
-      <div className="form-group"><label>Image URL</label><input type="text" value={a.image || ''} onChange={(e) => { updateSection('about', { image: e.target.value }); onSave('Saved') }} /></div>
-      {a.image && <div className="image-preview"><label>Preview:</label><img src={a.image} alt="About" /></div>}
+      <ImageDropField label="About Image — drag & drop or URL" value={a.image || ''} onChange={(v) => updateSection('about', { image: v })} onSave={onSave} />
     </div>
   )
 }
