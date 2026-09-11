@@ -91,7 +91,7 @@ export function validatePortfolioData(input) {
     tags: sanitizeArray(input.showreel.tags, t => sanitizeString(t, 60), 20),
   }
   // visibility — toggles for each section (top of admin page)
-  const visKeys = ['hero','showreel','work','services','process','about','tools','experience','testimonials','faq','contact']
+  const visKeys = ['hero','showreel','work','services','process','about','tools','experience','education','testimonials','faq','contact']
   out.visibility = {}
   for (const k of visKeys) {
     let v = true
@@ -157,6 +157,12 @@ export function validatePortfolioData(input) {
     client: sanitizeString(e.client || e.company || '', 100),
   }), 50)
   out.experienceLayout = ['timeline', 'cards', 'list'].includes(input.experienceLayout) ? input.experienceLayout : (input.experienceLayout === 'compact' ? 'list' : 'timeline')
+  out.education = sanitizeArray(input.education, e => ({
+    institution: sanitizeString(e.institution, 150),
+    degree: sanitizeString(e.degree, 150),
+    duration: sanitizeString(e.duration, 40),
+    details: sanitizeString(e.details || e.description || '', 2000),
+  }), 20)
 
   // testimonials
   out.testimonials = sanitizeArray(input.testimonials, t => ({
@@ -211,7 +217,7 @@ export function validatePortfolioData(input) {
 }
 
 export function sanitizeField(key, value) {
-  const allowed = ['hero', 'showreel', 'work', 'services', 'process', 'about', 'tools', 'experience', 'experienceLayout', 'visibility', 'testimonials', 'faq', 'contact', 'footer', 'siteName', 'siteDescription', '_version', 'theme']
+  const allowed = ['hero', 'showreel', 'work', 'services', 'process', 'about', 'tools', 'experience', 'experienceLayout', 'education', 'visibility', 'testimonials', 'faq', 'contact', 'footer', 'siteName', 'siteDescription', '_version', 'theme']
   if (!allowed.includes(key)) throw new Error(`Forbidden key: ${key}`)
   return value
 }

@@ -330,6 +330,28 @@ function Experience() {
   )
 }
 
+/* ====== EDUCATION ====== */
+function Education() {
+  const r = useReduce()
+  const { data } = usePortfolio()
+  const items = data.education || []
+  if (!items.length) return null
+  return (
+    <section id="education" className="education">
+      <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>EDUCATION</motion.div>
+      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.1 }}>EDUCATION</motion.h2>
+      <div className="education-list">{items.map((e, i) => (
+        <motion.div className="education-item" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.4, delay: i * 0.05 }}>
+          <div className="education-institution">{e.institution}</div>
+          <div className="education-degree">{e.degree}</div>
+          <div className="education-duration">{e.duration}</div>
+          {e.details && <p className="education-details">{e.details}</p>}
+        </motion.div>
+      ))}</div>
+    </section>
+  )
+}
+
 /* ====== TESTIMONIALS ====== */
 function Testimonials() {
   const r = useReduce()
@@ -437,6 +459,7 @@ function PortfolioSite() {
         {vis('about') && <About />}
         {vis('tools') && <Tools />}
         {vis('experience') && <Experience />}
+        {vis('education') && <Education />}
         <MarqueeBanner items={row2} reverse />
         {vis('testimonials') && <Testimonials />}
         {vis('faq') && <Faq />}

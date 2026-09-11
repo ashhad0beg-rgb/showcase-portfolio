@@ -79,6 +79,7 @@ const moreSections = [
   { path: '/admin/process', label: 'Process', icon: '◷' },
   { path: '/admin/tools', label: 'Tools', icon: '⬡' },
   { path: '/admin/experience', label: 'Experience', icon: '▭' },
+  { path: '/admin/education', label: 'Education', icon: '🎓' },
   { path: '/admin/testimonials', label: 'Quotes', icon: '❝' },
   { path: '/admin/faq', label: 'FAQ', icon: '?' },
 ]
@@ -371,6 +372,7 @@ export default function AdminDashboard() {
           {activeSection === 'about' && <AboutEdit onSave={triggerSaved} />}
           {activeSection === 'tools' && <ToolsEdit onSave={triggerSaved} />}
           {activeSection === 'experience' && <ExperienceEdit onSave={triggerSaved} />}
+          {activeSection === 'education' && <EducationEdit onSave={triggerSaved} />}
           {activeSection === 'testimonials' && <TestimonialsEdit onSave={triggerSaved} />}
           {activeSection === 'faq' && <FaqEdit onSave={triggerSaved} />}
           {activeSection === 'contact' && <ContactEdit onSave={triggerSaved} />}
@@ -533,6 +535,24 @@ function ExperienceEdit({ onSave }) {
           </div>
           <input type="text" placeholder="Role / Title" value={e.role} onChange={(ev) => { updateArrayItem('experience', i, { role: ev.target.value }); onSave('Saved') }} />
           <textarea placeholder="Roles and responsibilities" value={e.responsibilities || ''} onChange={(ev) => { updateArrayItem('experience', i, { responsibilities: ev.target.value }); onSave('Saved') }} rows={3} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function EducationEdit({ onSave }) {
+  const { data, updateArrayItem, addArrayItem, removeArrayItem } = usePortfolio()
+  return (
+    <div className="admin-section">
+      <div className="section-header-row"><h2>Education ({(data.education || []).length})</h2><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><SectionVisibility sectionKey="education" onSave={onSave} /><button className="btn-add" onClick={() => { addArrayItem('education', { institution: '', degree: '', duration: '', details: '' }); onSave('Added') }}>+ Add Education</button></div></div>
+      {(data.education || []).map((e, i) => (
+        <div key={i} className="edit-card edit-card-lg">
+          <div className="edit-card-header"><span>#{i + 1}</span><button className="btn-remove" onClick={() => { removeArrayItem('education', i); onSave('Removed') }}>×</button></div>
+          <input type="text" placeholder="Institution" value={e.institution} onChange={(ev) => { updateArrayItem('education', i, { institution: ev.target.value }); onSave('Saved') }} />
+          <input type="text" placeholder="Degree" value={e.degree} onChange={(ev) => { updateArrayItem('education', i, { degree: ev.target.value }); onSave('Saved') }} />
+          <input type="text" placeholder="Duration" value={e.duration} onChange={(ev) => { updateArrayItem('education', i, { duration: ev.target.value }); onSave('Saved') }} />
+          <textarea placeholder="Details" value={e.details} onChange={(ev) => { updateArrayItem('education', i, { details: ev.target.value }); onSave('Saved') }} rows={2} />
         </div>
       ))}
     </div>

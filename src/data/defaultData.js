@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 27,
+  "_version": 28,
   "visibility": {
     "hero": true,
     "showreel": true,
@@ -9,6 +9,7 @@ const defaultData = {
     "about": true,
     "tools": true,
     "experience": true,
+    "education": true,
     "testimonials": true,
     "faq": true,
     "contact": true
@@ -113,6 +114,14 @@ const defaultData = {
     "Premiere Pro",
     "Photoshop",
     "Illustrator"
+  ],
+  "education": [
+    {
+      "institution": "Jamia Millia Islamia",
+      "degree": "Bachelor of Fine Arts — Visual Arts",
+      "duration": "2021 — 2024",
+      "details": "Major in motion graphics and video production. Graduated with distinction."
+    }
   ],
   "experienceLayout": "timeline",
   "experience": [
