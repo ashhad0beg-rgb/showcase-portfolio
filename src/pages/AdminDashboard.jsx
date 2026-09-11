@@ -575,6 +575,8 @@ function FaqEdit({ onSave }) {
 function ContactEdit({ onSave }) {
   const { data, updateSection } = usePortfolio()
   const c = data.contact
+  const actions = c.actions || []
+  const setActions = (next) => { updateSection('contact', { actions: next }); onSave('Saved') }
   return (
     <div className="admin-section"><div className="section-header-row"><h2>Contact / Final CTA</h2><SectionVisibility sectionKey="contact" onSave={onSave} /></div>
       <div className="form-group"><label>Label</label><input type="text" value={c.label} onChange={(e) => { updateSection('contact', { label: e.target.value }); onSave('Saved') }} /></div>
@@ -582,6 +584,18 @@ function ContactEdit({ onSave }) {
       <div className="form-group"><label>Subtitle</label><input type="text" value={c.subtitle} onChange={(e) => { updateSection('contact', { subtitle: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Button Text</label><input type="text" value={c.buttonPrimary} onChange={(e) => { updateSection('contact', { buttonPrimary: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Email</label><input type="email" value={c.email} onChange={(e) => { updateSection('contact', { email: e.target.value }); onSave('Saved') }} /></div>
+      <div style={{ marginTop: '20px', padding: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}><label style={{ margin: 0 }}>Contact Buttons — tap to redirect</label><button className="btn-add" onClick={() => setActions([...actions, { label: '', url: '' }])}>+ Add Button</button></div>
+        <p className="hint" style={{ marginBottom: '12px' }}>Add custom buttons (e.g., WhatsApp, Calendly) — label + URL. On site, tap redirects to that URL (new tab).</p>
+        {actions.length === 0 && <div className="hint" style={{ textAlign: 'center', padding: '12px', color: '#64748b' }}>No custom buttons — click + Add Button</div>}
+        {actions.map((a, i) => (
+          <div key={i} className="edit-card" style={{ padding: '12px' }}>
+            <input type="text" placeholder="Label (e.g., WhatsApp)" value={a.label} onChange={(e) => { const next=[...actions]; next[i]={...next[i], label:e.target.value}; setActions(next) }} style={{ flex: 1 }} />
+            <input type="text" placeholder="URL (https://...)" value={a.url} onChange={(e) => { const next=[...actions]; next[i]={...next[i], url:e.target.value}; setActions(next) }} style={{ flex: 2 }} />
+            <button className="btn-remove" onClick={() => setActions(actions.filter((_,idx)=>idx!==i))}>×</button>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

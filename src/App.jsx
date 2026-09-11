@@ -382,13 +382,18 @@ function Contact() {
   return (
     <section id="contact" className="contact">
       <motion.div className="contact-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>{c.label}</motion.div>
-      <motion.h2 className="contact-title" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.1 }}>{c.title}</motion.h2>
-      <motion.div className="contact-subtitle" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.2 }}>{c.subtitle}</motion.div>
-      <motion.div className="contact-buttons" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.5, delay: 0.35 }}>
+      <motion.h2 className="contact-title" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>{c.title}</motion.h2>
+      <motion.div className="contact-subtitle" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.2 }}>{c.subtitle}</motion.div>
+      <motion.div className="contact-buttons" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.5, delay: 0.35 }}>
         <a href={`mailto:${c.email}`} className="btn btn-primary">{c.buttonPrimary} <span className="btn-arrow">→</span></a>
         <a href={`mailto:${c.email}`} className="btn btn-outline">EMAIL ME</a>
       </motion.div>
-      <motion.div className="contact-social" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.5, delay: 0.5 }}>
+      {c.actions && c.actions.length > 0 && (
+        <motion.div className="contact-actions" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.5, delay: 0.4 }} style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '20px' }}>
+          {c.actions.map((a, i) => <a key={i} href={a.url} target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ minWidth: '140px' }}>{a.label} →</a>)}
+        </motion.div>
+      )}
+      <motion.div className="contact-social" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.5, delay: 0.5 }}>
         {c.social.map(s => <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer">{s.name}</a>)}
       </motion.div>
     </section>

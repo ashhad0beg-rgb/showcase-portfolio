@@ -139,9 +139,10 @@ body:has(.admin-layout), body:has(.admin-login) { cursor: auto !important; }
   position: relative; overflow: hidden;
 }
 .particles-background {
-  position: absolute; inset: 0; z-index: 0;
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
 }
-.particles-background canvas { position: absolute; top: 0; left: 0; will-change: transform; transform: translateZ(0); }
+.particles-background canvas { position: absolute; top: 0; left: 0; will-change: transform; transform: translateZ(0); pointer-events: none; }
+.custom-cursor { pointer-events: none !important; }
 .hero > *:not(.particles-background) { position: relative; z-index: 1; }
 @media (pointer: coarse) { .particles-background { opacity: 0.7; } .particles-background canvas { opacity: 0.9; } }
 @media (prefers-reduced-motion: reduce) {
@@ -731,7 +732,14 @@ body:has(.admin-layout), body:has(.admin-login) { cursor: auto !important; }
 }
 .project-modal-close:hover { border-color: var(--color-accent); color: var(--color-accent); }
 
-/* ---------- RESPONSIVE ---------- */
+/* ---------- TOUCH ---------- */
+@media (pointer: coarse) {
+  .btn, .nav-toggle, .showreel-play, .work-item, .service-item, .faq-question, .project-modal-close { touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,255,136,0.15); }
+  .work-item, .service-item, .faq-question { cursor: pointer; }
+  .nav-toggle { min-width: 44px; min-height: 44px; }
+  .nav-mobile a { padding: 16px 20px; display: block; }
+  .project-modal { touch-action: pan-y; }
+}
 @media (max-width: 768px) {
   .hero { padding: 100px 5% var(--space-10); }
   .hero-title { letter-spacing: -1px; }

@@ -171,7 +171,7 @@ export function validatePortfolioData(input) {
     answer: sanitizeString(f.answer, 3000),
   }), 30)
 
-  // contact
+  // contact — with custom actions (label+url) that redirect on click
   if (!input.contact) throw new Error('Missing contact')
   out.contact = {
     label: sanitizeString(input.contact.label, 150),
@@ -179,6 +179,13 @@ export function validatePortfolioData(input) {
     subtitle: sanitizeString(input.contact.subtitle, 150),
     buttonPrimary: sanitizeString(input.contact.buttonPrimary, 80),
     email: sanitizeString(input.contact.email, 254),
+    actions: sanitizeArray(input.contact.actions || [], a => {
+      if (!a || typeof a !== 'object') return null
+      const label = sanitizeString(a.label, 60)
+      const url = sanitizeUrl(a.url || '')
+      if (!label || !url) return null
+      return { label, url }
+    }, 10),
     social: sanitizeArray(input.contact.social, s => ({
       name: sanitizeString(s.name, 80),
       url: sanitizeUrl(s.url || '#'),

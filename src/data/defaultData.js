@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 26,
+  "_version": 27,
   "visibility": {
     "hero": true,
     "showreel": true,
@@ -195,6 +195,12 @@ const defaultData = {
     "subtitle": "IMPOSSIBLE TO IGNORE.",
     "buttonPrimary": "START A PROJECT",
     "email": "ashhad0beg@example.com",
+    "actions": [
+      {
+        "label": "WhatsApp",
+        "url": "https://wa.me/919999999999"
+      }
+    ],
     "social": [
       {
         "name": "Instagram",
