@@ -366,13 +366,17 @@ function HeroEdit({ onSave }) {
 function ShowreelEdit({ onSave }) {
   const { data, updateSection } = usePortfolio()
   const s = data.showreel
+  const enabled = s.enabled !== false
   return (
-    <div className="admin-section"><h2>Showreel</h2>
-      <div className="form-group"><label>Label</label><input type="text" value={s.label} onChange={(e) => { updateSection('showreel', { label: e.target.value }); onSave('Saved') }} /></div>
-      <div className="form-group"><label>Title</label><input type="text" value={s.title} onChange={(e) => { updateSection('showreel', { title: e.target.value }); onSave('Saved') }} /></div>
-      <div className="form-group"><label>Video URL</label><input type="text" value={s.videoUrl} onChange={(e) => { updateSection('showreel', { videoUrl: e.target.value }); onSave('Saved') }} /></div>
-      <div className="form-group"><label>Poster Image URL</label><input type="text" value={s.posterUrl} onChange={(e) => { updateSection('showreel', { posterUrl: e.target.value }); onSave('Saved') }} /></div>
-      <div className="form-group"><label>Tags (comma separated)</label><input type="text" value={s.tags.join(', ')} onChange={(e) => { updateSection('showreel', { tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) }); onSave('Saved') }} /></div>
+    <div className="admin-section"><div className="section-header-row"><h2>Showreel</h2><label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}><input type="checkbox" checked={enabled} onChange={(e) => { updateSection('showreel', { enabled: e.target.checked }); onSave(e.target.checked ? 'Showreel enabled' : 'Showreel hidden') }} /> Enable Showreel</label></div>
+      {!enabled && <div className="hint" style={{ marginBottom: '16px', background: 'rgba(148,163,184,0.08)', padding: '10px', borderRadius: '8px' }}>Showreel is hidden on the site. Enable to show.</div>}
+      <div style={{ opacity: enabled ? 1 : 0.45, pointerEvents: enabled ? 'auto' : 'none' }}>
+        <div className="form-group"><label>Label</label><input type="text" value={s.label} onChange={(e) => { updateSection('showreel', { label: e.target.value }); onSave('Saved') }} /></div>
+        <div className="form-group"><label>Title</label><input type="text" value={s.title} onChange={(e) => { updateSection('showreel', { title: e.target.value }); onSave('Saved') }} /></div>
+        <div className="form-group"><label>Video URL</label><input type="text" value={s.videoUrl} onChange={(e) => { updateSection('showreel', { videoUrl: e.target.value }); onSave('Saved') }} /></div>
+        <div className="form-group"><label>Poster Image URL</label><input type="text" value={s.posterUrl} onChange={(e) => { updateSection('showreel', { posterUrl: e.target.value }); onSave('Saved') }} /></div>
+        <div className="form-group"><label>Tags (comma separated)</label><input type="text" value={s.tags.join(', ')} onChange={(e) => { updateSection('showreel', { tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) }); onSave('Saved') }} /></div>
+      </div>
     </div>
   )
 }
@@ -457,16 +461,21 @@ function ToolsEdit({ onSave }) {
 }
 
 function ExperienceEdit({ onSave }) {
-  const { data, updateArrayItem, addArrayItem, removeArrayItem } = usePortfolio()
+  const { data, updateData, updateArrayItem, addArrayItem, removeArrayItem } = usePortfolio()
+  const layout = data.experienceLayout || 'timeline'
   return (
     <div className="admin-section">
-      <div className="section-header-row"><h2>Experience ({data.experience.length})</h2><button className="btn-add" onClick={() => { addArrayItem('experience', { year: '', role: '', client: '' }); onSave('Added') }}>+ Add Entry</button></div>
+      <div className="section-header-row"><h2>Experience ({data.experience.length})</h2><button className="btn-add" onClick={() => { addArrayItem('experience', { company: '', duration: '', role: '', responsibilities: '' }); onSave('Added') }}>+ Add Experience</button></div>
+      <div className="form-group" style={{ maxWidth: '280px' }}><label>Layout</label><select value={layout} onChange={(e) => { updateData('experienceLayout', e.target.value); onSave('Layout saved') }}><option value="timeline">Timeline (vertical)</option><option value="cards">Cards (grid)</option><option value="list">List (simple)</option></select><p className="hint" style={{ marginTop: '6px' }}>Timeline shows company + duration + role + responsibilities with dot line. Cards is grid. List is minimal.</p></div>
       {data.experience.map((e, i) => (
-        <div key={i} className="edit-card">
-          <input type="text" placeholder="Year" value={e.year} onChange={(ev) => { updateArrayItem('experience', i, { year: ev.target.value }); onSave('Saved') }} />
-          <input type="text" placeholder="Role" value={e.role} onChange={(ev) => { updateArrayItem('experience', i, { role: ev.target.value }); onSave('Saved') }} />
-          <input type="text" placeholder="Client" value={e.client} onChange={(ev) => { updateArrayItem('experience', i, { client: ev.target.value }); onSave('Saved') }} />
-          <button className="btn-remove" onClick={() => { removeArrayItem('experience', i); onSave('Removed') }}>×</button>
+        <div key={i} className="edit-card edit-card-lg">
+          <div className="edit-card-header"><span>#{i + 1} — {e.company || e.client || 'New'}</span><button className="btn-remove" onClick={() => { removeArrayItem('experience', i); onSave('Removed') }}>×</button></div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <input type="text" placeholder="Company name" value={e.company || e.client || ''} onChange={(ev) => { updateArrayItem('experience', i, { company: ev.target.value }); onSave('Saved') }} />
+            <input type="text" placeholder="Duration (e.g., 2024 — Present)" value={e.duration || e.year || ''} onChange={(ev) => { updateArrayItem('experience', i, { duration: ev.target.value }); onSave('Saved') }} />
+          </div>
+          <input type="text" placeholder="Role / Title" value={e.role} onChange={(ev) => { updateArrayItem('experience', i, { role: ev.target.value }); onSave('Saved') }} />
+          <textarea placeholder="Roles and responsibilities" value={e.responsibilities || ''} onChange={(ev) => { updateArrayItem('experience', i, { responsibilities: ev.target.value }); onSave('Saved') }} rows={3} />
         </div>
       ))}
     </div>

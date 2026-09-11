@@ -80,9 +80,10 @@ export function validatePortfolioData(input) {
   }
   if (!out.hero.title) throw new Error('hero.title required')
 
-  // showreel
+  // showreel — enabled toggle
   if (!input.showreel) throw new Error('Missing showreel')
   out.showreel = {
+    enabled: input.showreel.enabled !== false,
     label: sanitizeString(input.showreel.label, 100),
     title: sanitizeString(input.showreel.title, 100),
     videoUrl: sanitizeUrl(input.showreel.videoUrl || ''),
@@ -135,12 +136,17 @@ export function validatePortfolioData(input) {
   // tools
   out.tools = sanitizeArray(input.tools, t => sanitizeString(t, 80), 30)
 
-  // experience
+  // experience — supports new: company, duration, responsibilities + layout; keeps year/client compat
   out.experience = sanitizeArray(input.experience, e => ({
-    year: sanitizeString(e.year, 10),
+    company: sanitizeString(e.company || e.client || '', 100),
+    duration: sanitizeString(e.duration || e.year || '', 40),
     role: sanitizeString(e.role, 150),
-    client: sanitizeString(e.client, 100),
+    responsibilities: sanitizeString(e.responsibilities || '', 2000),
+    // legacy kept for old data
+    year: sanitizeString(e.year || e.duration || '', 10),
+    client: sanitizeString(e.client || e.company || '', 100),
   }), 50)
+  out.experienceLayout = ['timeline', 'cards', 'list'].includes(input.experienceLayout) ? input.experienceLayout : (input.experienceLayout === 'compact' ? 'list' : 'timeline')
 
   // testimonials
   out.testimonials = sanitizeArray(input.testimonials, t => ({
@@ -188,7 +194,7 @@ export function validatePortfolioData(input) {
 }
 
 export function sanitizeField(key, value) {
-  const allowed = ['hero', 'showreel', 'work', 'services', 'process', 'about', 'tools', 'experience', 'testimonials', 'faq', 'contact', 'footer', 'siteName', 'siteDescription', '_version', 'theme']
+  const allowed = ['hero', 'showreel', 'work', 'services', 'process', 'about', 'tools', 'experience', 'experienceLayout', 'testimonials', 'faq', 'contact', 'footer', 'siteName', 'siteDescription', '_version', 'theme']
   if (!allowed.includes(key)) throw new Error(`Forbidden key: ${key}`)
   return value
 }

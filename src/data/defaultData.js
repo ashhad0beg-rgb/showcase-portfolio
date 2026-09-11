@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 24,
+  "_version": 25,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -16,6 +16,7 @@ const defaultData = {
     "image": ""
   },
   "showreel": {
+    "enabled": true,
     "label": "",
     "title": "",
     "videoUrl": "",
@@ -100,31 +101,37 @@ const defaultData = {
     "Photoshop",
     "Illustrator"
   ],
+  "experienceLayout": "timeline",
   "experience": [
     {
-      "year": "2026",
+      "company": "Nike",
+      "duration": "2026 — Present",
       "role": "Motion Designer",
-      "client": "Nike"
+      "responsibilities": "Led campaign motion, brand films, and social content. Tools: After Effects, Premiere Pro."
     },
     {
-      "year": "2025",
+      "company": "Spotify",
+      "duration": "2025",
       "role": "Video Editor",
-      "client": "Spotify"
+      "responsibilities": "Edited product and brand videos, sound design and color grading."
     },
     {
-      "year": "2025",
+      "company": "Samsung",
+      "duration": "2025",
       "role": "Freelance Motion Designer",
-      "client": "Samsung"
+      "responsibilities": "Created motion systems for launch films and digital ads."
     },
     {
-      "year": "2024",
+      "company": "Adidas",
+      "duration": "2024",
       "role": "Video Editor",
-      "client": "Adidas"
+      "responsibilities": "Cut commercials and YouTube content, handled audio mix."
     },
     {
-      "year": "2024",
+      "company": "Apple",
+      "duration": "2024",
       "role": "Motion Graphics Designer",
-      "client": "Apple"
+      "responsibilities": "Designed style frames and animated UI for product videos."
     }
   ],
   "testimonials": [

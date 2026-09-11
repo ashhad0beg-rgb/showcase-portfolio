@@ -126,6 +126,7 @@ function Showreel() {
   const r = useReduce()
   const { data } = usePortfolio()
   const s = data.showreel
+  if (s.enabled === false) return null
   const [playing, setPlaying] = useState(false)
   return (
     <section id="showreel" className="showreel">
@@ -278,17 +279,53 @@ function Tools() {
 function Experience() {
   const r = useReduce()
   const { data } = usePortfolio()
+  const layout = data.experienceLayout || 'timeline'
+  const items = data.experience || []
   return (
-    <section id="experience" className="experience">
+    <section id="experience" className={`experience experience-${layout}`}>
       <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>EXPERIENCE</motion.div>
       <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>EXPERIENCE</motion.h2>
-      <div className="experience-list">{data.experience.map((e, i) => (
-        <motion.div className="experience-item" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.4, delay: i * 0.05 }}>
-          <span className="experience-year">{e.year}</span>
-          <span className="experience-role">{e.role}</span>
-          <span className="experience-client">{e.client}</span>
-        </motion.div>
-      ))}</div>
+      {layout === 'cards' ? (
+        <div className="experience-cards">{items.map((e, i) => {
+          const company = e.company || e.client || ''
+          const duration = e.duration || e.year || ''
+          return (
+            <motion.div className="experience-card" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.4, delay: i * 0.05 }}>
+              <div className="experience-card-company">{company}</div>
+              <div className="experience-card-duration">{duration}</div>
+              <div className="experience-card-role">{e.role}</div>
+              {e.responsibilities && <p className="experience-card-resp">{e.responsibilities}</p>}
+            </motion.div>
+          )
+        })}</div>
+      ) : layout === 'list' ? (
+        <div className="experience-list">{items.map((e, i) => {
+          const company = e.company || e.client || ''
+          const duration = e.duration || e.year || ''
+          return (
+            <motion.div className="experience-item" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.4, delay: i * 0.05 }}>
+              <span className="experience-year">{duration}</span>
+              <span className="experience-role">{e.role}</span>
+              <span className="experience-client">{company}</span>
+            </motion.div>
+          )
+        })}</div>
+      ) : (
+        <div className="experience-timeline">{items.map((e, i) => {
+          const company = e.company || e.client || ''
+          const duration = e.duration || e.year || ''
+          return (
+            <motion.div className="experience-timeline-item" key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.4, delay: i * 0.05 }}>
+              <div className="experience-timeline-dot" />
+              <div className="experience-timeline-content">
+                <div className="experience-timeline-header"><span className="experience-timeline-company">{company}</span><span className="experience-timeline-duration">{duration}</span></div>
+                <div className="experience-timeline-role">{e.role}</div>
+                {e.responsibilities && <p className="experience-timeline-resp">{e.responsibilities}</p>}
+              </div>
+            </motion.div>
+          )
+        })}</div>
+      )}
     </section>
   )
 }
