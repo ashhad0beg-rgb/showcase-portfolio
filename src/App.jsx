@@ -415,9 +415,6 @@ function Contact() {
           {c.actions.map((a, i) => <a key={i} href={a.url} target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ minWidth: '140px' }}>{a.label} →</a>)}
         </motion.div>
       )}
-      <motion.div className="contact-social" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.5, delay: 0.5 }}>
-        {c.social.map(s => <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer">{s.name}</a>)}
-      </motion.div>
     </section>
   )
 }
