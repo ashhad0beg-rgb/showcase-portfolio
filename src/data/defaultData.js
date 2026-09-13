@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 41,
+  "_version": 42,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -107,44 +107,12 @@ const defaultData = {
   ],
   "experience": [
     {
-      "company": "Nike",
-      "duration": "2026 — Present",
-      "role": "Motion Designer",
-      "responsibilities": "Led campaign motion, brand films, and social content. Tools: After Effects, Premiere Pro.",
-      "year": "2026 — Pre",
-      "client": "Nike"
-    },
-    {
-      "company": "Spotify",
-      "duration": "2025",
+      "company": "Garage Productions",
+      "duration": "April 2026 - Present",
       "role": "Video Editor",
-      "responsibilities": "Edited product and brand videos, sound design and color grading.",
-      "year": "2025",
-      "client": "Spotify"
-    },
-    {
-      "company": "Samsung",
-      "duration": "2025",
-      "role": "Freelance Motion Designer",
-      "responsibilities": "Created motion systems for launch films and digital ads.",
-      "year": "2025",
-      "client": "Samsung"
-    },
-    {
-      "company": "Adidas",
-      "duration": "2024",
-      "role": "Video Editor",
-      "responsibilities": "Cut commercials and YouTube content, handled audio mix.",
-      "year": "2024",
-      "client": "Adidas"
-    },
-    {
-      "company": "Apple",
-      "duration": "2024",
-      "role": "Motion Graphics Designer",
-      "responsibilities": "Designed style frames and animated UI for product videos.",
-      "year": "2024",
-      "client": "Apple"
+      "responsibilities": "",
+      "year": "April 2026",
+      "client": "Garage Productions"
     }
   ],
   "experienceLayout": "timeline",
