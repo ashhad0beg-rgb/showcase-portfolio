@@ -1,19 +1,5 @@
 const defaultData = {
-  "_version": 28,
-  "visibility": {
-    "hero": true,
-    "showreel": true,
-    "work": true,
-    "services": true,
-    "process": true,
-    "about": true,
-    "tools": true,
-    "experience": true,
-    "education": true,
-    "testimonials": true,
-    "faq": true,
-    "contact": true
-  },
+  "_version": 29,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -38,6 +24,20 @@ const defaultData = {
     "tags": [
       "VIDEO EDITOR MOTION DESIGNER VISUAL STORYTELLING CREATIVE DI"
     ]
+  },
+  "visibility": {
+    "hero": true,
+    "showreel": true,
+    "work": true,
+    "services": true,
+    "process": true,
+    "about": true,
+    "tools": true,
+    "experience": true,
+    "education": true,
+    "testimonials": true,
+    "faq": true,
+    "contact": true
   },
   "work": [],
   "services": [
@@ -93,7 +93,7 @@ const defaultData = {
     "title": "THE PERSON BEHIND THE PIXELS.",
     "highlight": "I create work that makes brands impossible to ignore.",
     "content": "A video editor and motion graphics designer with a passion for visual storytelling. I collaborate with brands, agencies and creators to produce high-quality video edits, motion graphics and cinematic digital experiences.",
-    "image": "",
+    "image": "data:image/jpeg;base64,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",
     "details": [
       {
         "label": "Based in",
@@ -115,45 +115,55 @@ const defaultData = {
     "Photoshop",
     "Illustrator"
   ],
+  "experience": [
+    {
+      "company": "Nike",
+      "duration": "2026 — Present",
+      "role": "Motion Designer",
+      "responsibilities": "Led campaign motion, brand films, and social content. Tools: After Effects, Premiere Pro.",
+      "year": "2026 — Pre",
+      "client": "Nike"
+    },
+    {
+      "company": "Spotify",
+      "duration": "2025",
+      "role": "Video Editor",
+      "responsibilities": "Edited product and brand videos, sound design and color grading.",
+      "year": "2025",
+      "client": "Spotify"
+    },
+    {
+      "company": "Samsung",
+      "duration": "2025",
+      "role": "Freelance Motion Designer",
+      "responsibilities": "Created motion systems for launch films and digital ads.",
+      "year": "2025",
+      "client": "Samsung"
+    },
+    {
+      "company": "Adidas",
+      "duration": "2024",
+      "role": "Video Editor",
+      "responsibilities": "Cut commercials and YouTube content, handled audio mix.",
+      "year": "2024",
+      "client": "Adidas"
+    },
+    {
+      "company": "Apple",
+      "duration": "2024",
+      "role": "Motion Graphics Designer",
+      "responsibilities": "Designed style frames and animated UI for product videos.",
+      "year": "2024",
+      "client": "Apple"
+    }
+  ],
+  "experienceLayout": "timeline",
   "education": [
     {
       "institution": "Jamia Millia Islamia",
       "degree": "Bachelor of Fine Arts — Visual Arts",
       "duration": "2021 — 2024",
       "details": "Major in motion graphics and video production. Graduated with distinction."
-    }
-  ],
-  "experienceLayout": "timeline",
-  "experience": [
-    {
-      "company": "Nike",
-      "duration": "2026 — Present",
-      "role": "Motion Designer",
-      "responsibilities": "Led campaign motion, brand films, and social content. Tools: After Effects, Premiere Pro."
-    },
-    {
-      "company": "Spotify",
-      "duration": "2025",
-      "role": "Video Editor",
-      "responsibilities": "Edited product and brand videos, sound design and color grading."
-    },
-    {
-      "company": "Samsung",
-      "duration": "2025",
-      "role": "Freelance Motion Designer",
-      "responsibilities": "Created motion systems for launch films and digital ads."
-    },
-    {
-      "company": "Adidas",
-      "duration": "2024",
-      "role": "Video Editor",
-      "responsibilities": "Cut commercials and YouTube content, handled audio mix."
-    },
-    {
-      "company": "Apple",
-      "duration": "2024",
-      "role": "Motion Graphics Designer",
-      "responsibilities": "Designed style frames and animated UI for product videos."
     }
   ],
   "testimonials": [
@@ -206,8 +216,8 @@ const defaultData = {
     "email": "ashhad0beg@example.com",
     "actions": [
       {
-        "label": "WhatsApp",
-        "url": "https://wa.me/919999999999"
+        "label": "instagram",
+        "url": "https://www.instagram.com/video.edit.by.mab?stkn=MXc0bG1tcHkxeXl3Zw=="
       }
     ],
     "social": [
