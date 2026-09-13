@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { useNavigate, Navigate, useLocation } from 'react-router-dom'
 import { usePortfolio } from '../context/PortfolioContext.jsx'
 import { supabase, isSupabaseEnabled } from '../lib/supabase.js'
 import { validatePortfolioData } from '../lib/validate.js'
@@ -81,8 +81,8 @@ function ImageDropField({ label, value, onChange, onSave }) {
   return (
     <div className="form-group">
       <label>{label}</label>
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-        <input type="text" placeholder="https://... or drop image below" value={value || ''} onChange={(e) => { onChange(e.target.value); onSave && onSave('Saved') }} style={{ flex: 1 }} />
+      <div className="admin-field-row" style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+        <input className="admin-field-input" type="text" placeholder="https://... or drop image below" value={value || ''} onChange={(e) => { onChange(e.target.value); onSave && onSave('Saved') }} style={{ flex: 1 }} />
         <label className="btn-secondary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
           Browse
           <input type="file" accept="image/*" hidden onChange={onFilePick} />
@@ -171,7 +171,9 @@ function SyncBadge({ status, isSyncing }) {
 export default function AdminDashboard() {
   const { data, isAuthenticated, logout, updateData, resetData, importData, syncStatus, isSyncing, remoteVersion, lastSyncError, lastAuthError, supabaseUser, forceSyncToRemote } = usePortfolio()
   const navigate = useNavigate()
-  const [activeSection, setActiveSection] = useState('dashboard')
+  const location = useLocation()
+  const [activeSection, setActiveSection] = useState(() => getSection(location.pathname))
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [saved, setSaved] = useState(false)
   const [info, setInfo] = useState('')
   const [ghToken, setGhToken] = useState(() => {
@@ -189,6 +191,28 @@ export default function AdminDashboard() {
       else localStorage.removeItem('github_pat')
     } catch {}
   }, [ghToken])
+
+  // Keep active tab in sync with URL (deep links, back/forward, desktop + phone drawer)
+  useEffect(() => {
+    setActiveSection(getSection(location.pathname))
+    setSidebarOpen(false)
+  }, [location.pathname])
+
+  // Lock body scroll + close drawer on Escape (phone)
+  useEffect(() => {
+    if (!sidebarOpen) return
+    const onKey = (e) => { if (e.key === 'Escape') setSidebarOpen(false) }
+    document.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev }
+  }, [sidebarOpen])
+
+  const goTo = (path) => {
+    setActiveSection(getSection(path))
+    setSidebarOpen(false)
+    navigate(path)
+  }
 
   if (!isAuthenticated && !supabaseUser) {
     const hasLegacy = (() => { try { return localStorage.getItem('admin_auth_token') === 'admin_token_2026' } catch { return false } })()
@@ -385,11 +409,14 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-layout">
-      <aside className="admin-sidebar">
-        <div className="admin-sidebar-header"><h2>Admin</h2><div style={{ fontSize: '11px', color: sbEnabled ? '#5eead4' : '#94a3b8', marginTop: '4px', fontWeight: 600 }}>{sbEnabled ? '● Live' : '○ Local'}</div></div>
+      {sidebarOpen && <div className="admin-overlay" onClick={() => setSidebarOpen(false)} aria-hidden="true" />}
+      <aside className={`admin-sidebar${sidebarOpen ? ' open' : ''}`}>
+        <div className="admin-sidebar-header"><h2>Admin</h2><div style={{ fontSize: '11px', color: sbEnabled ? '#5eead4' : '#94a3b8', marginTop: '4px', fontWeight: 600 }}>{sbEnabled ? '● Live' : '○ Local'}</div>
+          <button type="button" className="admin-sidebar-close" onClick={() => setSidebarOpen(false)} aria-label="Close menu">×</button>
+        </div>
         <nav className="admin-nav">
           {sections.map(s => (
-            <button key={s.path} className={`admin-nav-item ${activeSection === getSection(s.path) ? 'active' : ''}`} onClick={() => { setActiveSection(getSection(s.path)); navigate(s.path) }}>
+            <button key={s.path} className={`admin-nav-item ${activeSection === getSection(s.path) ? 'active' : ''}`} onClick={() => goTo(s.path)}>
               <span className="admin-nav-icon">{s.icon}</span><span>{s.label}</span>
             </button>
           ))}
@@ -397,7 +424,7 @@ export default function AdminDashboard() {
             <summary style={{ fontSize: '12px', color: '#64748b', cursor: 'pointer', padding: '6px 8px', listStyle: 'none' }}>More ▾</summary>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '4px' }}>
               {moreSections.map(s => (
-                <button key={s.path} className={`admin-nav-item ${activeSection === getSection(s.path) ? 'active' : ''}`} onClick={() => { setActiveSection(getSection(s.path)); navigate(s.path) }} style={{ fontSize: '13px', minHeight: '36px', opacity: 0.85 }}>
+                <button key={s.path} className={`admin-nav-item ${activeSection === getSection(s.path) ? 'active' : ''}`} onClick={() => goTo(s.path)} style={{ fontSize: '13px', minHeight: '36px', opacity: 0.85 }}>
                   <span className="admin-nav-icon" style={{ fontSize: '14px' }}>{s.icon}</span><span>{s.label}</span>
                 </button>
               ))}
@@ -411,8 +438,11 @@ export default function AdminDashboard() {
       </aside>
       <main className="admin-main">
         <div className="admin-topbar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <h1 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Portfolio</h1>
+          <div className="admin-topbar-left">
+            <button type="button" className="admin-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Open menu" aria-expanded={sidebarOpen}>
+              <span /><span /><span />
+            </button>
+            <h1 className="admin-topbar-title">Portfolio</h1>
             <SyncBadge status={syncStatus} isSyncing={isSyncing} />
           </div>
           <div className="admin-topbar-actions">
@@ -449,8 +479,9 @@ export default function AdminDashboard() {
 
 function DashboardOverview({ data, updateData, onSave }) {
   const { isSupabaseEnabled: sbOn, syncStatus, supabaseUser, remoteVersion } = usePortfolio()
+  const workVisible = (data.work || []).filter((p) => p.enabled !== false).length
   const counts = [
-    { label: 'Work', value: data.work?.length || 0 },
+    { label: `Work (${workVisible} visible)`, value: data.work?.length || 0 },
     { label: 'Services', value: data.services?.length || 0 },
     { label: 'Tools', value: data.tools?.length || 0 },
     { label: 'FAQ', value: data.faq?.length || 0 },
@@ -508,14 +539,27 @@ function ShowreelEdit({ onSave }) {
 
 function WorkEdit({ onSave }) {
   const { data, updateArrayItem, addArrayItem, removeArrayItem } = usePortfolio()
+  const sectionVisible = (data.visibility?.work) !== false
+  const visibleCount = (data.work || []).filter((p) => p.enabled !== false).length
   return (
     <div className="admin-section">
-      <div className="section-header-row"><h2>Work ({data.work.length})</h2><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><SectionVisibility sectionKey="work" onSave={onSave} /><button className="btn-add" onClick={() => { addArrayItem('work', { title: '', client: '', year: '', role: '', category: '', image: '', description: '' }); onSave('Added') }}>+ Add Project</button></div></div>
-      {data.work.map((p, i) => (
-        <div key={i} className="edit-card edit-card-lg">
-          <div className="edit-card-header"><span>Project #{i + 1}</span><button className="btn-remove" onClick={() => { removeArrayItem('work', i); onSave('Removed') }}>×</button></div>
+      <div className="section-header-row"><h2>Work ({visibleCount}/{data.work.length} visible)</h2><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><SectionVisibility sectionKey="work" onSave={onSave} /><button className="btn-add" onClick={() => { addArrayItem('work', { title: '', client: '', year: '', role: '', category: '', image: '', description: '', enabled: true }); onSave('Added') }}>+ Add Project</button></div></div>
+      {!sectionVisible && <div className="hint" style={{ marginBottom: '16px', background: 'rgba(148,163,184,0.08)', padding: '10px', borderRadius: '8px' }}>SELECTED WORK section is hidden on the site. Toggle to Visible to show it.</div>}
+      <div style={{ opacity: sectionVisible ? 1 : 0.45, pointerEvents: sectionVisible ? 'auto' : 'none' }}>
+      {data.work.length === 0 && <div className="hint" style={{ textAlign: 'center', padding: '16px', color: '#64748b' }}>No projects yet — click + Add Project</div>}
+      {data.work.map((p, i) => {
+        const itemVisible = p.enabled !== false
+        return (
+        <div key={i} className="edit-card edit-card-lg" style={{ opacity: itemVisible ? 1 : 0.6, borderColor: itemVisible ? undefined : 'rgba(239,68,68,0.25)' }}>
+          <div className="edit-card-header"><span>Project #{i + 1}{!itemVisible ? ' — Hidden' : ''}</span><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', background: itemVisible ? 'rgba(94,234,212,0.08)' : 'rgba(239,68,68,0.08)', padding: '4px 10px', borderRadius: '20px', border: `1px solid ${itemVisible ? 'rgba(94,234,212,0.15)' : 'rgba(239,68,68,0.25)'}`, color: itemVisible ? '#5eead4' : '#fca5a5' }}>
+              <input type="checkbox" checked={itemVisible} onChange={(e) => { updateArrayItem('work', i, { enabled: e.target.checked }); onSave(e.target.checked ? 'Project visible on site' : 'Project hidden from site') }} />
+              {itemVisible ? 'Enabled' : 'Disabled'}
+            </label>
+            <button className="btn-remove" onClick={() => { removeArrayItem('work', i); onSave('Removed') }}>×</button>
+          </div></div>
           <input type="text" placeholder="Title" value={p.title} onChange={(e) => { updateArrayItem('work', i, { title: e.target.value }); onSave('Saved') }} />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+          <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             <input type="text" placeholder="Client" value={p.client} onChange={(e) => { updateArrayItem('work', i, { client: e.target.value }); onSave('Saved') }} />
             <input type="text" placeholder="Year" value={p.year} onChange={(e) => { updateArrayItem('work', i, { year: e.target.value }); onSave('Saved') }} />
           </div>
@@ -524,7 +568,9 @@ function WorkEdit({ onSave }) {
           <textarea placeholder="Description" value={p.description} onChange={(e) => { updateArrayItem('work', i, { description: e.target.value }); onSave('Saved') }} rows={2} />
           <ImageDropField label="Project Image — drag & drop or URL" value={p.image || ''} onChange={(v) => updateArrayItem('work', i, { image: v })} onSave={onSave} />
         </div>
-      ))}
+        )
+      })}
+      </div>
     </div>
   )
 }
@@ -593,7 +639,7 @@ function ExperienceEdit({ onSave }) {
       {data.experience.map((e, i) => (
         <div key={i} className="edit-card edit-card-lg">
           <div className="edit-card-header"><span>#{i + 1} — {e.company || e.client || 'New'}</span><button className="btn-remove" onClick={() => { removeArrayItem('experience', i); onSave('Removed') }}>×</button></div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+          <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             <input type="text" placeholder="Company name" value={e.company || e.client || ''} onChange={(ev) => { updateArrayItem('experience', i, { company: ev.target.value }); onSave('Saved') }} />
             <input type="text" placeholder="Duration (e.g., 2024 — Present)" value={e.duration || e.year || ''} onChange={(ev) => { updateArrayItem('experience', i, { duration: ev.target.value }); onSave('Saved') }} />
           </div>
@@ -669,7 +715,7 @@ function ContactEdit({ onSave }) {
       <div className="form-group"><label>Button Text</label><input type="text" value={c.buttonPrimary} onChange={(e) => { updateSection('contact', { buttonPrimary: e.target.value }); onSave('Saved') }} /></div>
       <div className="form-group"><label>Email</label><input type="email" value={c.email} onChange={(e) => { updateSection('contact', { email: e.target.value }); onSave('Saved') }} /></div>
       <div style={{ marginTop: '20px', padding: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}><label style={{ margin: 0 }}>Contact Buttons — tap to redirect</label><button className="btn-add" onClick={() => setActions([...actions, { label: '', url: '' }])}>+ Add Button</button></div>
+        <div className="admin-row-between" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}><label style={{ margin: 0 }}>Contact Buttons — tap to redirect</label><button className="btn-add" onClick={() => setActions([...actions, { label: '', url: '' }])}>+ Add Button</button></div>
         <p className="hint" style={{ marginBottom: '12px' }}>Add custom buttons (e.g., WhatsApp, Calendly) — label + URL. On site, tap redirects to that URL (new tab).</p>
         {actions.length === 0 && <div className="hint" style={{ textAlign: 'center', padding: '12px', color: '#64748b' }}>No custom buttons — click + Add Button</div>}
         {actions.map((a, i) => (
@@ -715,7 +761,7 @@ function ThemeEdit({ onSave }) {
         🎨 Customize typography & spacing <strong>live</strong> — changes auto-save locally, instant global when Supabase authenticated (`⚡ Instant Publish`) or via GitHub fallback. Preview below updates instantly across the site via <code>ThemeInjector</code>.
       </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+      <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
         <div className="form-group">
           <label>Display Font (headings, hero)</label>
           <select value={theme.fontDisplay} onChange={(e) => set({ fontDisplay: e.target.value })} style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#f1f5f9', fontFamily: `'${theme.fontDisplay}', sans-serif` }}>
@@ -747,10 +793,10 @@ function ThemeEdit({ onSave }) {
         <p className="hint" style={{ marginTop: '8px' }}>Scales <code>--space-*</code>, <code>--text-hero</code> (<code>clamp</code>), and section padding. Data attribute: <code>data-layout=&quot;{theme.layout}&quot;</code></p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px' }}>
+      <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px' }}>
         <div className="form-group">
           <label>Accent Color</label>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div className="admin-field-row" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <input type="color" value={theme.accentColor} onChange={(e) => set({ accentColor: e.target.value })} style={{ width: '56px', height: '42px', padding: '2px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', cursor: 'pointer' }} />
             <input type="text" value={theme.accentColor} onChange={(e) => set({ accentColor: e.target.value })} placeholder="#00ff88" pattern="^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" style={{ flex: 1, padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#f1f5f9', fontFamily: 'monospace' }} />
             <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: theme.accentColor, border: '1px solid rgba(255,255,255,0.15)', display: 'inline-block' }} />
@@ -877,18 +923,18 @@ function SettingsEdit({ onSave, ghToken, setGhToken, ghPublishing, onGhPublish, 
         <div style={{ display: 'grid', gap: '12px' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label>New Email {supabaseUser ? `(${supabaseUser.email})` : ''}</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div className="admin-field-row" style={{ display: 'flex', gap: '8px' }}>
               <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="new email" style={{ flex: 1 }} disabled={!sbOn || !supabaseUser || changing} />
               <button className="btn-save" onClick={handleUpdateEmail} disabled={!sbOn || !supabaseUser || changing || !newEmail.trim()}>{changing ? '…' : 'Update'}</button>
             </div>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label>New Password</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div className="admin-field-row" style={{ display: 'flex', gap: '8px' }}>
               <input type={showPw ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="≥8 chars" style={{ flex: 1 }} disabled={!sbOn || !supabaseUser || changing} autoComplete="new-password" />
               <input type={showPw ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm" style={{ flex: 1 }} disabled={!sbOn || !supabaseUser || changing} autoComplete="new-password" />
             </div>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+            <div className="admin-btn-row" style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
               <button className="btn-secondary" type="button" onClick={() => setShowPw(!showPw)} style={{ fontSize: '12px' }}>{showPw ? 'Hide' : 'Show'}</button>
               <button className="btn-save" onClick={handleUpdatePassword} disabled={!sbOn || !supabaseUser || changing || !newPassword || !confirmPassword}>{changing ? '…' : 'Update Password'}</button>
               <button className="btn-secondary" onClick={handleSendReset} disabled={!sbOn || changing} style={{ fontSize: '12px' }}>Send Reset Link</button>
@@ -904,7 +950,7 @@ function SettingsEdit({ onSave, ghToken, setGhToken, ghPublishing, onGhPublish, 
         <div style={{ marginTop: '12px', display: 'grid', gap: '12px' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label>GitHub Token (optional fallback)</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div className="admin-field-row" style={{ display: 'flex', gap: '8px' }}>
               <input type={showToken ? 'text' : 'password'} value={ghToken} onChange={(e) => setGhToken(e.target.value)} placeholder="ghp_..." style={{ flex: 1 }} />
               <button className="btn-secondary" type="button" onClick={() => setShowToken(!showToken)}>{showToken ? 'Hide' : 'Show'}</button>
               {ghToken && <button className="btn-secondary" type="button" onClick={() => { setGhToken(''); try { localStorage.removeItem('github_pat') } catch {} }}>Clear</button>}

@@ -119,7 +119,7 @@ export function validatePortfolioData(input) {
   }
   out.showreel.enabled = out.visibility.showreel
 
-  // work
+  // work — per-project enabled toggle (admin can hide a project without deleting it)
   out.work = sanitizeArray(input.work, p => {
     if (!p || typeof p !== 'object') return null
     return {
@@ -130,6 +130,7 @@ export function validatePortfolioData(input) {
       category: sanitizeString(p.category, 80),
       image: sanitizeUrl(p.image || ''),
       description: sanitizeString(p.description, 2000),
+      enabled: p.enabled !== false,
     }
   }, 50)
   out.work = out.work.filter(w => w.title)

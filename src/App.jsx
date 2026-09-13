@@ -67,12 +67,19 @@ function CustomCursor() {
 function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mob, setMob] = useState(false)
+  const { data } = usePortfolio()
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 60)
     window.addEventListener('scroll', h, { passive: true })
     return () => window.removeEventListener('scroll', h)
   }, [])
-  const items = [{ href: '#work', l: 'Work' }, { href: '#services', l: 'Services' }, { href: '#about', l: 'About' }, { href: '#contact', l: 'Contact' }]
+  const v = data.visibility || {}
+  const workVisible = v.work !== false && (data.work || []).some((p) => p.enabled !== false)
+  const allItems = [{ href: '#work', l: 'Work', key: 'work' }, { href: '#services', l: 'Services', key: 'services' }, { href: '#about', l: 'About', key: 'about' }, { href: '#contact', l: 'Contact', key: 'contact' }]
+  const items = allItems.filter((i) => {
+    if (i.key === 'work') return workVisible
+    return v[i.key] !== false
+  })
   return (
     <>
       <motion.nav className={`nav${scrolled ? ' scrolled' : ''}`} initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
@@ -168,6 +175,11 @@ function Work() {
     document.body.style.overflow = 'hidden'
     return () => { document.removeEventListener('keydown', k); document.body.style.overflow = '' }
   }, [selected])
+  // Section-level kill-switch (admin → Work → Visible/Hidden) + per-project toggle.
+  // Legacy items without `enabled` default to visible.
+  if (data.visibility?.work === false) return null
+  const visibleWork = (data.work || []).filter((p) => p.enabled !== false)
+  if (!visibleWork.length) return null
   return (
     <section id="work" className="work">
       <div className="work-header">
@@ -176,7 +188,7 @@ function Work() {
           <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.1 }}>SELECTED WORK</motion.h2>
         </div>
       </div>
-      <div className="work-grid">{data.work.map((p, i) => (
+      <div className="work-grid">{visibleWork.map((p, i) => (
         <motion.div className="work-item" key={i} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: i * 0.05 }} onClick={() => setSelected(p)}>
           <div className="work-item-visual">{p.image ? <img src={p.image} alt={p.title} loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none' }} /> : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(0,255,136,0.06), var(--color-surface))' }} />}</div>
           <div className="work-item-info">
