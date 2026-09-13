@@ -26,8 +26,10 @@ function loadFromStorage() {
       if (validated._version >= DATA_VERSION) {
         return validated
       }
-      if (!isSupabaseEnabled && validated._version === DATA_VERSION) return validated
-      if (isSupabaseEnabled) return validated
+      // Stale cache (older than the published bundle): ignore it so returning
+      // visitors see the latest published data/photos instead of outdated copies.
+      // (Supabase realtime sync is off in GitHub-only mode, so nothing else refreshes it.)
+      console.log(`[portfolio] ignoring stale cache v${validated._version} < bundle v${DATA_VERSION}`)
     }
   } catch (e) {
     console.warn('[portfolio] loadFromStorage rejected:', e?.message)
