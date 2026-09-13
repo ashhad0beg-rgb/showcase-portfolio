@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 38,
+  "_version": 39,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -16,7 +16,7 @@ const defaultData = {
     "image": ""
   },
   "showreel": {
-    "enabled": true,
+    "enabled": false,
     "label": "",
     "title": "",
     "videoUrl": "",
@@ -27,7 +27,7 @@ const defaultData = {
   },
   "visibility": {
     "hero": true,
-    "showreel": true,
+    "showreel": false,
     "work": true,
     "services": true,
     "process": true,
