@@ -23,9 +23,9 @@ function ParticlesBackground() {
               size: { ...particlesConfig.particles.size, value: 1.5, random: true },
               opacity: { ...particlesConfig.particles.opacity, value: 0.6, random: true },
               move: { ...particlesConfig.particles.move, speed: 0.32, random: true },
-              line_linked: { enable: false },
+              line_linked: { ...particlesConfig.particles.line_linked, enable: true, distance: 200, opacity: 0.5 },
             },
-            interactivity: { detect_on: 'canvas', events: { onhover: { enable: false }, onclick: { enable: false }, resize: true }, modes: {} },
+            interactivity: { detect_on: 'window', events: { onhover: { enable: true, mode: 'grab' }, onclick: { enable: true, mode: 'repulse' }, resize: true }, modes: { grab: { distance: 200, line_linked: { opacity: 1 } }, repulse: { distance: 200, duration: 0.4 } } },
             retina_detect: false,
           }
         : particlesConfig
