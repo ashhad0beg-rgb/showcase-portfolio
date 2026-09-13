@@ -749,13 +749,25 @@ body:has(.admin-layout), body:has(.admin-login) { cursor: auto !important; }
 }
 @media (max-width: 768px) {
   .hero { padding: 100px 5% var(--space-10); }
-  .hero-title { letter-spacing: -1px; }
+  .hero-title { letter-spacing: -1px; font-size: clamp(2.75rem, 13vw, 4rem); overflow-wrap: anywhere; }
   .hero-visual { display: none; }
   .work-item { grid-template-columns: 1fr; }
+  .work-header { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+  .work-item-meta { flex-wrap: wrap; }
+  .work-item-title, .service-name { overflow-wrap: anywhere; }
+  .service-desc p { padding-left: 0; }
+  .section-title, .showreel-title, .contact-title { font-size: clamp(2.25rem, 10vw, 3rem); overflow-wrap: anywhere; }
+  .contact-subtitle, .testimonials-quote { overflow-wrap: anywhere; }
+  .testimonials-quote::before { left: 0; top: -32px; }
+  .contact-social { flex-wrap: wrap; }
   .about-grid { grid-template-columns: 1fr; }
   .process-grid { grid-template-columns: 1fr; }
   .experience-item { grid-template-columns: 1fr; gap: var(--space-2); }
   .footer { flex-direction: column; gap: var(--space-4); text-align: center; }
+}
+/* Short screens: hero content reaches the scroll hint — hide instead of overlapping */
+@media (max-height: 700px) {
+  .hero-scroll { display: none; }
 }
 @media (min-width: 769px) and (max-width: 1024px) {
   .process-grid { grid-template-columns: repeat(3, 1fr); }
