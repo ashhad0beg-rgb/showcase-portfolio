@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 35,
+  "_version": 36,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -216,8 +216,16 @@ const defaultData = {
     "email": "ashhad0beg@example.com",
     "actions": [
       {
-        "label": "instagram",
+        "label": "Instagram",
         "url": "https://www.instagram.com/video.edit.by.mab?stkn=MXc0bG1tcHkxeXl3Zw=="
+      },
+      {
+        "label": "LinkedIn",
+        "url": "https://www.linkedin.com/in/mirza-ashhad-beg-b4730035b/"
+      },
+      {
+        "label": "Behance",
+        "url": "https://www.behance.net/mirzaashhad"
       }
     ],
     "social": [
