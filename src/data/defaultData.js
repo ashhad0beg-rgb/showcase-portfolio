@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 39,
+  "_version": 40,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -50,16 +50,6 @@ const defaultData = {
       "number": "02",
       "name": "MOTION  DESIGNER",
       "description": "Motion with purpose. Creativity in every frame."
-    },
-    {
-      "number": "03",
-      "name": "VISUAL STORYTELLING",
-      "description": "Turning ideas into stories through visuals."
-    },
-    {
-      "number": "04",
-      "name": "CREATIVE DIRECTION",
-      "description": "Turning big ideas into bold visual experiences."
     }
   ],
   "process": [
