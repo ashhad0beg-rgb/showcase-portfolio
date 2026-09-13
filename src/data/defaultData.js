@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 40,
+  "_version": 41,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -30,7 +30,7 @@ const defaultData = {
     "showreel": false,
     "work": true,
     "services": true,
-    "process": true,
+    "process": false,
     "about": true,
     "tools": true,
     "experience": true,
