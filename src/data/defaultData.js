@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 42,
+  "_version": 43,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -118,10 +118,34 @@ const defaultData = {
   "experienceLayout": "timeline",
   "education": [
     {
-      "institution": "Jamia Millia Islamia",
-      "degree": "Bachelor of Fine Arts — Visual Arts",
-      "duration": "2021 — 2024",
-      "details": "Major in motion graphics and video production. Graduated with distinction."
+      "institution": "MAAC",
+      "degree": "Advanced Program In Digital Media And Design",
+      "duration": "April 2024 - February 2026",
+      "details": ""
+    },
+    {
+      "institution": "C, Pro. Computer Info-Tech Institute",
+      "degree": "Advance Diploma In Computer Application",
+      "duration": "June 2023 - February 2024",
+      "details": ""
+    },
+    {
+      "institution": "Veer Bahadur Singh Paranuchal University, Jaunpur",
+      "degree": "Bachelor's Degree",
+      "duration": "July 2020 - June 2023",
+      "details": ""
+    },
+    {
+      "institution": "Uttar Pradesh State Board Of High School And Intermediate Education (UPMSP)",
+      "degree": "Intermediate Examination",
+      "duration": "May 2018 - June 2020",
+      "details": ""
+    },
+    {
+      "institution": "Uttar Pradesh State Board Of High School And Intermediate Education (UPMSP)",
+      "degree": "High School Examination",
+      "duration": "April 2016 - April 2018",
+      "details": ""
     }
   ],
   "testimonials": [
