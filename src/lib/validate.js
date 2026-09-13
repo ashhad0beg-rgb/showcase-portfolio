@@ -1,10 +1,14 @@
 // Super-safe validation & sanitization for portfolio data — Supabase edition
 // Prevents XSS, oversized payloads, injection, and malformed writes
-// Free-tier safe: payload <400KB, array caps, URL allowlist
+// Free-tier safe: payload <2.5MB, array caps, URL allowlist (data:image uploads preserved)
 
 const MAX_STR = 5000
 const MAX_ARRAY = 50
 const MAX_URL_LEN = 2048
+// Data-URL images (drag & drop uploads) are much longer than http URLs.
+// Allow ~1.8M chars (~1.3MB file) per image; total payload cap below guards overall size.
+const MAX_DATA_URL_LEN = 1800000
+const MAX_PAYLOAD_LEN = 2500000
 
 function sanitizeString(str, max = MAX_STR) {
   if (typeof str !== 'string') return ''
@@ -17,12 +21,26 @@ function sanitizeString(str, max = MAX_STR) {
 
 function sanitizeUrl(url) {
   if (typeof url !== 'string') return ''
-  const u = url.trim().slice(0, MAX_URL_LEN)
+  const u = url.trim()
   if (!u) return ''
-  const safe = /^(https?:\/\/|mailto:|tel:|\/|#|data:image\/)/i
-  if (!safe.test(u)) return ''
-  if (/javascript:/i.test(u) || /data:text\/html/i.test(u)) return ''
-  return sanitizeString(u, MAX_URL_LEN)
+  // Embedded uploads: data:image/...;base64,... — do NOT truncate to 2048
+  // and do NOT run sanitizeString on them (its on*= regex corrupts base64).
+  if (/^data:image\//i.test(u)) {
+    if (u.length > MAX_DATA_URL_LEN) return ''
+    // Strict allowlist: image mime + base64 payload only (blocks data:text/html XSS)
+    if (!/^data:image\/(png|jpe?g|webp|gif|avif|svg\+xml);base64,[A-Za-z0-9+/=\s]+$/i.test(u)) return ''
+    if (/javascript:/i.test(u) || /data:text\/html/i.test(u)) return ''
+    // Legacy corruption check: the pre-fix code sliced URLs to 2048 chars, cutting
+    // base64 mid-stream. Valid base64 length (mod 4) is never 1 — that proves truncation.
+    const b64 = u.slice(u.indexOf(',') + 1).replace(/\s/g, '')
+    if (b64.length % 4 === 1) return ''
+    return u
+  }
+  const t = u.slice(0, MAX_URL_LEN)
+  const safe = /^(https?:\/\/|mailto:|tel:|\/|#)/i
+  if (!safe.test(t)) return ''
+  if (/javascript:/i.test(t) || /data:text\/html/i.test(t)) return ''
+  return sanitizeString(t, MAX_URL_LEN)
 }
 
 function sanitizeArray(arr, mapper, max = MAX_ARRAY) {
@@ -211,7 +229,7 @@ export function validatePortfolioData(input) {
   out.siteDescription = sanitizeString(input.siteDescription, 300)
 
   const jsonLen = JSON.stringify(out).length
-  if (jsonLen > 400_000) throw new Error(`Payload too large: ${jsonLen} bytes > 400KB`)
+  if (jsonLen > MAX_PAYLOAD_LEN) throw new Error(`Payload too large: ${Math.round(jsonLen / 1024)}KB > ${Math.round(MAX_PAYLOAD_LEN / 1024)}KB — compress images (JPG ~1200px) or remove some photos`)
 
   return out
 }

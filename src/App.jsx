@@ -91,9 +91,9 @@ function Hero() {
   const r = useReduce()
   const { data } = usePortfolio()
   const h = data.hero
-  const lines = h.title.split('\n')
+  const lines = (h.title || '').split('\n')
   return (
-    <section className="hero" aria-label="Introduction">
+    <section className={`hero${h.image ? ' has-image' : ''}`} aria-label="Introduction">
       <ParticlesBackground />
       <motion.div className="hero-eyebrow" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>{h.eyebrow}</motion.div>
       <h1 className="hero-title">{lines.map((line, i) => (
@@ -104,6 +104,11 @@ function Hero() {
         <a href="#showreel" className="btn btn-primary">{h.buttonPrimary} <span className="btn-arrow">→</span></a>
         <a href="#contact" className="btn btn-outline">{h.buttonSecondary}</a>
       </motion.div>
+      {h.image && (
+        <motion.div className="hero-visual has-image" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.5 }}>
+          <img src={h.image} alt="Hero" onError={(e) => { e.currentTarget.closest('.hero-visual')?.remove() }} />
+        </motion.div>
+      )}
       <motion.div className="hero-scroll" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={r ? { duration: 0.22 } : { duration: 0.5, delay: 1.2 }}>
         <span className="hero-scroll-line" /> SCROLL TO EXPLORE <span className="hero-scroll-arrow">↓</span>
       </motion.div>
@@ -135,7 +140,7 @@ function Showreel() {
       <motion.div className="showreel-player" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.7, delay: 0.2 }}>
         {s.videoUrl && !playing ? (
           <>
-            {s.posterUrl && <img src={s.posterUrl} alt="Showreel poster" />}
+            {s.posterUrl && <img src={s.posterUrl} alt="Showreel poster" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
             <button className="showreel-play" onClick={() => setPlaying(true)} aria-label="Play showreel">▶</button>
           </>
         ) : s.videoUrl && playing ? (
@@ -173,7 +178,7 @@ function Work() {
       </div>
       <div className="work-grid">{data.work.map((p, i) => (
         <motion.div className="work-item" key={i} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: i * 0.05 }} onClick={() => setSelected(p)}>
-          <div className="work-item-visual">{p.image ? <img src={p.image} alt={p.title} loading="lazy" /> : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(0,255,136,0.06), var(--color-surface))' }} />}</div>
+          <div className="work-item-visual">{p.image ? <img src={p.image} alt={p.title} loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none' }} /> : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(0,255,136,0.06), var(--color-surface))' }} />}</div>
           <div className="work-item-info">
             <div className="work-item-category">{p.category}</div>
             <h3 className="work-item-title">{p.title}</h3>
@@ -185,7 +190,7 @@ function Work() {
       <AnimatePresence>{selected && (
         <motion.div className="project-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelected(null)} role="dialog" aria-modal="true" aria-label={selected.title}>
           <motion.div className="project-modal" initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ type: 'spring', stiffness: 320, damping: 30 }} onClick={e => e.stopPropagation()}>
-            {selected.image && <img className="project-modal-img" src={selected.image} alt={selected.title} />}
+            {selected.image && <img className="project-modal-img" src={selected.image} alt={selected.title} onError={(e) => { e.currentTarget.style.display = 'none' }} />}
             <div className="project-modal-body">
               <div className="work-item-category" style={{ marginBottom: '12px' }}>{selected.category}</div>
               <h3>{selected.title}</h3>
@@ -256,7 +261,7 @@ function About() {
           ))}</div>
         </motion.div>
         <motion.div className="about-image" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.15 }}>
-          {a.image ? <img src={a.image} alt="Portrait" /> : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(0,255,136,0.06), var(--color-surface))' }} />}
+          {a.image ? <img src={a.image} alt="Portrait" onError={(e) => { e.currentTarget.style.display = 'none' }} /> : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(0,255,136,0.06), var(--color-surface))' }} />}
         </motion.div>
       </div>
     </section>

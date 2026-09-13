@@ -203,6 +203,13 @@ body:has(.admin-layout), body:has(.admin-login) { cursor: auto !important; }
   overflow: hidden; opacity: 0.15;
   border: 1px solid var(--color-border);
 }
+.hero-visual.has-image {
+  opacity: 1;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+.hero.has-image .hero-title, .hero.has-image .hero-desc, .hero.has-image .hero-buttons, .hero.has-image .hero-eyebrow {
+  max-width: 52%;
+}
 .hero-visual img { width: 100%; height: 100%; object-fit: cover; }
 
 /* ---------- BUTTONS ---------- */
@@ -751,6 +758,13 @@ body:has(.admin-layout), body:has(.admin-login) { cursor: auto !important; }
   .hero { padding: 100px 5% var(--space-10); }
   .hero-title { letter-spacing: -1px; font-size: clamp(2.75rem, 13vw, 4rem); overflow-wrap: anywhere; }
   .hero-visual { display: none; }
+  .hero.has-image .hero-title, .hero.has-image .hero-desc, .hero.has-image .hero-buttons, .hero.has-image .hero-eyebrow { max-width: 100%; }
+  .hero-visual.has-image {
+    display: block;
+    position: relative; right: auto; top: auto; transform: none;
+    width: 100%; max-width: 420px; aspect-ratio: 4/3;
+    margin-top: 32px; opacity: 1;
+  }
   .work-item { grid-template-columns: 1fr; }
   .work-header { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
   .work-item-meta { flex-wrap: wrap; }

@@ -6,14 +6,62 @@ import { validatePortfolioData } from '../lib/validate.js'
 import '../admin/admin.css'
 
 // Drag & drop image helper — reads as data URL for GitHub publish (base64), keeps URL option too
+// Downscales large images via canvas (max 1280px, JPEG 0.82) so uploads stay under payload limits.
+function downscaleImage(file, maxDim = 1280, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      try {
+        URL.revokeObjectURL(url)
+        let { width, height } = img
+        const scale = Math.min(1, maxDim / Math.max(width, height))
+        if (scale === 1) {
+          // Small enough — keep original bytes
+          const r = new FileReader()
+          r.onload = (e) => resolve(e.target.result)
+          r.onerror = reject
+          r.readAsDataURL(file)
+          return
+        }
+        width = Math.round(width * scale)
+        height = Math.round(height * scale)
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, width, height)
+        // Prefer JPEG for photos (smaller); keep PNG only if source was PNG and small?
+        // Use JPEG unless original was PNG with transparency need — JPEG is safe default.
+        const mime = file.type === 'image/png' && file.size < 400 * 1024 ? 'image/png' : 'image/jpeg'
+        resolve(canvas.toDataURL(mime, quality))
+      } catch (e) { reject(e) }
+    }
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read image')) }
+    img.src = url
+  })
+}
+
 function useImageDrop(onChange, onSave) {
   const [dragOver, setDragOver] = useState(false)
+  const [busy, setBusy] = useState(false)
   const readFile = (file) => {
     if (!file || !file.type.startsWith('image/')) { alert('Drop an image file (jpg, png, webp)'); return }
-    if (file.size > 900 * 1024) { alert('Image too large — max 900KB (keeps payload <400KB). Compress first.'); return }
-    const reader = new FileReader()
-    reader.onload = (e) => { onChange(e.target.result); onSave && onSave('Image dropped') }
-    reader.readAsDataURL(file)
+    if (file.size > 4 * 1024 * 1024) { alert('Image too large — max 4MB. Compress first.'); return }
+    setBusy(true)
+    downscaleImage(file).then((dataUrl) => {
+      if (dataUrl.length > 1800000) {
+        alert(`Image still too large after compression (${Math.round(dataUrl.length / 1024)}KB) — try a smaller image or lower resolution.`)
+        return
+      }
+      onChange(dataUrl); onSave && onSave('Image added ✓')
+    }).catch(() => {
+      // Fallback: plain read (small files)
+      if (file.size > 900 * 1024) { alert('Could not compress image — try a smaller file (max 900KB).'); return }
+      const reader = new FileReader()
+      reader.onload = (e) => { onChange(e.target.result); onSave && onSave('Image dropped') }
+      reader.readAsDataURL(file)
+    }).finally(() => setBusy(false))
   }
   const handlers = {
     onDragOver: (e) => { e.preventDefault(); setDragOver(true) },
@@ -21,11 +69,15 @@ function useImageDrop(onChange, onSave) {
     onDrop: (e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if (f) readFile(f) },
   }
   const onFilePick = (e) => { const f = e.target.files?.[0]; if (f) readFile(f); e.target.value = '' }
-  return { dragOver, handlers, onFilePick }
+  return { dragOver, handlers, onFilePick, busy }
 }
 
 function ImageDropField({ label, value, onChange, onSave }) {
-  const { dragOver, handlers, onFilePick } = useImageDrop(onChange, onSave)
+  const { dragOver, handlers, onFilePick, busy } = useImageDrop(onChange, onSave)
+  const [imgErr, setImgErr] = useState(false)
+  useEffect(() => { setImgErr(false) }, [value])
+  const isDataUrl = typeof value === 'string' && value.startsWith('data:image/')
+  const sizeKb = typeof value === 'string' && value ? Math.round(value.length / 1024) : 0
   return (
     <div className="form-group">
       <label>{label}</label>
@@ -37,11 +89,23 @@ function ImageDropField({ label, value, onChange, onSave }) {
         </label>
         {value && <button type="button" className="btn-secondary" onClick={() => { onChange(''); onSave && onSave('Cleared') }}>Clear</button>}
       </div>
-      <div {...handlers} style={{ border: `1.5px dashed ${dragOver ? '#5eead4' : 'rgba(255,255,255,0.12)'}`, background: dragOver ? 'rgba(94,234,212,0.08)' : 'rgba(255,255,255,0.02)', borderRadius: '10px', padding: '14px', textAlign: 'center', cursor: 'pointer', transition: 'all 150ms' }}>
-        <div style={{ fontSize: '13px', color: dragOver ? '#5eead4' : '#94a3b8' }}>{dragOver ? 'Drop image here' : 'Drag & drop image here'}</div>
-        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>JPG/PNG/WEBP, max 900KB — stored as data URL for GitHub publish</div>
+      <div {...handlers} style={{ border: `1.5px dashed ${dragOver ? '#5eead4' : 'rgba(255,255,255,0.12)'}`, background: dragOver ? 'rgba(94,234,212,0.08)' : 'rgba(255,255,255,0.02)', borderRadius: '10px', padding: '14px', textAlign: 'center', cursor: 'pointer', transition: 'all 150ms', opacity: busy ? 0.6 : 1 }}>
+        <div style={{ fontSize: '13px', color: dragOver ? '#5eead4' : '#94a3b8' }}>{busy ? 'Compressing image…' : dragOver ? 'Drop image here' : 'Drag & drop image here'}</div>
+        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>JPG/PNG/WEBP, max 4MB — auto-compressed, stored for GitHub publish</div>
       </div>
-      {value && <div className="image-preview"><label>Preview:</label><img src={value} alt="Preview" /></div>}
+      {value && (
+        <div className="image-preview">
+          <label>Preview {sizeKb > 0 && <span style={{ textTransform: 'none', opacity: 0.7 }}>({isDataUrl ? 'upload' : 'link'} • {sizeKb}KB)</span>}:</label>
+          {!imgErr ? (
+            <img src={value} alt="Preview" onError={() => setImgErr(true)} />
+          ) : (
+            <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '12px', fontSize: '13px', color: '#fca5a5', lineHeight: 1.5 }}>
+              ⚠ This saved photo is corrupted (truncated by an older version) and can't be displayed.
+              Click <strong>Clear</strong> above, upload the photo again, then <strong>Publish to GitHub</strong>.
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
