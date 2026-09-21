@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 50,
+  "_version": 51,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -141,9 +141,9 @@ const defaultData = {
   },
   "tools": [
     "Adobe After Effects",
-    "Premiere Pro",
-    "Photoshop",
-    "Illustrator"
+    "Adobe Premiere Pro",
+    "Adobe Photoshop",
+    "Adobe Illustrator"
   ],
   "experience": [
     {
