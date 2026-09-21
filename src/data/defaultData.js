@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 46,
+  "_version": 47,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -66,7 +66,7 @@ const defaultData = {
     {
       "number": "01",
       "name": "DISCOVER",
-      "description": "Understand the brand, audience and objective."
+      "description": "I dive into your vision, understand your audience, and uncover what your project needs to say."
     },
     {
       "number": "02",
