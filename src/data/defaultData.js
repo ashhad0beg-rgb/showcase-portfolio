@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 47,
+  "_version": 48,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -71,22 +71,22 @@ const defaultData = {
     {
       "number": "02",
       "name": "CONCEPT",
-      "description": "Develop the creative direction and visual language."
+      "description": "I shape creative ideas into a clear visual direction, defining the mood, style, and storytelling approach."
     },
     {
       "number": "03",
       "name": "DESIGN",
-      "description": "Create storyboards, style frames and visual systems."
+      "description": "I craft storyboards, style frames, layouts, and graphic elements that bring the creative vision to life."
     },
     {
       "number": "04",
       "name": "CREATE",
-      "description": "Edit, animate, composite and refine."
+      "description": "From video editing and animation to compositing and sound, I bring every frame together with purpose"
     },
     {
       "number": "05",
       "name": "DELIVER",
-      "description": "Final polish, sound, color and delivery across formats."
+      "description": "I refine the details, balance sound and color, and deliver a polished video ready to make an impact."
     }
   ],
   "about": {
