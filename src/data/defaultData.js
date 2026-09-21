@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 49,
+  "_version": 50,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -60,6 +60,11 @@ const defaultData = {
       "number": "04",
       "name": "VIDEOGRAPHER",
       "description": "Capturing moments and telling compelling stories through creative visuals, cinematic shots, and engaging video production."
+    },
+    {
+      "number": "05",
+      "name": "FILM MAKER",
+      "description": "Planning shots, scenes, camera angles, and visual flow."
     }
   ],
   "process": [
