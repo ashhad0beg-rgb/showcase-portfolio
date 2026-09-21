@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 48,
+  "_version": 49,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -87,6 +87,31 @@ const defaultData = {
       "number": "05",
       "name": "DELIVER",
       "description": "I refine the details, balance sound and color, and deliver a polished video ready to make an impact."
+    },
+    {
+      "number": "06",
+      "name": "COLLABORATE",
+      "description": "Work closely with clients and creative teams to exchange ideas and align on the project's vision."
+    },
+    {
+      "number": "07",
+      "name": "ANIMATE",
+      "description": "Create purposeful motion, smooth transitions, and engaging animation that makes visuals come alive."
+    },
+    {
+      "number": "08",
+      "name": "REFINE",
+      "description": "Review timing, composition, transitions, and visual details to make every element work together."
+    },
+    {
+      "number": "09",
+      "name": "POLISH",
+      "description": "Fine-tune sound, color, pacing, and overall presentation for a cohesive final experience."
+    },
+    {
+      "number": "10",
+      "name": "IMPACT",
+      "description": "Deliver engaging visual experiences that communicate clearly, connect with viewers, and support the project's goals."
     }
   ],
   "about": {
