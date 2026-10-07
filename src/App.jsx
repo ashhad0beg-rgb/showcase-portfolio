@@ -73,7 +73,7 @@ function Navbar() {
     return () => window.removeEventListener('scroll', h)
   }, [])
   const v = data.visibility || {}
-  const allItems = [{ href: '#services', l: 'Services', key: 'services' }, { href: '#about', l: 'About', key: 'about' }, { href: '#contact', l: 'Contact', key: 'contact' }]
+  const allItems = [{ href: '#services', l: 'Services', key: 'services' }, { href: '#about', l: 'About', key: 'about' }, { href: '#work', l: 'Work', key: 'work' }, { href: '#contact', l: 'Contact', key: 'contact' }]
   const items = allItems.filter((i) => v[i.key] !== false)
   return (
     <>
