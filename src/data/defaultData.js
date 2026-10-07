@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 53,
+  "_version": 54,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -189,7 +189,15 @@ const defaultData = {
       "details": ""
     }
   ],
-  "certifications": [],
+  "certifications": [
+    {
+      "name": "test",
+      "issuer": "test",
+      "date": "test",
+      "url": "",
+      "details": "test"
+    }
+  ],
   "testimonials": [
     {
       "quote": "Working with Ashhad completely transformed the visual direction of our campaign. The attention to detail and creative vision was outstanding.",
