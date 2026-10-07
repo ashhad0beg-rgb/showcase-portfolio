@@ -119,21 +119,18 @@ export function validatePortfolioData(input) {
   }
   out.showreel.enabled = out.visibility.showreel
 
-  // work — per-project enabled toggle (admin can hide a project without deleting it)
-  out.work = sanitizeArray(input.work, p => {
-    if (!p || typeof p !== 'object') return null
+  // work — cert-style cards below Certifications (legacy showcase fields mapped)
+  out.work = sanitizeArray(input.work, w => {
+    if (!w || typeof w !== 'object') return null
     return {
-      title: sanitizeString(p.title, 120),
-      client: sanitizeString(p.client, 100),
-      year: sanitizeString(p.year, 10),
-      role: sanitizeString(p.role, 120),
-      category: sanitizeString(p.category, 80),
-      image: sanitizeUrl(p.image || ''),
-      description: sanitizeString(p.description, 2000),
-      enabled: p.enabled !== false,
+      name: sanitizeString(w.name || w.title || '', 150),
+      company: sanitizeString(w.company || w.client || w.issuer || '', 120),
+      date: sanitizeString(w.date || w.year || '', 40),
+      url: sanitizeUrl(w.url || ''),
+      details: sanitizeString(w.details || w.description || '', 1000),
     }
-  }, 50)
-  out.work = out.work.filter(w => w.title)
+  }, 20)
+  out.work = out.work.filter(w => w.name)
 
   // services
   out.services = sanitizeArray(input.services, s => ({

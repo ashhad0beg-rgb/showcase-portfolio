@@ -29,14 +29,13 @@ function CustomCursor() {
     const onOver = (e) => {
       const t = e.target
       if (!(t instanceof Element)) return
-      if (t.closest('.work-item')) setCursorType('project')
-      else if (t.closest('a, button, .btn, .service-item, .faq-question, .showreel-play')) setCursorType('hover')
+      if (t.closest('a, button, .btn, .service-item, .faq-question, .showreel-play')) setCursorType('hover')
       else setCursorType('')
     }
     const onOut = (e) => {
       const t = e.target
       if (!(t instanceof Element)) return
-      if (!t.closest('a, button, .btn, .work-item, .service-item, .faq-question, .showreel-play')) setCursorType('')
+      if (!t.closest('a, button, .btn, .service-item, .faq-question, .showreel-play')) setCursorType('')
     }
     window.addEventListener('mousemove', onM, { passive: true })
     document.addEventListener('mouseenter', onE)
@@ -58,7 +57,7 @@ function CustomCursor() {
   return (
     <div ref={wrapRef} className={`custom-cursor${cursorType ? ` cursor-${cursorType}` : ''}`} style={{ opacity: vis ? 1 : 0 }}>
       <div className="custom-cursor-dot" ref={dotRef} />
-      <div className="custom-cursor-ring" ref={ringRef}><span className="custom-cursor-label">View</span></div>
+      <div className="custom-cursor-ring" ref={ringRef} />
     </div>
   )
 }
@@ -74,12 +73,8 @@ function Navbar() {
     return () => window.removeEventListener('scroll', h)
   }, [])
   const v = data.visibility || {}
-  const workVisible = v.work !== false && (data.work || []).some((p) => p.enabled !== false)
-  const allItems = [{ href: '#work', l: 'Work', key: 'work' }, { href: '#services', l: 'Services', key: 'services' }, { href: '#about', l: 'About', key: 'about' }, { href: '#contact', l: 'Contact', key: 'contact' }]
-  const items = allItems.filter((i) => {
-    if (i.key === 'work') return workVisible
-    return v[i.key] !== false
-  })
+  const allItems = [{ href: '#services', l: 'Services', key: 'services' }, { href: '#about', l: 'About', key: 'about' }, { href: '#contact', l: 'Contact', key: 'contact' }]
+  const items = allItems.filter((i) => v[i.key] !== false)
   return (
     <>
       <motion.nav className={`nav${scrolled ? ' scrolled' : ''}`} initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
@@ -163,56 +158,27 @@ function Showreel() {
   )
 }
 
-/* ====== SELECTED WORK ====== */
+/* ====== WORK (certificate-style cards — sits below Certifications) ====== */
+// ponytail: mirrors <Certifications> markup — only the field names differ. Ceiling: a 3rd
+// card-style section. Upgrade then: extract one <CardSection items fields linkLabel />.
 function Work() {
   const r = useReduce()
   const { data } = usePortfolio()
-  const [selected, setSelected] = useState(null)
-  useEffect(() => {
-    if (!selected) return
-    const k = (e) => { if (e.key === 'Escape') setSelected(null) }
-    document.addEventListener('keydown', k)
-    document.body.style.overflow = 'hidden'
-    return () => { document.removeEventListener('keydown', k); document.body.style.overflow = '' }
-  }, [selected])
-  // Section-level kill-switch (admin → Work → Visible/Hidden) + per-project toggle.
-  // Legacy items without `enabled` default to visible.
-  if (data.visibility?.work === false) return null
-  const visibleWork = (data.work || []).filter((p) => p.enabled !== false)
-  if (!visibleWork.length) return null
+  const items = (data.work || []).filter((w) => w && w.name)
+  if (!items.length) return null
   return (
-    <section id="work" className="work">
-      <div className="work-header">
-        <div>
-          <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>PORTFOLIO</motion.div>
-          <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.1 }}>SELECTED WORK</motion.h2>
-        </div>
-      </div>
-      <div className="work-grid">{visibleWork.map((p, i) => (
-        <motion.div className="work-item" key={i} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: i * 0.05 }} onClick={() => setSelected(p)}>
-          <div className="work-item-visual">{p.image ? <img src={p.image} alt={p.title} loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none' }} /> : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(0,255,136,0.06), var(--color-surface))' }} />}</div>
-          <div className="work-item-info">
-            <div className="work-item-category">{p.category}</div>
-            <h3 className="work-item-title">{p.title}</h3>
-            <div className="work-item-meta"><span>{p.client}</span><span>{p.year}</span><span>{p.role}</span></div>
-            <div className="work-item-view">VIEW PROJECT <span className="btn-arrow">→</span></div>
-          </div>
+    <section id="work" className="work-cards">
+      <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>WORK</motion.div>
+      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.1 }}>WORK</motion.h2>
+      <div className="certifications-grid">{items.map((w, i) => (
+        <motion.div className="certification-item" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.4, delay: i * 0.05 }}>
+          <div className="certification-name">{w.name}</div>
+          {w.company && <div className="certification-issuer">{w.company}</div>}
+          {w.date && <div className="certification-date">{w.date}</div>}
+          {w.details && <p className="certification-details">{w.details}</p>}
+          {w.url && <a className="certification-link" href={w.url} target="_blank" rel="noopener noreferrer">View project <span className="btn-arrow">→</span></a>}
         </motion.div>
       ))}</div>
-      <AnimatePresence>{selected && (
-        <motion.div className="project-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelected(null)} role="dialog" aria-modal="true" aria-label={selected.title}>
-          <motion.div className="project-modal" initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ type: 'spring', stiffness: 320, damping: 30 }} onClick={e => e.stopPropagation()}>
-            {selected.image && <img className="project-modal-img" src={selected.image} alt={selected.title} onError={(e) => { e.currentTarget.style.display = 'none' }} />}
-            <div className="project-modal-body">
-              <div className="work-item-category" style={{ marginBottom: '12px' }}>{selected.category}</div>
-              <h3>{selected.title}</h3>
-              <p style={{ marginTop: '8px', fontSize: 'var(--text-sm)', color: 'var(--color-text-tertiary)' }}>{selected.client} · {selected.year} · {selected.role}</p>
-              <p>{selected.description}</p>
-              <button className="project-modal-close" onClick={() => setSelected(null)} aria-label="Close">×</button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}</AnimatePresence>
     </section>
   )
 }
@@ -490,7 +456,6 @@ function PortfolioSite() {
         {vis('hero') && <Hero />}
         <MarqueeBanner items={row1} />
         {vis('showreel') && <Showreel />}
-        {vis('work') && <Work />}
         {vis('services') && <Services />}
         {vis('process') && <Process />}
         {vis('about') && <About />}
@@ -498,6 +463,7 @@ function PortfolioSite() {
         {vis('experience') && <Experience />}
         {vis('education') && <Education />}
         {vis('certifications') && <Certifications />}
+        {vis('work') && <Work />}
         <MarqueeBanner items={row2} reverse />
         {vis('testimonials') && <Testimonials />}
         {vis('faq') && <Faq />}

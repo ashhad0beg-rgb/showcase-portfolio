@@ -481,9 +481,8 @@ export default function AdminDashboard() {
 
 function DashboardOverview({ data, updateData, onSave }) {
   const { isSupabaseEnabled: sbOn, syncStatus, supabaseUser, remoteVersion } = usePortfolio()
-  const workVisible = (data.work || []).filter((p) => p.enabled !== false).length
   const counts = [
-    { label: `Work (${workVisible} visible)`, value: data.work?.length || 0 },
+    { label: 'Work', value: data.work?.length || 0 },
     { label: 'Services', value: data.services?.length || 0 },
     { label: 'Tools', value: data.tools?.length || 0 },
     { label: 'FAQ', value: data.faq?.length || 0 },
@@ -541,38 +540,26 @@ function ShowreelEdit({ onSave }) {
 
 function WorkEdit({ onSave }) {
   const { data, updateArrayItem, addArrayItem, removeArrayItem } = usePortfolio()
+  const items = data.work || []
   const sectionVisible = (data.visibility?.work) !== false
-  const visibleCount = (data.work || []).filter((p) => p.enabled !== false).length
   return (
     <div className="admin-section">
-      <div className="section-header-row"><h2>Work ({visibleCount}/{data.work.length} visible)</h2><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><SectionVisibility sectionKey="work" onSave={onSave} /><button className="btn-add" onClick={() => { addArrayItem('work', { title: '', client: '', year: '', role: '', category: '', image: '', description: '', enabled: true }); onSave('Added') }}>+ Add Project</button></div></div>
-      {!sectionVisible && <div className="hint" style={{ marginBottom: '16px', background: 'rgba(148,163,184,0.08)', padding: '10px', borderRadius: '8px' }}>SELECTED WORK section is hidden on the site. Toggle to Visible to show it.</div>}
-      <div style={{ opacity: sectionVisible ? 1 : 0.45, pointerEvents: sectionVisible ? 'auto' : 'none' }}>
-      {data.work.length === 0 && <div className="hint" style={{ textAlign: 'center', padding: '16px', color: '#64748b' }}>No projects yet — click + Add Project</div>}
-      {data.work.map((p, i) => {
-        const itemVisible = p.enabled !== false
-        return (
-        <div key={i} className="edit-card edit-card-lg" style={{ opacity: itemVisible ? 1 : 0.6, borderColor: itemVisible ? undefined : 'rgba(239,68,68,0.25)' }}>
-          <div className="edit-card-header"><span>Project #{i + 1}{!itemVisible ? ' — Hidden' : ''}</span><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', background: itemVisible ? 'rgba(94,234,212,0.08)' : 'rgba(239,68,68,0.08)', padding: '4px 10px', borderRadius: '20px', border: `1px solid ${itemVisible ? 'rgba(94,234,212,0.15)' : 'rgba(239,68,68,0.25)'}`, color: itemVisible ? '#5eead4' : '#fca5a5' }}>
-              <input type="checkbox" checked={itemVisible} onChange={(e) => { updateArrayItem('work', i, { enabled: e.target.checked }); onSave(e.target.checked ? 'Project visible on site' : 'Project hidden from site') }} />
-              {itemVisible ? 'Enabled' : 'Disabled'}
-            </label>
-            <button className="btn-remove" onClick={() => { removeArrayItem('work', i); onSave('Removed') }}>×</button>
-          </div></div>
-          <input type="text" placeholder="Title" value={p.title} onChange={(e) => { updateArrayItem('work', i, { title: e.target.value }); onSave('Saved') }} />
+      <div className="section-header-row"><h2>Work ({items.length})</h2><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><SectionVisibility sectionKey="work" onSave={onSave} /><button className="btn-add" onClick={() => { addArrayItem('work', { name: '', company: '', date: '', url: '', details: '' }); onSave('Added') }}>+ Add Work</button></div></div>
+      <p className="hint" style={{ marginBottom: '16px', background: 'rgba(94,234,212,0.06)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(94,234,212,0.12)' }}>Shown on the main site right below Certifications (card style). Add name, company, date, optional details and a link.</p>
+      {!sectionVisible && <div className="hint" style={{ marginBottom: '16px', background: 'rgba(148,163,184,0.08)', padding: '10px', borderRadius: '8px' }}>Work section is hidden on the site. Toggle to Visible to show it.</div>}
+      {items.length === 0 && <div className="hint" style={{ textAlign: 'center', padding: '16px', color: '#64748b' }}>No work items yet — click + Add Work</div>}
+      {items.map((w, i) => (
+        <div key={i} className="edit-card edit-card-lg">
+          <div className="edit-card-header"><span>#{i + 1} — {w.name || 'New work item'}</span><button className="btn-remove" onClick={() => { removeArrayItem('work', i); onSave('Removed') }}>×</button></div>
+          <input type="text" placeholder="Work / project name" value={w.name || ''} onChange={(e) => { updateArrayItem('work', i, { name: e.target.value }); onSave('Saved') }} />
           <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            <input type="text" placeholder="Client" value={p.client} onChange={(e) => { updateArrayItem('work', i, { client: e.target.value }); onSave('Saved') }} />
-            <input type="text" placeholder="Year" value={p.year} onChange={(e) => { updateArrayItem('work', i, { year: e.target.value }); onSave('Saved') }} />
+            <input type="text" placeholder="Company / client" value={w.company || ''} onChange={(e) => { updateArrayItem('work', i, { company: e.target.value }); onSave('Saved') }} />
+            <input type="text" placeholder="Date (e.g., 2025)" value={w.date || ''} onChange={(e) => { updateArrayItem('work', i, { date: e.target.value }); onSave('Saved') }} />
           </div>
-          <input type="text" placeholder="Role" value={p.role} onChange={(e) => { updateArrayItem('work', i, { role: e.target.value }); onSave('Saved') }} />
-          <input type="text" placeholder="Category" value={p.category} onChange={(e) => { updateArrayItem('work', i, { category: e.target.value }); onSave('Saved') }} />
-          <textarea placeholder="Description" value={p.description} onChange={(e) => { updateArrayItem('work', i, { description: e.target.value }); onSave('Saved') }} rows={2} />
-          <ImageDropField label="Project Image — drag & drop or URL" value={p.image || ''} onChange={(v) => updateArrayItem('work', i, { image: v })} onSave={onSave} />
+          <input type="text" placeholder="Link (https://...)" value={w.url || ''} onChange={(e) => { updateArrayItem('work', i, { url: e.target.value }); onSave('Saved') }} />
+          <textarea placeholder="Details (optional)" value={w.details || ''} onChange={(e) => { updateArrayItem('work', i, { details: e.target.value }); onSave('Saved') }} rows={2} />
         </div>
-        )
-      })}
-      </div>
+      ))}
     </div>
   )
 }
