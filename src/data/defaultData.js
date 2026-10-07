@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 55,
+  "_version": 56,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -290,7 +290,7 @@ const defaultData = {
     "copyright": "© 2026 Ashhad Beg. ALL RIGHTS RESERVED."
   },
   "siteName": "Ashhad Beg | Video Editor & Motion Designer",
-  "siteDescription": "Ashhad Beg - Premium Video Editing & Motion Graphics Portfolio",
+  "siteDescription": "Ashhad Beg — Premium Video Editing & Motion Graphics Portfolio",
   "navWorkUrl": ""
 }
 
