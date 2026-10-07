@@ -102,10 +102,12 @@ function Hero() {
         <span className="line" key={i}><motion.span className="word" initial={{ y: '110%', filter: 'blur(8px)' }} animate={{ y: 0, filter: 'blur(0px)' }} transition={r ? { duration: 0.2, delay: 0.1 + i * 0.05 } : { duration: 0.7, delay: 0.2 + i * 0.12, ease: [0.16, 1, 0.3, 1] }}>{line}</motion.span></span>
       ))}</h1>
       <motion.p className="hero-desc" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={r ? { duration: 0.22 } : { duration: 0.5, delay: 0.7 }}>{h.description}</motion.p>
-      <motion.div className="hero-buttons" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={r ? { duration: 0.22 } : { duration: 0.5, delay: 0.9 }}>
-        <a href="#showreel" className="btn btn-primary">{h.buttonPrimary} <span className="btn-arrow">→</span></a>
-        <a href="#contact" className="btn btn-outline">{h.buttonSecondary}</a>
-      </motion.div>
+      {(h.buttonPrimary || h.buttonSecondary) ? (
+        <motion.div className="hero-buttons" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={r ? { duration: 0.22 } : { duration: 0.5, delay: 0.9 }}>
+          {h.buttonPrimary && <a href="#showreel" className="btn btn-primary">{h.buttonPrimary} <span className="btn-arrow">→</span></a>}
+          {h.buttonSecondary && <a href="#contact" className="btn btn-outline">{h.buttonSecondary}</a>}
+        </motion.div>
+      ) : null}
       {h.image && (
         <motion.div className="hero-visual has-image" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.5 }}>
           <img src={h.image} alt="Hero" onError={(e) => { e.currentTarget.closest('.hero-visual')?.remove() }} />
@@ -413,7 +415,7 @@ function Contact() {
       <motion.h2 className="contact-title" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}>{c.title}</motion.h2>
       <motion.div className="contact-subtitle" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.6, delay: 0.2 }}>{c.subtitle}</motion.div>
       <motion.div className="contact-buttons" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0 } : { duration: 0.5, delay: 0.35 }}>
-        <a href={`mailto:${c.email}`} className="btn btn-primary">{c.buttonPrimary} <span className="btn-arrow">→</span></a>
+        {c.buttonPrimary ? <a href={`mailto:${c.email}`} className="btn btn-primary">{c.buttonPrimary} <span className="btn-arrow">→</span></a> : null}
         <a href={`mailto:${c.email}`} className="btn btn-outline">EMAIL ME</a>
       </motion.div>
       {c.actions && c.actions.length > 0 && (
