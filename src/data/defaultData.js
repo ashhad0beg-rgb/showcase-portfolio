@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 54,
+  "_version": 55,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -258,10 +258,6 @@ const defaultData = {
       {
         "label": "Behance",
         "url": "https://www.behance.net/mirzaashhad"
-      },
-      {
-        "label": "Work",
-        "url": "https://drive.google.com/drive/folders/1c36gv-wc0U2QVi9aI-PGgOMDTyV82C8Z?usp=sharing"
       }
     ],
     "social": [
