@@ -109,7 +109,7 @@ export function validatePortfolioData(input) {
     tags: sanitizeArray(input.showreel.tags, t => sanitizeString(t, 60), 20),
   }
   // visibility — toggles for each section (top of admin page)
-  const visKeys = ['hero','showreel','work','services','process','about','tools','experience','education','testimonials','faq','contact']
+  const visKeys = ['hero','showreel','work','services','process','about','tools','experience','education','certifications','testimonials','faq','contact']
   out.visibility = {}
   for (const k of visKeys) {
     let v = true
@@ -183,6 +183,19 @@ export function validatePortfolioData(input) {
     details: sanitizeString(e.details || e.description || '', 2000),
   }), 20)
 
+  // certifications — shown below Education; managed in Admin → Certifications
+  out.certifications = sanitizeArray(input.certifications, c => {
+    if (!c || typeof c !== 'object') return null
+    return {
+      name: sanitizeString(c.name, 150),
+      issuer: sanitizeString(c.issuer || '', 120),
+      date: sanitizeString(c.date || c.duration || '', 40),
+      url: sanitizeUrl(c.url || ''),
+      details: sanitizeString(c.details || '', 1000),
+    }
+  }, 20)
+  out.certifications = out.certifications.filter(c => c.name)
+
   // testimonials
   out.testimonials = sanitizeArray(input.testimonials, t => ({
     quote: sanitizeString(t.quote, 2000),
@@ -236,7 +249,7 @@ export function validatePortfolioData(input) {
 }
 
 export function sanitizeField(key, value) {
-  const allowed = ['hero', 'showreel', 'work', 'services', 'process', 'about', 'tools', 'experience', 'experienceLayout', 'education', 'visibility', 'testimonials', 'faq', 'contact', 'footer', 'siteName', 'siteDescription', '_version', 'theme']
+  const allowed = ['hero', 'showreel', 'work', 'services', 'process', 'about', 'tools', 'experience', 'experienceLayout', 'education', 'certifications', 'visibility', 'testimonials', 'faq', 'contact', 'footer', 'siteName', 'siteDescription', '_version', 'theme']
   if (!allowed.includes(key)) throw new Error(`Forbidden key: ${key}`)
   return value
 }

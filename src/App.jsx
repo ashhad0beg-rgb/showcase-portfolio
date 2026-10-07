@@ -369,6 +369,29 @@ function Education() {
   )
 }
 
+/* ====== CERTIFICATIONS ====== */
+function Certifications() {
+  const r = useReduce()
+  const { data } = usePortfolio()
+  const items = (data.certifications || []).filter((c) => c && c.name)
+  if (!items.length) return null
+  return (
+    <section id="certifications" className="certifications">
+      <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>CERTIFICATIONS</motion.div>
+      <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.1 }}>CERTIFICATIONS</motion.h2>
+      <div className="certifications-grid">{items.map((c, i) => (
+        <motion.div className="certification-item" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.4, delay: i * 0.05 }}>
+          <div className="certification-name">{c.name}</div>
+          {c.issuer && <div className="certification-issuer">{c.issuer}</div>}
+          {c.date && <div className="certification-date">{c.date}</div>}
+          {c.details && <p className="certification-details">{c.details}</p>}
+          {c.url && <a className="certification-link" href={c.url} target="_blank" rel="noopener noreferrer">Verify credential <span className="btn-arrow">→</span></a>}
+        </motion.div>
+      ))}</div>
+    </section>
+  )
+}
+
 /* ====== TESTIMONIALS ====== */
 function Testimonials() {
   const r = useReduce()
@@ -474,6 +497,7 @@ function PortfolioSite() {
         {vis('tools') && <Tools />}
         {vis('experience') && <Experience />}
         {vis('education') && <Education />}
+        {vis('certifications') && <Certifications />}
         <MarqueeBanner items={row2} reverse />
         {vis('testimonials') && <Testimonials />}
         {vis('faq') && <Faq />}

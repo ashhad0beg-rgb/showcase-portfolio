@@ -144,6 +144,7 @@ const moreSections = [
   { path: '/admin/tools', label: 'Tools', icon: '⬡' },
   { path: '/admin/experience', label: 'Experience', icon: '▭' },
   { path: '/admin/education', label: 'Education', icon: '🎓' },
+  { path: '/admin/certifications', label: 'Certifications', icon: '📜' },
   { path: '/admin/testimonials', label: 'Quotes', icon: '❝' },
   { path: '/admin/faq', label: 'FAQ', icon: '?' },
 ]
@@ -467,6 +468,7 @@ export default function AdminDashboard() {
           {activeSection === 'tools' && <ToolsEdit onSave={triggerSaved} />}
           {activeSection === 'experience' && <ExperienceEdit onSave={triggerSaved} />}
           {activeSection === 'education' && <EducationEdit onSave={triggerSaved} />}
+          {activeSection === 'certifications' && <CertificationsEdit onSave={triggerSaved} />}
           {activeSection === 'testimonials' && <TestimonialsEdit onSave={triggerSaved} />}
           {activeSection === 'faq' && <FaqEdit onSave={triggerSaved} />}
           {activeSection === 'contact' && <ContactEdit onSave={triggerSaved} />}
@@ -663,6 +665,30 @@ function EducationEdit({ onSave }) {
           <input type="text" placeholder="Degree" value={e.degree} onChange={(ev) => { updateArrayItem('education', i, { degree: ev.target.value }); onSave('Saved') }} />
           <input type="text" placeholder="Duration" value={e.duration} onChange={(ev) => { updateArrayItem('education', i, { duration: ev.target.value }); onSave('Saved') }} />
           <textarea placeholder="Details" value={e.details} onChange={(ev) => { updateArrayItem('education', i, { details: ev.target.value }); onSave('Saved') }} rows={2} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function CertificationsEdit({ onSave }) {
+  const { data, updateArrayItem, addArrayItem, removeArrayItem } = usePortfolio()
+  const items = data.certifications || []
+  return (
+    <div className="admin-section">
+      <div className="section-header-row"><h2>Certifications ({items.length})</h2><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><SectionVisibility sectionKey="certifications" onSave={onSave} /><button className="btn-add" onClick={() => { addArrayItem('certifications', { name: '', issuer: '', date: '', url: '', details: '' }); onSave('Added') }}>+ Add Certification</button></div></div>
+      <p className="hint" style={{ marginBottom: '16px', background: 'rgba(94,234,212,0.06)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(94,234,212,0.12)' }}>Shown on the main site right below Education. Add name, issuer, date, optional details and a credential link.</p>
+      {items.length === 0 && <div className="hint" style={{ textAlign: 'center', padding: '16px', color: '#64748b' }}>No certifications yet — click + Add Certification</div>}
+      {items.map((c, i) => (
+        <div key={i} className="edit-card edit-card-lg">
+          <div className="edit-card-header"><span>#{i + 1} — {c.name || 'New certification'}</span><button className="btn-remove" onClick={() => { removeArrayItem('certifications', i); onSave('Removed') }}>×</button></div>
+          <input type="text" placeholder="Certification name (e.g., Adobe Certified Professional)" value={c.name || ''} onChange={(ev) => { updateArrayItem('certifications', i, { name: ev.target.value }); onSave('Saved') }} />
+          <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <input type="text" placeholder="Issuer (e.g., Adobe, Google)" value={c.issuer || ''} onChange={(ev) => { updateArrayItem('certifications', i, { issuer: ev.target.value }); onSave('Saved') }} />
+            <input type="text" placeholder="Date (e.g., 2025)" value={c.date || ''} onChange={(ev) => { updateArrayItem('certifications', i, { date: ev.target.value }); onSave('Saved') }} />
+          </div>
+          <input type="text" placeholder="Credential URL (https://...)" value={c.url || ''} onChange={(ev) => { updateArrayItem('certifications', i, { url: ev.target.value }); onSave('Saved') }} />
+          <textarea placeholder="Details (optional)" value={c.details || ''} onChange={(ev) => { updateArrayItem('certifications', i, { details: ev.target.value }); onSave('Saved') }} rows={2} />
         </div>
       ))}
     </div>
