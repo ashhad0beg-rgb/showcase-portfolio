@@ -73,17 +73,19 @@ function Navbar() {
     return () => window.removeEventListener('scroll', h)
   }, [])
   const v = data.visibility || {}
-  const allItems = [{ href: '#services', l: 'Services', key: 'services' }, { href: '#about', l: 'About', key: 'about' }, { href: '#work', l: 'Work', key: 'work' }, { href: '#contact', l: 'Contact', key: 'contact' }]
+  const workUrl = (data.navWorkUrl || '').trim()
+  const ext = { target: '_blank', rel: 'noopener noreferrer' }
+  const allItems = [{ href: '#services', l: 'Services', key: 'services' }, { href: '#about', l: 'About', key: 'about' }, { href: workUrl || '#work', l: 'Work', key: 'work', external: /^https?:\/\//i.test(workUrl) }, { href: '#contact', l: 'Contact', key: 'contact' }]
   const items = allItems.filter((i) => v[i.key] !== false)
   return (
     <>
       <motion.nav className={`nav${scrolled ? ' scrolled' : ''}`} initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
         <a href="#" className="nav-logo">Ashhad <span className="accent">Beg</span></a>
-        <ul className="nav-links">{items.map(i => <li key={i.href}><a href={i.href}>{i.l}</a></li>)}</ul>
+        <ul className="nav-links">{items.map(i => <li key={i.href}><a href={i.href} {...(i.external ? ext : {})}>{i.l}</a></li>)}</ul>
         <div className="nav-availability"><span className="nav-availability-dot" /> AVAILABLE FOR FREELANCE</div>
         <button className={`nav-toggle${mob ? ' open' : ''}`} onClick={() => setMob(!mob)} aria-label="Toggle menu"><span /><span /><span /></button>
       </motion.nav>
-      <AnimatePresence>{mob && <motion.div className="nav-mobile" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>{items.map(i => <a key={i.href} href={i.href} onClick={() => setMob(false)}>{i.l}</a>)}</motion.div>}</AnimatePresence>
+      <AnimatePresence>{mob && <motion.div className="nav-mobile" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>{items.map(i => <a key={i.href} href={i.href} {...(i.external ? ext : {})} onClick={() => setMob(false)}>{i.l}</a>)}</motion.div>}</AnimatePresence>
     </>
   )
 }

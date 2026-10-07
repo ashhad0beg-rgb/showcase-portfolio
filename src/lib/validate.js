@@ -238,6 +238,7 @@ export function validatePortfolioData(input) {
 
   out.siteName = sanitizeString(input.siteName, 150)
   out.siteDescription = sanitizeString(input.siteDescription, 300)
+  out.navWorkUrl = sanitizeUrl(input.navWorkUrl || '')
 
   const jsonLen = JSON.stringify(out).length
   if (jsonLen > MAX_PAYLOAD_LEN) throw new Error(`Payload too large: ${Math.round(jsonLen / 1024)}KB > ${Math.round(MAX_PAYLOAD_LEN / 1024)}KB — compress images (JPG ~1200px) or remove some photos`)
@@ -246,7 +247,7 @@ export function validatePortfolioData(input) {
 }
 
 export function sanitizeField(key, value) {
-  const allowed = ['hero', 'showreel', 'work', 'services', 'process', 'about', 'tools', 'experience', 'experienceLayout', 'education', 'certifications', 'visibility', 'testimonials', 'faq', 'contact', 'footer', 'siteName', 'siteDescription', '_version', 'theme']
+  const allowed = ['hero', 'showreel', 'work', 'services', 'process', 'about', 'tools', 'experience', 'experienceLayout', 'education', 'certifications', 'visibility', 'testimonials', 'faq', 'contact', 'footer', 'siteName', 'siteDescription', 'navWorkUrl', '_version', 'theme']
   if (!allowed.includes(key)) throw new Error(`Forbidden key: ${key}`)
   return value
 }

@@ -539,12 +539,16 @@ function ShowreelEdit({ onSave }) {
 }
 
 function WorkEdit({ onSave }) {
-  const { data, updateArrayItem, addArrayItem, removeArrayItem } = usePortfolio()
+  const { data, updateData, updateArrayItem, addArrayItem, removeArrayItem } = usePortfolio()
   const items = data.work || []
   const sectionVisible = (data.visibility?.work) !== false
   return (
     <div className="admin-section">
       <div className="section-header-row"><h2>Work ({items.length})</h2><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}><SectionVisibility sectionKey="work" onSave={onSave} /><button className="btn-add" onClick={() => { addArrayItem('work', { name: '', company: '', date: '', url: '', details: '' }); onSave('Added') }}>+ Add Work</button></div></div>
+      <div className="form-group" style={{ marginBottom: '16px' }}>
+        <label>Navbar &quot;Work&quot; link URL</label>
+        <input type="url" placeholder="https://... — leave empty to jump to the on-page Work section" value={data.navWorkUrl || ''} onChange={(e) => { updateData('navWorkUrl', e.target.value); onSave('Saved') }} />
+      </div>
       <p className="hint" style={{ marginBottom: '16px', background: 'rgba(94,234,212,0.06)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(94,234,212,0.12)' }}>Shown on the main site right below Certifications (card style). Add name, company, date, optional details and a link.</p>
       {!sectionVisible && <div className="hint" style={{ marginBottom: '16px', background: 'rgba(148,163,184,0.08)', padding: '10px', borderRadius: '8px' }}>Work section is hidden on the site. Toggle to Visible to show it.</div>}
       {items.length === 0 && <div className="hint" style={{ textAlign: 'center', padding: '16px', color: '#64748b' }}>No work items yet — click + Add Work</div>}
