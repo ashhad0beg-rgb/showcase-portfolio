@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 56,
+  "_version": 57,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -291,7 +291,7 @@ const defaultData = {
   },
   "siteName": "Ashhad Beg | Video Editor & Motion Designer",
   "siteDescription": "Ashhad Beg — Premium Video Editing & Motion Graphics Portfolio",
-  "navWorkUrl": ""
+  "navWorkUrl": "https://drive.google.com/drive/folders/1c36gv-wc0U2QVi9aI-PGgOMDTyV82C8Z?usp=sharing"
 }
 
 export default defaultData
