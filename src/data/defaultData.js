@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 59,
+  "_version": 60,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -144,14 +144,15 @@ const defaultData = {
     "Adobe After Effects",
     "Adobe Premiere Pro",
     "Adobe Photoshop",
-    "Adobe Illustrator"
+    "Adobe Illustrator",
+    "Canva"
   ],
   "experience": [
     {
       "company": "Garage Productions",
       "duration": "April 2026 - Present",
-      "role": "Video Editor",
-      "responsibilities": "",
+      "role": "Video Editor & Motion Designer",
+      "responsibilities": "Sia Solar\nVideo Editor\n\n\n\n• Edited long-form YouTube videos for educational, promotional, and corporate content.\n• Created engaging visuals using B-roll, drone footage, motion graphics, and text animations.\n• Managed color correction, sound design, and brand consistency while meeting deadlines.\n\nCaprese Bag\nVideo Editor & Motion Designer\n\n• Edited premium promotional videos and Instagram Reels for a fashion and lifestyle brand.\n• Edited premium promotional videos and Instagram Reels for a fashion and lifestyle brand.\n• Created product showcases with cinematic editing, motion graphics, and speed ramping.\n\nKaayu Rituals\nVideo Editor\n\n• Edited engaging Instagram Reels for promotional and social media marketing campaigns.\n• Created dynamic videos with motion graphics, text animations, and transitions.\n• Maintained brand consistency through color correction and sound design.\n\nVanamati Government Project\nVideo Editor & Motion Designer\n\n• Edited informational and awareness videos for a Maharashtra Government project.\n• Created engaging visual narratives using B-roll, lower thirds, and Marathi text graphics\n• Ensured visual consistency and timely video delivery.\n\nSHRM India\nVideo Editor & Motion Designer\n\n• Edited promotional event reels using B-roll, motion graphics, and kinetic typography.\n• Created dynamic text animations, transitions, and branded visual elements.\n• Managed editing, color correction, and music syne for engaging social media content.",
       "year": "April 2026",
       "client": "Garage Productions"
     }
@@ -191,11 +192,18 @@ const defaultData = {
   ],
   "certifications": [
     {
-      "name": "test",
-      "issuer": "test",
-      "date": "test",
+      "name": "MAAC 24FPS COMPETITION",
+      "issuer": "",
+      "date": "",
       "url": "",
-      "details": "test"
+      "details": "Participated in a national-level creative\ncompetition focused on billboard, social media post &\nvideo editing."
+    },
+    {
+      "name": "MAAC CREATIVE LEAGUE (MCL)",
+      "issuer": "",
+      "date": "",
+      "url": "",
+      "details": "Participated two times in a national-level\ncreative competition focused on poster design\nand photography"
     }
   ],
   "testimonials": [
