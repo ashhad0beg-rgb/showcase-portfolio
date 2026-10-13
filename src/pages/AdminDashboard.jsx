@@ -637,7 +637,8 @@ function ExperienceEdit({ onSave }) {
             <input type="text" placeholder="Duration (e.g., 2024 — Present)" value={e.duration || e.year || ''} onChange={(ev) => { updateArrayItem('experience', i, { duration: ev.target.value }); onSave('Saved') }} />
           </div>
           <input type="text" placeholder="Role / Title" value={e.role} onChange={(ev) => { updateArrayItem('experience', i, { role: ev.target.value }); onSave('Saved') }} />
-          <textarea placeholder="Roles and responsibilities" value={e.responsibilities || ''} onChange={(ev) => { updateArrayItem('experience', i, { responsibilities: ev.target.value }); onSave('Saved') }} rows={3} />
+          <textarea placeholder="Roles and responsibilities — each sentence after a '.' shows as its own bullet on the site" value={e.responsibilities || ''} onChange={(ev) => { updateArrayItem('experience', i, { responsibilities: ev.target.value }); onSave('Saved') }} rows={3} />
+          <p className="hint" style={{ marginTop: '6px' }}>Tip: write normal sentences ending with “.” — each one becomes its own bullet point on the main page.</p>
         </div>
       ))}
     </div>

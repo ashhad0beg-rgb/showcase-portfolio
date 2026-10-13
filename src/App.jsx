@@ -263,6 +263,29 @@ function Tools() {
 }
 
 /* ====== EXPERIENCE ====== */
+// Splits responsibilities text into one bullet per sentence:
+// - respects newlines typed in admin, and splits on ". " between sentences
+// - single sentence stays a plain paragraph (no bullets)
+function splitResponsibilities(text) {
+  if (!text || typeof text !== 'string') return []
+  return text
+    .split('\n')
+    .flatMap((line) => line.split(/(?<=\.)\s+/))
+    .map((s) => s.replace(/^[•\-*]+\s*/, '').trim())
+    .filter(Boolean)
+}
+
+function ExperienceResp({ text, className }) {
+  const points = splitResponsibilities(text)
+  if (!points.length) return null
+  if (points.length === 1) return <p className={className}>{points[0]}</p>
+  return (
+    <ul className={`${className} experience-resp-list`}>
+      {points.map((s, i) => <li key={i}>{s}</li>)}
+    </ul>
+  )
+}
+
 function Experience() {
   const r = useReduce()
   const { data } = usePortfolio()
@@ -281,7 +304,7 @@ function Experience() {
               <div className="experience-card-company">{company}</div>
               <div className="experience-card-duration">{duration}</div>
               <div className="experience-card-role">{e.role}</div>
-              {e.responsibilities && <p className="experience-card-resp">{e.responsibilities}</p>}
+              {e.responsibilities && <ExperienceResp text={e.responsibilities} className="experience-card-resp" />}
             </motion.div>
           )
         })}</div>
@@ -307,7 +330,7 @@ function Experience() {
               <div className="experience-timeline-content">
                 <div className="experience-timeline-header"><span className="experience-timeline-company">{company}</span><span className="experience-timeline-duration">{duration}</span></div>
                 <div className="experience-timeline-role">{e.role}</div>
-                {e.responsibilities && <p className="experience-timeline-resp">{e.responsibilities}</p>}
+                {e.responsibilities && <ExperienceResp text={e.responsibilities} className="experience-timeline-resp" />}
               </div>
             </motion.div>
           )
