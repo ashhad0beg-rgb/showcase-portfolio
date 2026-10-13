@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 63,
+  "_version": 64,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -152,7 +152,7 @@ const defaultData = {
       "company": "Garage Productions",
       "duration": "April 2026 - Present",
       "role": "Video Editor & Motion Designer",
-      "responsibilities": "TESTV\nTEST \nTEST",
+      "responsibilities": "TESTV.\nTEST .\nTEST.",
       "year": "April 2026",
       "client": "Garage Productions"
     }
