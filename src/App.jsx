@@ -263,26 +263,71 @@ function Tools() {
 }
 
 /* ====== EXPERIENCE ====== */
-// Splits responsibilities text into one bullet per sentence:
-// - respects newlines typed in admin, and splits on ". " between sentences
-// - single sentence stays a plain paragraph (no bullets)
-function splitResponsibilities(text) {
-  if (!text || typeof text !== 'string') return []
-  return text
-    .split('\n')
-    .flatMap((line) => line.split(/(?<=\.)\s+/))
-    .map((s) => s.replace(/^[•\-*]+\s*/, '').trim())
-    .filter(Boolean)
+// Per-line control for responsibilities:
+// - Enter (\n in admin) = new line / separate entry
+// - Full stop "." = bullet (single "Sentence." or "A. B." on one line -> bullets)
+// - Admin can force per line: "- " prefix = always bullet,
+//   "= " prefix = always plain new line, no prefix = auto (above rules)
+function parseResponsibilityLines(text) {
+  const rawLines = Array.isArray(text)
+    ? text.map((s) => String(s ?? ''))
+    : String(text ?? '').replace(/\r\n?/g, '\n').split('\n')
+  const out = []
+  for (const raw of rawLines) {
+    const t = String(raw ?? '').trim()
+    if (!t) continue
+    // Forced bullet: "- text" / "• text" / "* text"
+    const forcedBullet = t.match(/^([•\-*]+)\s+(.*)$/)
+    if (forcedBullet && forcedBullet[2].trim()) {
+      out.push({ text: forcedBullet[2].trim(), bullet: true })
+      continue
+    }
+    // Forced plain new line: "= text" / "> text"
+    const forcedPlain = t.match(/^[=>\\]\s+(.*)$/)
+    if (forcedPlain && forcedPlain[1].trim()) {
+      out.push({ text: forcedPlain[1].trim(), bullet: false })
+      continue
+    }
+    // Auto: split "Sentence one. Sentence two." into separate bullets
+    const cleaned = t.replace(/^[•\-*]+\s*/, '').trim()
+    if (!cleaned) continue
+    const sentences = cleaned.split(/(?<=\.)\s+/).map((s) => s.trim()).filter(Boolean)
+    if (sentences.length > 1) {
+      for (const s of sentences) out.push({ text: s, bullet: true })
+    } else {
+      const single = sentences[0] || cleaned
+      out.push({ text: single, bullet: /\.\s*$/.test(single) })
+    }
+  }
+  return out
 }
 
 function ExperienceResp({ text, className }) {
-  const points = splitResponsibilities(text)
-  if (!points.length) return null
-  if (points.length === 1) return <p className={className}>{points[0]}</p>
+  const lines = parseResponsibilityLines(text)
+  if (!lines.length) return null
+  // Group consecutive bullets into one <ul> so order is preserved
+  // when bullets and plain new-lines are mixed.
+  const blocks = []
+  let curUl = null
+  for (const ln of lines) {
+    if (ln.bullet) {
+      if (!curUl) { curUl = []; blocks.push({ kind: 'ul', items: curUl }) }
+      curUl.push(ln.text)
+    } else {
+      curUl = null
+      blocks.push({ kind: 'p', text: ln.text })
+    }
+  }
   return (
-    <ul className={`${className} experience-resp-list`}>
-      {points.map((s, i) => <li key={i}>{s}</li>)}
-    </ul>
+    <div className={`${className}-wrap`}>
+      {blocks.map((b, i) => b.kind === 'ul' ? (
+        <ul key={i} className={`${className} experience-resp-list`}>
+          {b.items.map((s, j) => <li key={j}>{s}</li>)}
+        </ul>
+      ) : (
+        <p key={i} className={`${className} experience-resp-plain`}>{b.text}</p>
+      ))}
+    </div>
   )
 }
 
@@ -302,8 +347,8 @@ function Experience() {
           return (
             <motion.div className="experience-card" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.4, delay: i * 0.05 }}>
               <div className="experience-card-company">{company}</div>
-              <div className="experience-card-duration">{duration}</div>
               <div className="experience-card-role">{e.role}</div>
+              {duration ? <div className="experience-card-duration">{duration}</div> : null}
               {e.responsibilities && <ExperienceResp text={e.responsibilities} className="experience-card-resp" />}
             </motion.div>
           )
@@ -313,10 +358,11 @@ function Experience() {
           const company = e.company || e.client || ''
           const duration = e.duration || e.year || ''
           return (
-            <motion.div className="experience-item" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.4, delay: i * 0.05 }}>
-              <span className="experience-year">{duration}</span>
-              <span className="experience-role">{e.role}</span>
-              <span className="experience-client">{company}</span>
+            <motion.div className="experience-item experience-item-stacked" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.4, delay: i * 0.05 }}>
+              <div className="experience-item-company">{company}</div>
+              <div className="experience-item-role">{e.role}</div>
+              {duration ? <div className="experience-item-duration">{duration}</div> : null}
+              {e.responsibilities && <ExperienceResp text={e.responsibilities} className="experience-item-resp" />}
             </motion.div>
           )
         })}</div>

@@ -622,6 +622,172 @@ function ToolsEdit({ onSave }) {
   )
 }
 
+// ---- Experience responsibilities: per-line control ----
+// Storage is still a plain string (Enter = "\n"), so no migration needed:
+// - "- text"  => forced bullet (•)
+// - "= text"  => forced plain new line (¶)
+// - "text"    => auto: ends with "." = bullet, otherwise plain new line.
+//   "One. Two." on one line auto-splits into two bullets.
+function splitRespEditLines(text) {
+  const parts = String(text ?? '').replace(/\r\n?/g, '\n').split('\n')
+  return parts.length ? parts : ['']
+}
+function getRespLineMode(line) {
+  if (/^\s*[•\-*]+\s+/.test(line)) return 'bullet'
+  if (/^\s*[=>\\]\s+/.test(line)) return 'plain'
+  return 'auto'
+}
+function stripRespPrefix(line) {
+  const m = String(line ?? '').match(/^\s*(?:[•\-*]+|[=>\\])\s+(.*)$/)
+  return m ? m[1] : String(line ?? '')
+}
+function withRespMode(content, mode) {
+  const clean = stripRespPrefix(content)
+  // keep user text as typed (incl. trailing "."), only swap the prefix
+  const leading = (String(content).match(/^\s*/) || [''])[0]
+  void leading
+  if (mode === 'bullet') return clean ? `- ${clean.trimStart()}` : ''
+  if (mode === 'plain') return clean ? `= ${clean.trimStart()}` : ''
+  return clean
+}
+// Same rules as the live site (src/App.jsx) — preview shows bullets vs plain lines.
+function previewRespLines(text) {
+  const rawLines = String(text ?? '').replace(/\r\n?/g, '\n').split('\n')
+  const out = []
+  for (const raw of rawLines) {
+    const t = String(raw ?? '').trim()
+    if (!t) continue
+    const fb = t.match(/^([•\-*]+)\s+(.*)$/)
+    if (fb && fb[2].trim()) { out.push({ text: fb[2].trim(), bullet: true }); continue }
+    const fp = t.match(/^[=>\\]\s+(.*)$/)
+    if (fp && fp[1].trim()) { out.push({ text: fp[1].trim(), bullet: false }); continue }
+    const cleaned = t.replace(/^[•\-*]+\s*/, '').trim()
+    if (!cleaned) continue
+    const sentences = cleaned.split(/(?<=\.)\s+/).map((s) => s.trim()).filter(Boolean)
+    if (sentences.length > 1) { for (const s of sentences) out.push({ text: s, bullet: true }) }
+    else out.push({ text: sentences[0] || cleaned, bullet: /\.\s*$/.test(sentences[0] || cleaned) })
+  }
+  return out
+}
+
+function ResponsibilitiesEditor({ value, onChange, onSave }) {
+  const lines = splitRespEditLines(value || '')
+  const setLines = (next, msg = 'Saved') => {
+    onChange(next.join('\n'))
+    onSave(msg)
+  }
+  const autoSplitSentences = () => {
+    const next = []
+    for (const ln of lines) {
+      const mode = getRespLineMode(ln)
+      const content = stripRespPrefix(ln).trim()
+      if (!content) continue
+      if (mode !== 'auto') { next.push(ln); continue }
+      const parts = content.split(/(?<=\.)\s+/).map((s) => s.trim()).filter(Boolean)
+      for (const p of parts) next.push(p)
+    }
+    setLines(next.length ? next : [''], 'Split into lines ✓')
+  }
+  const preview = previewRespLines(value || '')
+  return (
+    <div>
+      <label style={{ fontSize: '12px', fontWeight: 700, color: '#94a3b8', display: 'block', marginBottom: '6px' }}>
+        Responsibilities — Enter = new line, “.” at end = bullet •, or pick per line below
+      </label>
+      <textarea
+        placeholder={'Type fast here — e.g.\nEdited reels for clients.\nGraded colors and mixed sound.\nPress Enter for a new line.'}
+        value={value || ''}
+        onChange={(ev) => { onChange(ev.target.value); onSave('Saved') }}
+        rows={3}
+        style={{ width: '100%' }}
+      />
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', margin: '8px 0 4px', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: '12px', fontWeight: 700, color: '#94a3b8' }}>Each line — pick what you want:</span>
+        <button type="button" className="btn-secondary" onClick={autoSplitSentences} title="Split 'One. Two.' into two separate lines">Split on “.”</button>
+        <button type="button" className="btn-secondary" onClick={() => setLines([...lines, ''], 'Line added')}>+ Add line</button>
+      </div>
+      {lines.map((ln, li) => {
+        const mode = getRespLineMode(ln)
+        const content = stripRespPrefix(ln)
+        return (
+          <div key={li} style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '6px' }}>
+            <span style={{ width: '22px', textAlign: 'center', color: mode === 'bullet' ? '#5eead4' : mode === 'plain' ? '#94a3b8' : '#64748b', fontWeight: 800 }}>
+              {mode === 'bullet' ? '•' : mode === 'plain' ? '¶' : 'A'}
+            </span>
+            <input
+              type="text"
+              placeholder={mode === 'bullet' ? 'Bullet point…' : mode === 'plain' ? 'Plain new line…' : 'Line — end with “.” for bullet, Enter for new line…'}
+              value={content}
+              onChange={(ev) => {
+                const next = [...lines]
+                next[li] = withRespMode(ev.target.value, mode)
+                // typing in the box must not wipe the line: withRespMode('')
+                // returns '' only when cleared — keep raw while typing a bare prefix char
+                if (ev.target.value && !next[li]) next[li] = ev.target.value
+                setLines(next)
+              }}
+              onKeyDown={(ev) => {
+                if (ev.key === 'Enter') {
+                  ev.preventDefault()
+                  const next = [...lines.slice(0, li + 1), '', ...lines.slice(li + 1)]
+                  setLines(next, 'New line ✓')
+                }
+              }}
+              style={{ flex: 1 }}
+            />
+            <select
+              value={mode}
+              onChange={(ev) => {
+                const next = [...lines]
+                next[li] = withRespMode(content || '', ev.target.value)
+                if (!next[li] && content) next[li] = content
+                setLines(next, ev.target.value === 'bullet' ? 'Line → bullet •' : ev.target.value === 'plain' ? 'Line → new line ¶' : 'Line → auto')
+              }}
+              title="Choose how this line shows on the site"
+              style={{ maxWidth: '128px' }}
+            >
+              <option value="auto">Auto (.” = •)</option>
+              <option value="bullet">• Bullet</option>
+              <option value="plain">¶ New line</option>
+            </select>
+            <button
+              type="button"
+              className="btn-remove"
+              onClick={() => setLines(lines.filter((_, idx) => idx !== li), 'Line removed')}
+              title="Remove this line"
+            >×</button>
+          </div>
+        )
+      })}
+      <div style={{ marginTop: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 12px' }}>
+        <div style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.6px', color: '#64748b', marginBottom: '6px' }}>LIVE PREVIEW — AS IT SHOWS ON SITE</div>
+        {preview.length === 0 && <div style={{ fontSize: '13px', color: '#64748b' }}>Nothing yet — type above. End a line with “.” for a bullet •, or press Enter for a new line ¶.</div>}
+        {preview.length > 0 && (
+          <div>
+            {(() => {
+              const blocks = []
+              let cur = null
+              for (const ln of preview) {
+                if (ln.bullet) {
+                  if (!cur) { cur = []; blocks.push({ kind: 'ul', items: cur }) }
+                  cur.push(ln.text)
+                } else { cur = null; blocks.push({ kind: 'p', text: ln.text }) }
+              }
+              return blocks.map((b, i) => b.kind === 'ul' ? (
+                <ul key={i} style={{ listStyle: 'none', padding: 0, margin: '6px 0 0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {b.items.map((s, j) => <li key={j} style={{ position: 'relative', paddingLeft: '16px', fontSize: '13px', color: '#cbd5e1' }}><span style={{ position: 'absolute', left: '2px', top: '8px', width: '6px', height: '6px', borderRadius: '50%', background: '#5eead4', display: 'inline-block' }} />{s}</li>)}
+                </ul>
+              ) : (
+                <p key={i} style={{ fontSize: '13px', color: '#94a3b8', margin: '6px 0 0' }}>{b.text}</p>
+              ))
+            })()}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function ExperienceEdit({ onSave }) {
   const { data, updateData, updateArrayItem, addArrayItem, removeArrayItem } = usePortfolio()
   const layout = data.experienceLayout || 'timeline'
@@ -637,8 +803,7 @@ function ExperienceEdit({ onSave }) {
             <input type="text" placeholder="Duration (e.g., 2024 — Present)" value={e.duration || e.year || ''} onChange={(ev) => { updateArrayItem('experience', i, { duration: ev.target.value }); onSave('Saved') }} />
           </div>
           <input type="text" placeholder="Role / Title" value={e.role} onChange={(ev) => { updateArrayItem('experience', i, { role: ev.target.value }); onSave('Saved') }} />
-          <textarea placeholder="Roles and responsibilities — each sentence after a '.' shows as its own bullet on the site" value={e.responsibilities || ''} onChange={(ev) => { updateArrayItem('experience', i, { responsibilities: ev.target.value }); onSave('Saved') }} rows={3} />
-          <p className="hint" style={{ marginTop: '6px' }}>Tip: write normal sentences ending with “.” — each one becomes its own bullet point on the main page.</p>
+          <ResponsibilitiesEditor value={e.responsibilities || ''} onChange={(v) => updateArrayItem('experience', i, { responsibilities: v })} onSave={onSave} />
         </div>
       ))}
     </div>
