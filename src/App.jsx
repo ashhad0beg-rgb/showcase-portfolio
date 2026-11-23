@@ -6,22 +6,16 @@ import AdminDashboard from './pages/AdminDashboard.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
 import ParticlesBackground from './components/ParticlesBackground.jsx'
 import ThemeInjector from './components/ThemeInjector.jsx'
+import workFolders from './data/workFolders.json'
 import './App.css'
 import './admin/admin.css'
 
 function useReduce() { return useReducedMotion() }
 
-/* Convert Google Drive links into embeddable views for iframe popups */
-function embedUrl(url) {
-  const u = String(url || '').trim()
-  const folder = u.match(/drive\.google\.com\/drive\/(?:u\/\d+\/)?folders\/([a-zA-Z0-9_-]+)/)
-  if (folder) return `https://drive.google.com/embeddedfolderview?id=${folder[1]}#grid`
-  const file = u.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/)
-  if (file) return `https://drive.google.com/file/d/${file[1]}/preview`
-  const openId = u.match(/[?&]id=([a-zA-Z0-9_-]+)/)
-  if (openId && /drive\.google\.com/.test(u)) return `https://drive.google.com/file/d/${openId[1]}/preview`
-  return u
-}
+const DRIVE_ROOT = `https://drive.google.com/drive/folders/${workFolders.id}`
+const driveFolderUrl = (id) => `https://drive.google.com/drive/folders/${id}`
+const driveThumb = (id) => `https://drive.google.com/thumbnail?id=${id}&sz=w320`
+const drivePreview = (id) => `https://drive.google.com/file/d/${id}/preview`
 
 /* ====== CUSTOM CURSOR ====== */
 function CustomCursor() {
@@ -78,52 +72,24 @@ function CustomCursor() {
 function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mob, setMob] = useState(false)
-  const [workOpen, setWorkOpen] = useState(false)
   const { data } = usePortfolio()
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 60)
     window.addEventListener('scroll', h, { passive: true })
     return () => window.removeEventListener('scroll', h)
   }, [])
-  useEffect(() => {
-    if (!workOpen) return
-    const onKey = (e) => { if (e.key === 'Escape') setWorkOpen(false) }
-    window.addEventListener('keydown', onKey)
-    document.body.style.overflow = 'hidden'
-    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = '' }
-  }, [workOpen])
   const v = data.visibility || {}
-  const workUrl = (data.navWorkUrl || '').trim()
-  const isExternalWork = /^https?:\/\//i.test(workUrl)
-  const ext = { target: '_blank', rel: 'noopener noreferrer' }
-  const allItems = [{ href: '#services', l: 'Services', key: 'services' }, { href: '#about', l: 'About', key: 'about' }, { href: workUrl || '#work', l: 'Work', key: 'work', external: isExternalWork }, { href: '#contact', l: 'Contact', key: 'contact' }]
+  const allItems = [{ href: '#services', l: 'Services', key: 'services' }, { href: '#about', l: 'About', key: 'about' }, { href: '#work', l: 'Work', key: 'work' }, { href: '#contact', l: 'Contact', key: 'contact' }]
   const items = allItems.filter((i) => v[i.key] !== false)
-  const handleWorkClick = (e) => { if (isExternalWork) { e.preventDefault(); setWorkOpen(true); setMob(false) } }
   return (
     <>
       <motion.nav className={`nav${scrolled ? ' scrolled' : ''}`} initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
         <a href="#" className="nav-logo">Ashhad <span className="accent">Beg</span></a>
-        <ul className="nav-links">{items.map(i => <li key={i.href}>{i.key === 'work' && isExternalWork ? <a href={i.href} onClick={handleWorkClick}>{i.l}</a> : <a href={i.href} {...(i.external ? ext : {})}>{i.l}</a>}</li>)}</ul>
+        <ul className="nav-links">{items.map(i => <li key={i.href}><a href={i.href}>{i.l}</a></li>)}</ul>
         <div className="nav-availability"><span className="nav-availability-dot" /> AVAILABLE FOR FREELANCE</div>
         <button className={`nav-toggle${mob ? ' open' : ''}`} onClick={() => setMob(!mob)} aria-label="Toggle menu"><span /><span /><span /></button>
       </motion.nav>
-      <AnimatePresence>{mob && <motion.div className="nav-mobile" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>{items.map(i => i.key === 'work' && isExternalWork ? <a key={i.href} href={i.href} onClick={handleWorkClick}>{i.l}</a> : <a key={i.href} href={i.href} {...(i.external ? ext : {})} onClick={() => setMob(false)}>{i.l}</a>)}</motion.div>}</AnimatePresence>
-      <AnimatePresence>
-        {workOpen && isExternalWork && (
-          <motion.div className="work-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setWorkOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-            <motion.div className="work-modal" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()} style={{ background: '#0A0A0A', borderRadius: '12px', width: '90vw', maxWidth: '1100px', height: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                <span style={{ color: '#fff', fontWeight: 600 }}>Work</span>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <a href={workUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#00ff88', textDecoration: 'none', fontSize: '13px' }}>Open in new tab ↗</a>
-                  <button onClick={() => setWorkOpen(false)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '20px', cursor: 'pointer' }}>×</button>
-                </div>
-              </div>
-              <iframe src={embedUrl(workUrl)} title="Work" style={{ flex: 1, border: 'none', width: '100%' }} />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <AnimatePresence>{mob && <motion.div className="nav-mobile" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>{items.map(i => <a key={i.href} href={i.href} onClick={() => setMob(false)}>{i.l}</a>)}</motion.div>}</AnimatePresence>
     </>
   )
 }
@@ -200,26 +166,108 @@ function Showreel() {
   )
 }
 
-/* ====== WORK (certificate-style cards — sits below Certifications) ====== */
-// ponytail: mirrors <Certifications> markup — only the field names differ. Ceiling: a 3rd
-// card-style section. Upgrade then: extract one <CardSection items fields linkLabel />.
+/* ====== WORK (Drive folder browser — sits below Certifications) ====== */
+function FolderIcon() {
+  return (
+    <svg className="work-tile-icon" viewBox="0 0 165 127" fill="none" aria-hidden="true">
+      <path d="M0 4a4 4 0 0 1 4-4h54a4 4 0 0 1 4 4v6h103v15H0Z" fill="#616161" />
+      <rect y="25" width="165" height="102" rx="2" fill="#8F8F8F" />
+      <svg x="54" y="47" width="58" height="58" viewBox="0 0 16 16">
+        <path fill="#EFEFEF" d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7Zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+        <path fill="#EFEFEF" fillRule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216ZM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+      </svg>
+    </svg>
+  )
+}
+
 function Work() {
   const r = useReduce()
   const { data } = usePortfolio()
-  const items = (data.work || []).filter((w) => w && w.name)
-  const folderUrl = (items.find((w) => w.url)?.url) || (data.navWorkUrl || '').trim()
-  if (!folderUrl) return null
+  const [path, setPath] = useState([])
+  const [preview, setPreview] = useState(null)
+  const configuredUrl = ((data.work || []).find((w) => w && w.url)?.url) || (data.navWorkUrl || '').trim()
+  const configuredId = (configuredUrl.match(/\/folders\/([a-zA-Z0-9_-]+)/) || [])[1]
+  const dynamic = configuredId && configuredId !== workFolders.id
+  const current = path.length ? path[path.length - 1] : workFolders
+  const entries = (current.children || [])
+    .slice()
+    .sort((a, b) => (a.type === b.type ? a.name.localeCompare(b.name, undefined, { numeric: true }) : a.type === 'folder' ? -1 : 1))
+  useEffect(() => {
+    if (!preview) return
+    const onKey = (e) => { if (e.key === 'Escape') setPreview(null) }
+    window.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = '' }
+  }, [preview])
+  if (dynamic) {
+    return (
+      <section id="work" className="work-cards">
+        <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>WORK</motion.div>
+        <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.1 }}>WORK</motion.h2>
+        <div className="work-explorer">
+          <div className="work-explorer-bar">
+            <span className="work-crumb">WorK</span>
+            <a className="work-open-drive" href={configuredUrl} target="_blank" rel="noopener noreferrer">Open in Drive ↗</a>
+          </div>
+          <iframe className="work-fallback-embed" src={`https://drive.google.com/embeddedfolderview?id=${configuredId}#grid`} title="Work" />
+        </div>
+      </section>
+    )
+  }
+  if (!entries.length) return null
   return (
     <section id="work" className="work-cards">
       <motion.div className="section-label" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>WORK</motion.div>
       <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.1 }}>WORK</motion.h2>
-      <motion.div className="work-folder-embed" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.15 }} style={{ width: '100%' }}>
-        <iframe
-          src={embedUrl(folderUrl)}
-          title="Work"
-          style={{ width: '100%', height: '760px', border: 'none', background: 'transparent', display: 'block' }}
-        />
+      <motion.div className="work-explorer" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={r ? { duration: 0.22 } : { duration: 0.6, delay: 0.15 }}>
+        <div className="work-explorer-bar">
+          <div className="work-crumbs">
+            {path.length > 0 && <button type="button" className="work-crumb-back" onClick={() => setPath((p) => p.slice(0, -1))} aria-label="Back">←</button>}
+            <button type="button" className="work-crumb" onClick={() => setPath([])}>WorK</button>
+            {path.map((f, i) => (
+              <span key={f.id} className="work-crumb-wrap">
+                <span className="work-crumb-sep">/</span>
+                <button type="button" className="work-crumb" onClick={() => setPath((p) => p.slice(0, i + 1))}>{f.name}</button>
+              </span>
+            ))}
+          </div>
+          <a className="work-open-drive" href={path.length ? driveFolderUrl(current.id) : DRIVE_ROOT} target="_blank" rel="noopener noreferrer">Open in Drive ↗</a>
+        </div>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div key={current.id} className="work-grid" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: r ? 0.15 : 0.28 }}>
+            {entries.map((e) => e.type === 'folder' ? (
+              <button type="button" className="work-tile" key={e.id} onClick={() => setPath((p) => [...p, e])} aria-label={`Open ${e.name}`}>
+                <FolderIcon />
+                <span className="work-tile-name">{e.name}</span>
+              </button>
+            ) : (
+              <button type="button" className="work-tile" key={e.id} onClick={() => setPreview(e)} aria-label={`Play ${e.name}`}>
+                <span className="work-tile-thumb">
+                  <img src={driveThumb(e.id)} alt="" loading="lazy" onError={(ev) => { ev.currentTarget.style.visibility = 'hidden' }} />
+                  <span className="work-tile-play" aria-hidden="true" />
+                </span>
+                <span className="work-tile-name">{e.name}</span>
+              </button>
+            ))}
+          </motion.div>
+        </AnimatePresence>
       </motion.div>
+      <AnimatePresence>
+        {preview && (
+          <motion.div className="work-preview-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPreview(null)}>
+            <motion.div className="work-preview" initial={{ scale: 0.94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.94, opacity: 0 }} transition={{ duration: r ? 0.15 : 0.25 }} onClick={(e) => e.stopPropagation()}>
+              <div className="work-preview-bar">
+                <span className="work-preview-name">{preview.name}</span>
+                <div className="work-preview-actions">
+                  <a href={driveFolderUrl(current.id)} target="_blank" rel="noopener noreferrer">Open in Drive ↗</a>
+                  <button type="button" onClick={() => setPreview(null)} aria-label="Close preview">×</button>
+                </div>
+              </div>
+              <iframe src={drivePreview(preview.id)} title={preview.name} allow="autoplay; fullscreen" allowFullScreen />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   )
 }
