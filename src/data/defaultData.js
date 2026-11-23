@@ -1,5 +1,5 @@
 const defaultData = {
-  "_version": 68,
+  "_version": 69,
   "theme": {
     "fontDisplay": "Poppins",
     "fontBody": "Poppins",
@@ -40,7 +40,15 @@ const defaultData = {
     "faq": true,
     "contact": true
   },
-  "work": [],
+  "work": [
+    {
+      "name": "Work",
+      "company": "",
+      "date": "",
+      "url": "https://drive.google.com/drive/folders/1c36gv-wc0U2QVi9aI-PGgOMDTyV82C8Z?usp=sharing",
+      "details": "Click to view my work samples."
+    }
+  ],
   "services": [
     {
       "number": "01",
